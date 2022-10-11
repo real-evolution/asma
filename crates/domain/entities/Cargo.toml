@@ -6,5 +6,9 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# workspace dependencies
 uuid = { workspace = true }
 chrono = { workspace = true }
+
+# crate dependencies
+validator = { version = "^0", features = ["derive"] }
