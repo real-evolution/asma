@@ -6,3 +6,5 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+uuid = { workspace = true }
+chrono = { workspace = true }
