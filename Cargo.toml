@@ -1,0 +1,7 @@
+[workspace]
+members = []
+
+[workspace.package]
+edition = "2021"
+version = "0.0.1"
+authors = ["Ayman Al-Qadhi <alqd@protonmail.com>"]
