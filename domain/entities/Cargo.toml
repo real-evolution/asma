@@ -1,0 +1,8 @@
+[package]
+name = "data_entities"
+workspace = "A crate to hold entites used in data-oriented operations"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
