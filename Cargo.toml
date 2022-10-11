@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "domain/entities"
+  "crates/domain/*"
 ]
 
 [workspace.package]
