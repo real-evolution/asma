@@ -6,6 +6,9 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# project dependencies
+domain_macros = { path = "../macros" }
+
 # workspace dependencies
 uuid = { workspace = true }
 chrono = { workspace = true }
