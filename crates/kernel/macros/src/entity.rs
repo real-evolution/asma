@@ -1,26 +1,8 @@
-use common_macros::proc::parse::*;
+use common_macros::proc::util;
 
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{parse::*, *};
-
-fn add_fields(input: TokenStream, fields: Vec<Field>) -> TokenStream {
-    let mut ast = syn::parse2::<DeriveInput>(input).unwrap();
-
-    let struct_data = extract_struct(&mut ast);
-    let iter = fields.into_iter();
-
-    match struct_data.fields {
-        Fields::Named(ref mut f) => iter.for_each(|i| f.named.push(i)),
-        Fields::Unnamed(ref mut f) => iter.for_each(|i| f.unnamed.push(i)),
-        Fields::Unit => panic!("`{}` cannot have fields", ast.ident),
-    };
-
-    quote! {
-        #ast
-    }
-    .into()
-}
 
 fn get_entity_fields<const CREATED: bool, const UPDATED: bool>() -> Vec<Field> {
     let mut fields = vec![quote! { pub id: uuid::Uuid }];
@@ -42,7 +24,7 @@ fn get_entity_fields<const CREATED: bool, const UPDATED: bool>() -> Vec<Field> {
 pub fn add_entity_fields<const CREATED: bool, const UPDATED: bool>(
     input: TokenStream,
 ) -> TokenStream {
-    add_fields(input, get_entity_fields::<CREATED, UPDATED>())
+    util::append_fields(input, get_entity_fields::<CREATED, UPDATED>())
 }
 
 pub fn implement_entity_trait<const CREATED: bool, const UPDATED: bool>(
