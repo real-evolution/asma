@@ -1,6 +1,7 @@
-use crate::entity::Entity;
+use crate::traits::*;
+use domain_macros::*;
+
 use chrono::{DateTime, Utc};
-use domain_macros::{add_entity_fields, Entity};
 
 pub enum AccountState {
     Active,
@@ -12,8 +13,8 @@ pub struct AccountPassword {
     pub salt: String,
 }
 
-#[derive(Entity)]
-#[add_entity_fields]
+#[derive(MutableEntity)]
+#[mutable_entity]
 pub struct Account {
     pub holder_name: Option<String>,
     pub password: Option<AccountPassword>,
