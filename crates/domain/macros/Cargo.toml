@@ -11,6 +11,7 @@ proc-macro = true
 [dependencies]
 common_macros = { path = "../../common/macros" }
 
+# crate dependencies
 syn = { version = "1", features = ["extra-traits"] }
 quote = "1"
 proc-macro2 = "1"
