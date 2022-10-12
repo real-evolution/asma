@@ -1,5 +1,5 @@
 [package]
-name = "domain_macros"
+name = "domain_proc_macros"
 description = "A crate to hold macros used in the domain layer cates"
 edition.workspace = true
 version.workspace = true

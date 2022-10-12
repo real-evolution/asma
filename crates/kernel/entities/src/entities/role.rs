@@ -1,5 +1,5 @@
 use crate::traits::*;
-use domain_macros::*;
+use domain_proc_macros::*;
 
 #[derive(MutableEntity)]
 #[mutable_entity]

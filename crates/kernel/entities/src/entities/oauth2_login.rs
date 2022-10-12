@@ -1,7 +1,7 @@
 use super::Account;
 use crate::traits::*;
 
-use domain_macros::*;
+use domain_proc_macros::*;
 
 use chrono::{DateTime, Utc};
 
