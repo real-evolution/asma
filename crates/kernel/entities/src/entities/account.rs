@@ -13,8 +13,7 @@ pub struct AccountPassword {
     pub salt: String,
 }
 
-#[derive(MutableEntity)]
-#[mutable_entity]
+#[entity]
 pub struct Account {
     pub holder_name: Option<String>,
     pub password: Option<AccountPassword>,

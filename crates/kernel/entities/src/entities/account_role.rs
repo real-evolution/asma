@@ -3,8 +3,7 @@ use domain_proc_macros::*;
 
 use super::{Role, Account};
 
-#[derive(Entity)]
-#[entity]
+#[entity(entity_type = "immutable")]
 pub struct AccountRole {
     pub account_id: <Account as Identifiable>::Key,
     pub role_id: <Role as Identifiable>::Key,

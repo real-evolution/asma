@@ -7,8 +7,7 @@ pub enum UserState {
     Suspended,
 }
 
-#[derive(MutableEntity)]
-#[mutable_entity]
+#[entity]
 pub struct User {
     pub display_name: String,
     pub state: UserState,

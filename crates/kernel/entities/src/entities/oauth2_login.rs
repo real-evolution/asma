@@ -11,7 +11,6 @@ pub enum OAuth2Provider {
     GitHub,
 }
 
-#[derive(Entity)]
 #[entity]
 pub struct OAuth2Login {
     pub provider: OAuth2Provider,
