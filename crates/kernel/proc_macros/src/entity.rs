@@ -1,69 +1,118 @@
-use common_macros::proc::util;
+use common_macros::proc::parse::{extract_named_fields, extract_struct};
 
+use darling::FromMeta;
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::DeriveInput;
 use syn::{parse::*, *};
 
-fn get_entity_fields<const CREATED: bool, const UPDATED: bool>() -> Vec<Field> {
-    let mut fields = vec![quote! { pub id: uuid::Uuid }];
-
-    if CREATED {
-        fields.push(quote! { pub created_at: chrono::DateTime<chrono::Utc> });
-    }
-
-    if UPDATED {
-        fields.push(quote! { pub updated_at: chrono::DateTime<chrono::Utc> });
-    }
-
-    fields
-        .into_iter()
-        .map(|i| Field::parse_named.parse2(i).unwrap())
-        .collect()
+#[derive(Debug, Clone, Copy, FromMeta)]
+#[darling(default)]
+pub enum EntityType {
+    Basic,
+    Immutable,
+    Mutable,
 }
 
-pub fn add_entity_fields<const CREATED: bool, const UPDATED: bool>(
-    input: TokenStream,
-) -> TokenStream {
-    util::append_fields(input, get_entity_fields::<CREATED, UPDATED>())
+impl Default for EntityType {
+    fn default() -> Self {
+        Self::Mutable
+    }
 }
 
-pub fn implement_entity_trait<const CREATED: bool, const UPDATED: bool>(
-    input: TokenStream,
-) -> TokenStream {
-    let ast = syn::parse2::<DeriveInput>(input).unwrap();
-    let type_ident = ast.ident;
+impl EntityType {
+    fn into_fields(&self, id_type: &Type) -> Vec<Field> {
+        let mut fields = vec![quote!(pub id: #id_type)];
 
-    let mut impls = vec![quote! {
-        impl Identifiable for #type_ident{
-            type Key = uuid::Uuid;
-
-            fn get_id(&self) -> Self::Key {
-                self.id
-            }
+        if self.is_immutable() {
+            fields.push(quote!(pub created_at: chrono::DateTime<chrono::Utc>));
         }
-    }];
 
-    if CREATED || UPDATED {
-        impls.push(quote! {
-            impl Entity for #type_ident {
-                fn get_created(&self) -> chrono::DateTime<chrono::Utc> {
-                    self.created_at
-                }
-            }
-        });
+        if self.is_mutable() {
+            fields.push(quote!(pub updated_at: chrono::DateTime<chrono::Utc>));
+        }
+
+        fields
+            .into_iter()
+            .map(|f| Field::parse_named.parse2(f).unwrap().into())
+            .collect()
     }
 
-    if CREATED && UPDATED {
-        impls.push(quote! {
-            impl MutableEntity for #type_ident {
-                fn get_updated(&self) -> chrono::DateTime<chrono::Utc> {
-                    self.updated_at
+    fn into_impls(&self, id_type: &Type, type_ident: &Ident) -> Vec<TokenStream> {
+        let mut impls = vec![quote! {
+            impl Identifiable for #type_ident{
+                type Key = #id_type;
+
+                fn get_id(&self) -> Self::Key {
+                    self.id
                 }
             }
-        });
+        }];
+
+        if self.is_immutable() {
+            impls.push(quote! {
+                impl Entity for #type_ident {
+                    fn get_created(&self) -> chrono::DateTime<chrono::Utc> {
+                        self.created_at
+                    }
+                }
+            });
+        }
+
+        if self.is_mutable() {
+            impls.push(quote! {
+                impl MutableEntity for #type_ident {
+                    fn get_updated(&self) -> chrono::DateTime<chrono::Utc> {
+                        self.updated_at
+                    }
+                }
+            });
+        }
+
+        impls
     }
+
+    fn is_immutable(&self) -> bool {
+        match self {
+            EntityType::Basic => false,
+            _ => true,
+        }
+    }
+
+    fn is_mutable(&self) -> bool {
+        match self {
+            EntityType::Mutable => true,
+            _ => false,
+        }
+    }
+}
+
+#[derive(Debug, Default, FromMeta)]
+#[darling(default)]
+pub struct EntityOptions {
+    #[darling(default)]
+    pub id_type: Option<syn::Type>,
+    #[darling(default)]
+    pub entity_type: EntityType,
+}
+
+pub fn expand_entity(args: AttributeArgs, mut input: DeriveInput) -> TokenStream {
+    let args = EntityOptions::from_list(&args).unwrap();
+
+    let id_type = args
+        .id_type
+        .unwrap_or(Type::parse.parse2(quote! { uuid::Uuid }).unwrap());
+
+    let fields = args.entity_type.into_fields(&id_type);
+    let impls = args.entity_type.into_impls(&id_type, &input.ident);
+
+    extract_named_fields(extract_struct(&mut input))
+        .named
+        .extend(fields);
 
     quote! {
+        #input
+
         #(#impls)*
     }
     .into()
