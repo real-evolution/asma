@@ -40,7 +40,7 @@ impl EntityType {
 
     fn into_impls(&self, id_type: &Type, type_ident: &Ident) -> Vec<TokenStream> {
         let mut impls = vec![quote! {
-            impl Identifiable for #type_ident{
+            impl BasicEntity for #type_ident{
                 type Key = #id_type;
 
                 fn get_id(&self) -> Self::Key {
@@ -51,7 +51,7 @@ impl EntityType {
 
         if self.is_immutable() {
             impls.push(quote! {
-                impl Entity for #type_ident {
+                impl ImmutableEntity for #type_ident {
                     fn get_created(&self) -> chrono::DateTime<chrono::Utc> {
                         self.created_at
                     }

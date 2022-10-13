@@ -1,11 +1,11 @@
-use crate::traits::*;
+use crate::{key_type, traits::*};
 use kernel_proc_macros::*;
 
-use super::{Role, Account};
+use super::{Account, Role};
 
 #[entity(entity_type = "immutable")]
 pub struct AccountRole {
-    pub account_id: <Account as Identifiable>::Key,
-    pub role_id: <Role as Identifiable>::Key,
+    pub account_id: key_type!(Account),
+    pub role_id: key_type!(Role),
     pub enabled: bool,
 }
