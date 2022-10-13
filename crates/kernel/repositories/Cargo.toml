@@ -6,3 +6,5 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# project dependencies
+kernel_entities = { path = "../entities" }
