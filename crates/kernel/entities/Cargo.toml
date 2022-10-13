@@ -1,5 +1,5 @@
 [package]
-name = "data_entities"
+name = "kernel_entities"
 description = "A crate to hold entites used in data-oriented operations"
 edition.workspace = true
 version.workspace = true
@@ -7,7 +7,7 @@ authors.workspace = true
 
 [dependencies]
 # project dependencies
-domain_proc_macros = { path = "../proc_macros" }
+kernel_proc_macros = { path = "../proc_macros" }
 
 # workspace dependencies
 uuid = { workspace = true }

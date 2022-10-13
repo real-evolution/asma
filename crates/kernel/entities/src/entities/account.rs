@@ -1,7 +1,7 @@
 use crate::traits::*;
-use domain_proc_macros::*;
 
 use chrono::{DateTime, Utc};
+use kernel_proc_macros::*;
 
 pub enum AccountState {
     Active,

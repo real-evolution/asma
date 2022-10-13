@@ -1,5 +1,5 @@
 use crate::traits::*;
-use domain_proc_macros::*;
+use kernel_proc_macros::*;
 
 #[entity]
 pub struct Role {
