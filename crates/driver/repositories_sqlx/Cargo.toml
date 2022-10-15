@@ -6,3 +6,15 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# project dependencies
+kernel_entities = { path = "../../kernel/entities" }
+kernel_repositories = { path = "../../kernel/repositories" }
+
+# workspace dependencies
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+sqlx = { workspace = true }
+uuid = { workspace = true }
+
+# crate dependencies
+tokio = { version = "1", features = ["full"] }
