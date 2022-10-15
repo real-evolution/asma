@@ -14,3 +14,4 @@ async-trait = { workspace = true }
 anyhow = { workspace = true }
 derive_more = { workspace = true }
 uuid = { workspace = true }
+thiserror = { workspace = true }

@@ -1,7 +1,14 @@
-use derive_more::{Error, Display};
+use derive_more::Display;
+use thiserror::Error;
 
-#[derive(Debug, Display, Error)]
-pub enum RepoError<K> {
-    #[display(fmt = "item with key `{}` not found", _0)]
-    NotFound(K),
+#[derive(Debug, Error, Display)]
+pub enum RepoError {
+    #[display(fmt = "i/o error: {}", _0)]
+    Io(std::io::Error),
+
+    #[display(fmt = "data error: {}", _0)]
+    Data(anyhow::Error),
+
+    #[display(fmt = "item not found")]
+    NotFound,
 }
