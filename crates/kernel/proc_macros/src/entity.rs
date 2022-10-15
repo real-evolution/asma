@@ -1,7 +1,7 @@
 use common_macros::proc::parse::{extract_named_fields, extract_struct};
 
 use darling::FromMeta;
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::DeriveInput;
 use syn::{parse::*, *};
@@ -21,7 +21,7 @@ impl Default for EntityType {
 }
 
 impl EntityType {
-    fn into_fields(&self, id_type: &Type) -> Vec<Field> {
+    fn into_fields(&self, id_type: &Ident) -> Vec<Field> {
         let mut fields = vec![quote!(pub id: #id_type)];
 
         if self.is_immutable() {
@@ -38,7 +38,7 @@ impl EntityType {
             .collect()
     }
 
-    fn into_impls(&self, id_type: &Type, type_ident: &Ident) -> Vec<TokenStream> {
+    fn into_impls(&self, id_type: &Ident, type_ident: &Ident) -> Vec<TokenStream> {
         let mut impls = vec![quote! {
             impl BasicEntity for #type_ident{
                 type Key = #id_type;
@@ -99,21 +99,31 @@ pub struct EntityOptions {
 pub fn expand_entity(args: AttributeArgs, mut input: DeriveInput) -> TokenStream {
     let args = EntityOptions::from_list(&args).unwrap();
 
-    let id_type = args
+    let id_inner_type = args
         .id_type
         .unwrap_or(Type::parse.parse2(quote! { uuid::Uuid }).unwrap());
+    let id_type = Ident::new(&format!("{}Key", &input.ident), Span::call_site());
+    let id_struct = quote! {
+        #[derive(Copy, Debug, Clone, sqlx::Type, derive_more::Deref, derive_more::Into)]
+        #[sqlx(transparent)]
+        pub struct #id_type(#id_inner_type);
+    };
 
     let fields = args.entity_type.into_fields(&id_type);
     let impls = args.entity_type.into_impls(&id_type, &input.ident);
 
-    extract_named_fields(extract_struct(&mut input))
-        .named
-        .extend(fields);
+    for field in fields.into_iter().rev() {
+        extract_named_fields(extract_struct(&mut input))
+            .named
+            .insert(0, field);
+    }
 
     quote! {
         #input
 
         #(#impls)*
+
+        #id_struct
     }
     .into()
 }
