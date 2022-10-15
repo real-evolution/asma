@@ -1,24 +1,16 @@
-use super::User;
-use crate::{key_type, traits::*};
-
-use chrono::{DateTime, Utc};
+use super::*;
+use crate::traits::*;
 use kernel_proc_macros::*;
 
-pub enum AccountState {
-    Active,
-    Inactive,
-}
-
-pub struct AccountPassword {
-    pub hash: String,
-    pub salt: String,
-}
+use chrono::{DateTime, Utc};
 
 #[entity]
+#[derive(sqlx::FromRow)]
 pub struct Account {
+    pub account_name: String,
     pub holder_name: Option<String>,
-    pub password: Option<AccountPassword>,
-    pub valid_until: DateTime<Utc>,
-    pub state: AccountState,
-    pub account_id: key_type!(User),
+    pub password: Option<String>,
+    pub is_active: bool,
+    pub valid_until: Option<DateTime<Utc>>,
+    pub account_id: UserKey,
 }

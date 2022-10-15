@@ -1,10 +1,11 @@
-use super::Account;
-use crate::{key_type, traits::*};
+use super::*;
+use crate::traits::*;
 
 use kernel_proc_macros::*;
 
 use chrono::{DateTime, Utc};
 
+#[derive(sqlx::types::Type)]
 pub enum OAuth2Provider {
     Google,
     Facebook,
@@ -12,6 +13,7 @@ pub enum OAuth2Provider {
 }
 
 #[entity]
+#[derive(sqlx::FromRow)]
 pub struct OAuth2Login {
     pub provider: OAuth2Provider,
     pub provided_name: Option<String>,
@@ -19,5 +21,5 @@ pub struct OAuth2Login {
     pub access_token: String,
     pub refresh_token: String,
     pub valid_until: DateTime<Utc>,
-    pub account_id: key_type!(Account),
+    pub account_id: AccountKey,
 }

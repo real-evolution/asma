@@ -1,11 +1,12 @@
-use crate::{key_type, traits::*};
+use super::*;
+use crate::traits::*;
+
 use kernel_proc_macros::*;
 
-use super::{Account, Role};
-
 #[entity(entity_type = "immutable")]
+#[derive(sqlx::FromRow)]
 pub struct AccountRole {
-    pub account_id: key_type!(Account),
-    pub role_id: key_type!(Role),
+    pub account_id: AccountKey,
+    pub role_id: RoleKey,
     pub enabled: bool,
 }
