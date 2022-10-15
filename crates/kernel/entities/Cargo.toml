@@ -10,8 +10,10 @@ authors.workspace = true
 kernel_proc_macros = { path = "../proc_macros" }
 
 # workspace dependencies
-uuid = { workspace = true }
 chrono = { workspace = true }
+derive_more = { workspace = true }
+uuid = { workspace = true }
+sqlx = { workspace = true }
 
 # crate dependencies
-validator = { version = "^0", features = ["derive"] }
+validator = { version = "0", features = ["derive"] }
