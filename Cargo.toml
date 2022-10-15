@@ -11,5 +11,11 @@ anyhow = "1.0.65"
 async-trait = "0.1.57"
 chrono = "0.4"
 derive_more = "0.99.17"
+sqlx = { version = "0.6", features = [
+  "chrono",
+  "postgres",
+  "runtime-tokio-rustls",
+  "uuid",
+] }
 thiserror = "1.0"
 uuid = { version = "1.2.1", features = ["v4"] }
