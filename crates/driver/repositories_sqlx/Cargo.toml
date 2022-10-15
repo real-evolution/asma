@@ -14,7 +14,5 @@ kernel_repositories = { path = "../../kernel/repositories" }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 sqlx = { workspace = true }
+tokio = { workspace = true }
 uuid = { workspace = true }
-
-# crate dependencies
-tokio = { version = "1", features = ["full"] }

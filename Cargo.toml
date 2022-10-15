@@ -12,18 +12,18 @@ version = "0.0.1"
 authors = ["Ayman Al-Qadhi <alqd@protonmail.com>"]
 
 [workspace.dependencies]
-anyhow = "1.0.65"
-async-trait = "0.1.57"
-chrono = "0.4"
-derive_more = "0.99.17"
-sqlx = { version = "0.6", features = [
+anyhow = "1"
+async-trait = "0"
+chrono = "0"
+derive_more = "0"
+sqlx = { version = "0", features = [
   "chrono",
   "postgres",
   "runtime-tokio-rustls",
   "uuid",
 ] }
-thiserror = "1.0"
-tokio = { version = "1.0", features = ["full"] }
-serde = { version = "1.0.138", features = ["derive"] }
-serde_json = "1.0"
-uuid = { version = "1.2.1", features = ["v4"] }
+thiserror = "1"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }

@@ -6,6 +6,6 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
-syn = { version = "^1", features = ["extra-traits"] }
-quote = "^1"
-proc-macro2 = "^1"
+syn = { version = "1", features = ["extra-traits"] }
+quote = "1"
+proc-macro2 = "1"
