@@ -3,14 +3,15 @@ use std::ops::Deref;
 use kernel_entities::entities::*;
 use kernel_repositories::RolesRepo;
 
-use crate::SqlxRepo;
+use crate::{util::map_sqlx_error, SqlxRepo};
 
 #[async_trait::async_trait]
 impl RolesRepo for SqlxRepo {
     async fn get_all(&self) -> anyhow::Result<Vec<Role>> {
         Ok(sqlx::query_as::<_, Role>("SELECT * FROM roles")
             .fetch_all(self.deref())
-            .await?)
+            .await
+            .map_err(map_sqlx_error)?)
     }
 
     async fn get_account_roles(&self, account_id: &AccountKey) -> anyhow::Result<Vec<Role>> {
@@ -24,7 +25,8 @@ impl RolesRepo for SqlxRepo {
         )
         .bind(account_id)
         .fetch_all(self.deref())
-        .await?)
+        .await
+        .map_err(map_sqlx_error)?)
     }
 
     async fn is_account_in_role(
@@ -43,7 +45,8 @@ impl RolesRepo for SqlxRepo {
         .bind(account_id)
         .bind(role_id)
         .fetch_optional(self.deref())
-        .await?;
+        .await
+        .map_err(map_sqlx_error)?;
 
         Ok(match ret {
             Some(_) => true,

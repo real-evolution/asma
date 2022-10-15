@@ -3,7 +3,7 @@ use std::ops::Deref;
 use kernel_entities::entities::*;
 use kernel_repositories::UsersRepo;
 
-use crate::repo::SqlxRepo;
+use crate::{repo::SqlxRepo, util::map_sqlx_error};
 
 #[async_trait::async_trait]
 impl UsersRepo for SqlxRepo {
@@ -12,7 +12,8 @@ impl UsersRepo for SqlxRepo {
             sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = ?")
                 .bind(id)
                 .fetch_one(self.deref())
-                .await?,
+                .await
+                .map_err(map_sqlx_error)?,
         )
     }
 
@@ -21,7 +22,8 @@ impl UsersRepo for SqlxRepo {
             sqlx::query_as::<_, User>("SELECT * FROM users WHERE username = ?")
                 .bind(username)
                 .fetch_one(self.deref())
-                .await?,
+                .await
+                .map_err(map_sqlx_error)?,
         )
     }
 }

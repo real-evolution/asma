@@ -3,7 +3,7 @@ use std::ops::Deref;
 use kernel_entities::entities::*;
 use kernel_repositories::AccountsRepo;
 
-use crate::SqlxRepo;
+use crate::{SqlxRepo, util::map_sqlx_error};
 
 #[async_trait::async_trait]
 impl AccountsRepo for SqlxRepo {
@@ -18,6 +18,7 @@ impl AccountsRepo for SqlxRepo {
         .bind(user_id)
         .bind(account_name)
         .fetch_one(self.deref())
-        .await?)
+        .await
+        .map_err(map_sqlx_error)?)
     }
 }
