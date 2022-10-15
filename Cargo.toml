@@ -1,5 +1,10 @@
 [workspace]
-members = ["crates/common/*", "crates/kernel/*", "crates/driver/*"]
+members = [
+  "crates/common/*",
+  "crates/kernel/*",
+  "crates/driver/*",
+  "crates/host/*",
+]
 
 [workspace.package]
 edition = "2021"
