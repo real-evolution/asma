@@ -1,8 +1,8 @@
 [package]
-name = "rest_axum"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+name = "host_rest_axum"
+description = "HTTP RESTful API host using tokio/axum"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
 
 [dependencies]

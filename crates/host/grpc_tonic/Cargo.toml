@@ -1,8 +1,8 @@
 [package]
-name = "grpc_tonic"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+name = "host_grpc_tonic"
+description = "HTTP/2.0 gRPC host using tokio/tonic"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
 
 [dependencies]
