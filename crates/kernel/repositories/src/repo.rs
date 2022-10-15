@@ -1,11 +1,7 @@
 use kernel_entities::traits::BasicEntity;
 
-use async_trait::async_trait;
-
-#[async_trait]
-pub trait Repo<Key, Entity>
+pub trait Repo<E, K>
 where
-    Entity: BasicEntity<Key = Key>,
+    E: BasicEntity<Key = K>,
 {
-    async fn get(id: Key) -> anyhow::Result<Entity>;
 }
