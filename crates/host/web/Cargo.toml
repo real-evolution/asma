@@ -1,8 +1,18 @@
 [package]
-name = "web"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+name = "host_web"
+description = "HTTP server runner to run a hybrid RESTful/gRPC setup"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
 
 [dependencies]
+# crate dependencies
+axum = "0"
+axum_tonic = "0"
+
+# project dependencies
+host_rest_axum = { path = "../rest_axum" }
+host_grpc_tonic = { path = "../grpc_tonic" }
+
+# workspace dependencies
+tokio = { workspace = true }
