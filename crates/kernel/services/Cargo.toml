@@ -1,0 +1,8 @@
+[package]
+name = "kernel_services"
+description = "A crate to hold services' traits and abstract code"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
