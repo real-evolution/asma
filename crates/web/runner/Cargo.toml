@@ -1,5 +1,5 @@
 [package]
-name = "host_web"
+name = "web_runner"
 description = "HTTP server runner to run a hybrid RESTful/gRPC setup"
 edition.workspace = true
 version.workspace = true
@@ -11,8 +11,8 @@ axum = "0"
 axum_tonic = "0"
 
 # project dependencies
-host_rest_axum = { path = "../rest_axum" }
-host_grpc_tonic = { path = "../grpc_tonic" }
+web_rest = { path = "../rest" }
+web_grpc = { path = "../grpc" }
 
 # workspace dependencies
 tokio = { workspace = true }

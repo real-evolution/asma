@@ -3,7 +3,7 @@ members = [
   "crates/common/*",
   "crates/kernel/*",
   "crates/driver/*",
-  "crates/host/*",
+  "crates/web/*",
 ]
 
 [workspace.package]
