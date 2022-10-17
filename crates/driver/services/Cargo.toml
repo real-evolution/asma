@@ -1,0 +1,8 @@
+[package]
+name = "driver_services"
+description = "Implementation of services that require external apis"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
