@@ -104,9 +104,9 @@ pub fn expand_entity(args: AttributeArgs, mut input: DeriveInput) -> TokenStream
         .unwrap_or(Type::parse.parse2(quote! { uuid::Uuid }).unwrap());
     let id_type = Ident::new(&format!("{}Key", &input.ident), Span::call_site());
     let id_struct = quote! {
-        #[derive(Copy, Debug, Clone, sqlx::Type, derive_more::Deref, derive_more::Into)]
+        #[derive(Copy, Debug, Clone, sqlx::Type, derive_more::Into)]
         #[sqlx(transparent)]
-        pub struct #id_type(#id_inner_type);
+        pub struct #id_type(pub #id_inner_type);
     };
 
     let fields = args.entity_type.into_fields(&id_type);
