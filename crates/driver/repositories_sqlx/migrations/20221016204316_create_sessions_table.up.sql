@@ -3,6 +3,7 @@ CREATE TABLE sessions
     id UUID NOT NULL PRIMARY KEY,
 
     device_identifier VARCHAR NOT NULL,
+    refresh_token VARCHAR NOT NULL,
     agent VARCHAR NOT NULL,
     last_address VARCHAR NULL,
 
