@@ -1,19 +1,14 @@
-create table account_roles
+CREATE TABLE account_roles
 (
-    id         uuid                      not null primary key,
-    account_id uuid                      null,
-    role_id    uuid                      not null,
-    enabled    boolean     default true  not null,
-    created_at timestamptz default now() not null,
+    id UUID NOT NULL PRIMARY KEY,
 
-    constraint account_roles_account_fk
-      foreign key (account_id)
-        references accounts(id),
+    account_id UUID NULL,
+    role_id UUID NOT NULL,
+    enabled BOOLEAN DEFAULT true NOT null,
 
-    constraint account_roles_role_fk
-      foreign key (role_id)
-        references roles(id),
+    created_at TIMESTAMPTZ DEFAULT now() NOT null,
 
-    constraint account_roles_unique
-      unique (account_id, role_id)
+    CONSTRAINT account_roles_unique UNIQUE (account_id, role_id),
+    CONSTRAINT account_fk FOREIGN KEY (account_id) REFERENCES accounts(id),
+    CONSTRAINT role_fk FOREIGN KEY (role_id) REFERENCES roles(id)
 );

@@ -1,16 +1,17 @@
-create table accounts
+CREATE TABLE accounts
 (
-    id           uuid                      not null primary key,
-    account_name varchar                   not null,
-    holder_name  varchar                   null,
-    password     varchar                   null,
-    is_active    boolean     default false not null,
-    valid_until  timestamptz               null,
-    user_id      uuid                      not null,
-    created_at   timestamptz default now() not null,
-    updated_at   timestamptz default now() not null,
+    id UUID NOT NULL PRIMARY KEY,
+    account_name VARCHAR NOT NULL,
+    holder_name VARCHAR NULL,
 
-    constraint account_user_fk
-      foreign key (user_id)
-        references users(id)
+    password VARCHAR NULL,
+    valid_until TIMESTAMPTZ NULL,
+    is_active BOOLEAN DEFAULT FALSE NOT NULL,
+
+    user_id UUID NOT NULL,
+
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+
+    CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES users(id)
 );

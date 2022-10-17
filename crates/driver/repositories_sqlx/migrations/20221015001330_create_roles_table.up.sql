@@ -1,8 +1,10 @@
-create table roles
+CREATE TABLE roles
 (
-    id            uuid                      not null primary key,
-    code          varchar                   not null unique,
-    friendly_name varchar                   null,
-    created_at    timestamptz default now() not null,
-    updated_at    timestamptz default now() not null
+    id UUID NOT NULL PRIMARY KEY,
+
+    code VARCHAR NOT NULL UNIQUE,
+    friendly_name VARCHAR NULL,
+
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );

@@ -1,9 +1,11 @@
-create table users
+CREATE TABLE users
 (
-    id           uuid                      not null primary key,
-    username     varchar                   not null unique,
-    display_name varchar                   not null,
-    state        integer     default 0     not null,
-    created_at   timestamptz default now() not null,
-    updated_at   timestamptz default now() not null
+    id UUID NOT NULL PRIMARY KEY,
+
+    username VARCHAR NOT NULL UNIQUE,
+    display_name VARCHAR NOT NULL,
+    state INTEGER DEFAULT 0 NOT NULL,
+
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
