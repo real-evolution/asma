@@ -18,6 +18,7 @@ chrono = "0"
 derive_more = "0"
 sqlx = { version = "0", features = [
   "chrono",
+  "macros",
   "postgres",
   "runtime-tokio-rustls",
   "uuid",
