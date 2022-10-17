@@ -12,5 +12,5 @@ pub struct Account {
     pub password: Option<String>,
     pub is_active: bool,
     pub valid_until: Option<DateTime<Utc>>,
-    pub account_id: UserKey,
+    pub user_id: UserKey,
 }
