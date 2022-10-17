@@ -13,6 +13,7 @@ pub struct Session {
     pub last_address: Option<String>,
     pub last_access: DateTime<Utc>,
     pub valid_until: DateTime<Utc>,
+    pub refresh_token: String,
     pub user_id: UserKey,
     pub account_id: AccountKey,
 }
