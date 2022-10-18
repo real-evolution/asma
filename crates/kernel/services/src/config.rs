@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 
 pub trait ConfigService {
     fn get_section<'a, C: serde::Deserialize<'a>>(
@@ -5,6 +6,25 @@ pub trait ConfigService {
         section: &str,
     ) -> anyhow::Result<C>;
 
-    fn get<'a>(&self, key: &str) -> anyhow::Result<&'a str>;
-    fn get_as<'a, T>(&self, key: &str) -> anyhow::Result<T>;
+    fn get(&self, key: &str) -> anyhow::Result<ConfigValue>;
+    fn get_bool(&self, key: &str) -> anyhow::Result<bool>;
+    fn get_int(&self, key: &str) -> anyhow::Result<i64>;
+    fn get_float(&self, key: &str) -> anyhow::Result<f64>;
+    fn get_string(&self, key: &str) -> anyhow::Result<String>;
+    fn get_array(&self, key: &str) -> anyhow::Result<Vec<ConfigValue>>;
+    fn get_map(
+        &self,
+        key: &str,
+    ) -> anyhow::Result<HashMap<String, ConfigValue>>;
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ConfigValue {
+    None,
+    Boolean(bool),
+    Integer(i64),
+    Float(f64),
+    String(String),
+    Map(HashMap<String, ConfigValue>),
+    Array(Vec<ConfigValue>),
 }
