@@ -9,6 +9,12 @@ pub struct SqlxDatabase {
     pool: sqlx::Pool<DbType>,
 }
 
+impl SqlxDatabase {
+    pub fn new(pool: sqlx::Pool<DbType>) -> Self {
+        Self { pool }
+    }
+}
+
 impl<E, K> Repo<E, K> for SqlxDatabase where E: BasicEntity<Key = K> {}
 
 impl Deref for SqlxDatabase {
