@@ -5,13 +5,13 @@ use kernel_repositories::Repo;
 
 pub type DbType = sqlx::postgres::Postgres;
 
-pub struct SqlxRepo {
+pub struct SqlxDatabase {
     pool: sqlx::Pool<DbType>,
 }
 
-impl<E, K> Repo<E, K> for SqlxRepo where E: BasicEntity<Key = K> {}
+impl<E, K> Repo<E, K> for SqlxDatabase where E: BasicEntity<Key = K> {}
 
-impl Deref for SqlxRepo {
+impl Deref for SqlxDatabase {
     type Target = sqlx::Pool<DbType>;
 
     fn deref(&self) -> &Self::Target {
@@ -19,7 +19,7 @@ impl Deref for SqlxRepo {
     }
 }
 
-impl DerefMut for SqlxRepo {
+impl DerefMut for SqlxDatabase {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.pool
     }

@@ -3,10 +3,10 @@ use std::ops::Deref;
 use kernel_entities::entities::*;
 use kernel_repositories::SessionsRepo;
 
-use crate::{util::map_sqlx_error, SqlxRepo};
+use crate::{util::map_sqlx_error, SqlxDatabase};
 
 #[async_trait::async_trait]
-impl SessionsRepo for SqlxRepo {
+impl SessionsRepo for SqlxDatabase {
     async fn get_by_id(&self, id: &SessionKey) -> anyhow::Result<Session> {
         Ok(
             sqlx::query_as::<_, Session>("SELECT * FROM sessions WHERE id = $1")

@@ -3,10 +3,10 @@ use std::ops::Deref;
 use kernel_entities::entities::*;
 use kernel_repositories::AccountsRepo;
 
-use crate::{util::map_sqlx_error, SqlxRepo};
+use crate::{util::map_sqlx_error, SqlxDatabase};
 
 #[async_trait::async_trait]
-impl AccountsRepo for SqlxRepo {
+impl AccountsRepo for SqlxDatabase {
     async fn get_of_user_by_name(
         &self,
         user_id: &UserKey,

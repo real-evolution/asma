@@ -3,10 +3,10 @@ use std::ops::Deref;
 use kernel_entities::entities::*;
 use kernel_repositories::RolesRepo;
 
-use crate::{util::map_sqlx_error, SqlxRepo};
+use crate::{util::map_sqlx_error, SqlxDatabase};
 
 #[async_trait::async_trait]
-impl RolesRepo for SqlxRepo {
+impl RolesRepo for SqlxDatabase {
     async fn get_all(&self) -> anyhow::Result<Vec<Role>> {
         Ok(sqlx::query_as::<_, Role>("SELECT * FROM roles")
             .fetch_all(self.deref())
