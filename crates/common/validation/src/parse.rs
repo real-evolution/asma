@@ -18,8 +18,8 @@ pub struct Endpoint {
 pub struct SupportedDriver(pub String);
 
 #[derive(Validator)]
-#[validator(regex(RE_BASIC_USERNAME))]
-pub struct BasicUsername(pub String);
+#[validator(regex(RE_IDENTIFIER))]
+pub struct Identifier(pub String);
 
 #[derive(Validator)]
 #[validator(regex(RE_USERNAME))]
