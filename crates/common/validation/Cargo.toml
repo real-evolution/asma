@@ -1,5 +1,5 @@
 [package]
-name = "validation"
+name = "common_validation"
 description = "Common validation code"
 edition.workspace = true
 version.workspace = true
