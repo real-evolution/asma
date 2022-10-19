@@ -1,8 +1,8 @@
+use shaku::Interface;
+
 use std::collections::HashMap;
 
-use crate::Service;
-
-pub trait ConfigService: Service {
+pub trait ConfigService: Interface {
     fn get_section_validated<'a, C>(&self, section: &str) -> anyhow::Result<C>
     where
         C: serde::Deserialize<'a> + validator::Validate;

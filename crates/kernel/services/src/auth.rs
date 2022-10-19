@@ -2,9 +2,8 @@ use kernel_entities::entities::*;
 
 use chrono::{DateTime, Utc};
 use derive_more::Display;
+use shaku::Interface;
 use thiserror::Error;
-
-use crate::Service;
 
 #[derive(Debug, Error, Display)]
 pub enum AuthError {
@@ -16,7 +15,7 @@ pub enum AuthError {
 }
 
 #[async_trait::async_trait]
-pub trait AuthService: Service {
+pub trait AuthService: Interface {
     async fn signin(
         &self,
         account_name: &str,

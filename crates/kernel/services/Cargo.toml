@@ -15,5 +15,6 @@ async-trait = { workspace = true }
 chrono = { workspace = true }
 derive_more = { workspace = true }
 serde = { workspace = true }
+shaku = { workspace = true }
 thiserror = { workspace = true }
 validator = { workspace = true }
