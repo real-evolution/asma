@@ -12,6 +12,7 @@ directories = "4"
 
 # project dependencies
 kernel_services = { path = "../../kernel/services" }
+kernel_proc_macros = { path = "../../kernel/proc_macros" }
 
 # workspace dependencies
 anyhow = { workspace = true }

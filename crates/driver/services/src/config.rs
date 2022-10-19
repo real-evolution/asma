@@ -1,3 +1,4 @@
+use kernel_proc_macros::Service;
 use kernel_services::config::{ConfigService, ConfigValue};
 
 use config::{Config, File, FileFormat, Value, ValueKind};
@@ -5,6 +6,7 @@ use config::{Config, File, FileFormat, Value, ValueKind};
 use std::collections::HashMap;
 use std::{env, io};
 
+#[derive(Service)]
 pub struct TomlConfigService {
     cfg: Config,
 }
