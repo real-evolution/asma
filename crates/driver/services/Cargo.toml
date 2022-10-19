@@ -16,3 +16,4 @@ kernel_services = { path = "../../kernel/services" }
 # workspace dependencies
 anyhow = { workspace = true }
 serde = { workspace = true }
+validator = { workspace = true }

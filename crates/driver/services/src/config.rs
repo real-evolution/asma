@@ -10,6 +10,17 @@ pub struct TomlConfigService {
 }
 
 impl ConfigService for TomlConfigService {
+    fn get_section_validated<'a, C>(&self, section: &str) -> anyhow::Result<C>
+    where
+        C: serde::Deserialize<'a> + validator::Validate,
+    {
+        let ret = self.get_section::<C>(section)?;
+
+        ret.validate()?;
+
+        Ok(ret)
+    }
+
     fn get_section<'a, C: serde::Deserialize<'a>>(
         &self,
         section: &str,
