@@ -14,5 +14,7 @@ kernel_repositories = { path = "../../kernel/repositories" }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 sqlx = { workspace = true }
+serde = { workspace = true }
 tokio = { workspace = true }
 uuid = { workspace = true }
+validator = { workspace = true }
