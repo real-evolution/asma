@@ -6,7 +6,7 @@ use validator::Validate;
 pub const DATA_CONFIG_SECTION: &str = "data";
 
 #[derive(Debug, Deserialize, Validate)]
-pub struct SqlxDataConfig<'a> {
+pub struct DataConfig<'a> {
     #[validate(custom = "supported_driver")]
     pub driver: &'a str,
     #[validate(custom = "endpoint")]
