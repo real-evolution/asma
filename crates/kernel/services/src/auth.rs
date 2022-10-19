@@ -4,6 +4,8 @@ use chrono::{DateTime, Utc};
 use derive_more::Display;
 use thiserror::Error;
 
+use crate::Service;
+
 #[derive(Debug, Error, Display)]
 pub enum AuthError {
     #[display(fmt = "invalid username or password")]
@@ -14,7 +16,7 @@ pub enum AuthError {
 }
 
 #[async_trait::async_trait]
-pub trait AuthService {
+pub trait AuthService: Service {
     async fn signin(
         &self,
         account_name: &str,

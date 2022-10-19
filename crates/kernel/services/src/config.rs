@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-pub trait ConfigService {
+use crate::Service;
+
+pub trait ConfigService: Service {
     fn get_section_validated<'a, C>(&self, section: &str) -> anyhow::Result<C>
     where
         C: serde::Deserialize<'a> + validator::Validate;
