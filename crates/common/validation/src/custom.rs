@@ -26,8 +26,8 @@ pub fn supported_driver(value: &str) -> Result<(), ValidationError> {
     validate::<SupportedDriver>("supported_driver", value)
 }
 
-pub fn basic_username(value: &str) -> Result<(), ValidationError> {
-    validate::<BasicUsername>("basic_username", value)
+pub fn identifier(value: &str) -> Result<(), ValidationError> {
+    validate::<Identifier>("identifier", value)
 }
 
 pub fn username(value: &str) -> Result<(), ValidationError> {
