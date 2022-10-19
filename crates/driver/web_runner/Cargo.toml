@@ -1,5 +1,5 @@
 [package]
-name = "web_runner"
+name = "driver_web_runner"
 description = "HTTP server runner to run a hybrid RESTful/gRPC setup"
 edition.workspace = true
 version.workspace = true
@@ -11,14 +11,14 @@ axum = "0"
 axum_tonic = "0"
 
 # project dependencies
-web_rest = { path = "../rest" }
-web_grpc = { path = "../grpc" }
+driver_web_rest = { path = "../web_rest" }
+driver_web_grpc = { path = "../web_grpc" }
 
 kernel_services = { path = "../../kernel/services" }
-driver_services = { path = "../../driver/services" }
+adapter_services = { path = "../../adapter/services" }
 
 kernel_repositories = { path = "../../kernel/repositories" }
-driver_repositories_sqlx = { path = "../../driver/repositories_sqlx" }
+adapter_repositories_sqlx = { path = "../../adapter/repositories_sqlx" }
 
 # workspace dependencies
 tokio = { workspace = true }

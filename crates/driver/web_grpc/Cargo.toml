@@ -1,5 +1,5 @@
 [package]
-name = "web_grpc"
+name = "driver_web_grpc"
 description = "HTTP/2.0 gRPC host using tokio/tonic"
 edition.workspace = true
 version.workspace = true

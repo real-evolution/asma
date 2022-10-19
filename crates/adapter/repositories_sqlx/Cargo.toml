@@ -1,5 +1,5 @@
 [package]
-name = "driver_repositories_sqlx"
+name = "adapter_repositories_sqlx"
 description = "Repositories implementation using SQLx"
 edition.workspace = true
 version.workspace = true
@@ -14,6 +14,8 @@ kernel_repositories = { path = "../../kernel/repositories" }
 # workspace dependencies
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+lazy_static = { workspace = true }
+regex = { workspace = true }
 sqlx = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }

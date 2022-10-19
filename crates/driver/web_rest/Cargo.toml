@@ -1,5 +1,5 @@
 [package]
-name = "web_rest"
+name = "driver_web_rest"
 description = "HTTP RESTful API host using tokio/axum"
 edition.workspace = true
 version.workspace = true
