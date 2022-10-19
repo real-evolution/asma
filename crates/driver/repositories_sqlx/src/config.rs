@@ -35,3 +35,18 @@ pub struct PoolConfig {
     pub idle_timeout_ms: Option<u64>,
     pub lazy: Option<bool>,
 }
+
+impl DataConfig<'_> {
+    pub fn get_connection_string(&self) -> anyhow::Result<String> {
+        let ep = Endpoint::parse_str(self.host)?;
+        let host = match self.port.or(ep.port) {
+            Some(port) => format!("{}:{}", ep.domain, port),
+            None => ep.domain,
+        };
+
+        Ok(format!(
+            "{}://{}:{}@{}/{}",
+            self.driver, self.username, self.password, host, self.database
+        ))
+    }
+}
