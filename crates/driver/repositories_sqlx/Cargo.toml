@@ -7,6 +7,7 @@ authors.workspace = true
 
 [dependencies]
 # project dependencies
+common_validation = { path = "../../common/validation" }
 kernel_entities = { path = "../../kernel/entities" }
 kernel_repositories = { path = "../../kernel/repositories" }
 
