@@ -1,0 +1,8 @@
+[package]
+name = "validation"
+description = "Common validation code"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
