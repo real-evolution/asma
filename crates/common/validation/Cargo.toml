@@ -6,3 +6,10 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# crate dependencies
+validators = "0"
+
+# workspace dependencies
+lazy_static = { workspace = true }
+regex = { workspace = true }
+validator = { workspace = true }
