@@ -14,5 +14,11 @@ axum_tonic = "0"
 web_rest = { path = "../rest" }
 web_grpc = { path = "../grpc" }
 
+kernel_services = { path = "../../kernel/services" }
+driver_services = { path = "../../driver/services" }
+
+kernel_repositories = { path = "../../kernel/repositories" }
+driver_repositories_sqlx = { path = "../../driver/repositories_sqlx" }
+
 # workspace dependencies
 tokio = { workspace = true }
