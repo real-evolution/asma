@@ -1,1 +1,3 @@
-pub mod router;
+pub(crate) mod api;
+
+pub mod app;

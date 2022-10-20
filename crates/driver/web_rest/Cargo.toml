@@ -8,6 +8,7 @@ authors.workspace = true
 [dependencies]
 # crate dependencies
 axum = "0"
+shaku_axum = "0"
 
 # workspace dependencies
 tokio = { workspace = true }

@@ -17,4 +17,5 @@ kernel_repositories = { path = "../../kernel/repositories" }
 adapter_repositories_sqlx = { path = "../../adapter/repositories_sqlx" }
 
 # workspace dependencies
+anyhow = { workspace = true }
 shaku = { workspace = true }
