@@ -1,0 +1,8 @@
+[package]
+name = "web_common"
+description = "Common code used in web drivers"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
