@@ -6,3 +6,15 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# crate dependencies
+axum = "0"
+
+# project dependencies
+kernel_services = { path = "../../kernel/services" }
+adapter_services = { path = "../../adapter/services" }
+
+kernel_repositories = { path = "../../kernel/repositories" }
+adapter_repositories_sqlx = { path = "../../adapter/repositories_sqlx" }
+
+# workspace dependencies
+shaku = { workspace = true }
