@@ -22,6 +22,10 @@ pub fn endpoint(value: &str) -> Result<(), ValidationError> {
     validate::<Endpoint>("endpoint", value)
 }
 
+pub fn ip_endpoint(value: &str) -> Result<(), ValidationError> {
+    validate::<IpEndpoint>("ip_endpoint", value)
+}
+
 pub fn supported_driver(value: &str) -> Result<(), ValidationError> {
     validate::<SupportedDriver>("supported_driver", value)
 }
