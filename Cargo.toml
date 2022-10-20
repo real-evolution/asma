@@ -16,6 +16,7 @@ anyhow = "1"
 async-trait = "0"
 chrono = "0"
 derive_more = "0"
+erased-serde = "0"
 lazy_static = "1"
 regex = "1"
 sqlx = { version = "0", features = [

@@ -14,6 +14,7 @@ anyhow = { workspace = true }
 async-trait = { workspace = true }
 chrono = { workspace = true }
 derive_more = { workspace = true }
+erased-serde = { workspace = true }
 serde = { workspace = true }
 shaku = { workspace = true }
 thiserror = { workspace = true }

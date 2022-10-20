@@ -9,6 +9,7 @@ authors.workspace = true
 # crate dependencies
 config = "0"
 directories = "4"
+toml = "0"
 
 # project dependencies
 kernel_services = { path = "../../kernel/services" }
@@ -16,5 +17,7 @@ kernel_proc_macros = { path = "../../kernel/proc_macros" }
 
 # workspace dependencies
 anyhow = { workspace = true }
+erased-serde = { workspace = true }
 serde = { workspace = true }
+shaku = { workspace = true }
 validator = { workspace = true }

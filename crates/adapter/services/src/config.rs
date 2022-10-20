@@ -1,33 +1,26 @@
-use kernel_proc_macros::Service;
 use kernel_services::config::{ConfigService, ConfigValue};
 
 use config::{Config, File, FileFormat, Value, ValueKind};
+use erased_serde::*;
+use shaku::Component;
 
 use std::collections::HashMap;
 use std::{env, io};
 
-#[derive(Service)]
+#[derive(Component)]
+#[shaku(interface = ConfigService)]
 pub struct TomlConfigService {
     cfg: Config,
 }
 
 impl ConfigService for TomlConfigService {
-    fn get_section_validated<'a, C>(&self, section: &str) -> anyhow::Result<C>
-    where
-        C: serde::Deserialize<'a> + validator::Validate,
-    {
-        let ret = self.get_section::<C>(section)?;
-
-        ret.validate()?;
-
-        Ok(ret)
-    }
-
-    fn get_section<'a, C: serde::Deserialize<'a>>(
+    fn get_section(
         &self,
         section: &str,
-    ) -> anyhow::Result<C> {
-        Ok(self.cfg.get::<C>(section)?)
+    ) -> anyhow::Result<Box<dyn erased_serde::Deserializer>> {
+        let val = self.cfg.get::<Value>(section)?;
+
+        Ok(Box::new(<dyn Deserializer>::erase(val)))
     }
 
     fn get(&self, key: &str) -> anyhow::Result<ConfigValue> {

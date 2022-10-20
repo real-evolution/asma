@@ -1,16 +1,12 @@
-use shaku::Interface;
-
 use std::collections::HashMap;
 
-pub trait ConfigService: Interface {
-    fn get_section_validated<'a, C>(&self, section: &str) -> anyhow::Result<C>
-    where
-        C: serde::Deserialize<'a> + validator::Validate;
+use shaku::Interface;
 
-    fn get_section<'a, C: serde::Deserialize<'a>>(
+pub trait ConfigService: Interface {
+    fn get_section(
         &self,
         section: &str,
-    ) -> anyhow::Result<C>;
+    ) -> anyhow::Result<Box<dyn erased_serde::Deserializer>>;
 
     fn get(&self, key: &str) -> anyhow::Result<ConfigValue>;
     fn get_bool(&self, key: &str) -> anyhow::Result<bool>;
