@@ -1,9 +1,9 @@
-use axum::{extract::Path, routing::get, Router};
+use axum::{routing::get, Router};
 
-async fn echo(Path(path): Path<String>) -> String {
-    path
+async fn echo(body: String) -> String {
+    body
 }
 
 pub fn diag_routes() -> Router {
-    Router::new().route("/echo", get(echo))
+    Router::new().route("/echo", get(echo).post(echo))
 }
