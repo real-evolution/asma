@@ -2,8 +2,9 @@ mod root;
 mod services;
 
 use kernel_services::config::ConfigService;
-use root::RootModule;
-use services::ServicesModuleImpl;
+
+use root::*;
+use services::*;
 
 use std::sync::Arc;
 
@@ -11,8 +12,8 @@ use shaku::HasComponent;
 
 pub trait ServicesModule: HasComponent<dyn ConfigService> {}
 
-pub fn build_di() -> Arc<RootModule> {
-    let services = Arc::new(ServicesModuleImpl::builder().build());
+pub fn build_di() -> anyhow::Result<Arc<RootModule>> {
+    let services = services_module()?;
 
-    Arc::new(RootModule::builder(services).build())
+    Ok(Arc::new(RootModule::builder(services).build()))
 }
