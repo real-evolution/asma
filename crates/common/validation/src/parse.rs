@@ -2,6 +2,8 @@ use crate::patterns::*;
 
 use validators::prelude::*;
 
+use std::net::IpAddr;
+
 #[derive(Validator)]
 #[validator(domain(ipv4(Allow), local(Allow), port(NotAllow)))]
 pub struct Host(pub String);
@@ -10,6 +12,13 @@ pub struct Host(pub String);
 #[validator(domain(ipv4(Allow), local(Allow), port(Allow)))]
 pub struct Endpoint {
     pub domain: String,
+    pub port: Option<u16>,
+}
+
+#[derive(Validator)]
+#[validator(ip(local(Allow), port(Allow)))]
+pub struct IpEndpoint {
+    pub ip: IpAddr,
     pub port: Option<u16>,
 }
 
