@@ -11,9 +11,15 @@ axum = "0"
 axum_tonic = "0"
 
 # project dependencies
+common_validation = { path = "../../common/validation" }
 driver_web_common = { path = "../web_common" }
 driver_web_rest = { path = "../web_rest" }
 driver_web_grpc = { path = "../web_grpc" }
+kernel_services = { path = "../../kernel/services" }
 
 # workspace dependencies
+anyhow = { workspace = true }
+erased-serde = { workspace = true }
+serde = { workspace = true }
 tokio = { workspace = true }
+validator = { workspace = true }
