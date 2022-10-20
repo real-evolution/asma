@@ -11,15 +11,9 @@ axum = "0"
 axum_tonic = "0"
 
 # project dependencies
+driver_web_common = { path = "../web_common" }
 driver_web_rest = { path = "../web_rest" }
 driver_web_grpc = { path = "../web_grpc" }
 
-kernel_services = { path = "../../kernel/services" }
-adapter_services = { path = "../../adapter/services" }
-
-kernel_repositories = { path = "../../kernel/repositories" }
-adapter_repositories_sqlx = { path = "../../adapter/repositories_sqlx" }
-
 # workspace dependencies
-shaku = { workspace = true }
 tokio = { workspace = true }

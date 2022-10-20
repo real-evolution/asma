@@ -1,13 +1,10 @@
 use axum::Extension;
-
-mod di;
+use driver_web_common::di::build_di;
 
 #[tokio::main]
 async fn main() {
-    let module = di::build_di_module();
-
     let rest_app =
-        driver_web_rest::router::make_router().layer(Extension(module));
+        driver_web_rest::router::make_router().layer(Extension(build_di()));
 
     axum::Server::bind(&"127.0.0.1:8080".parse().unwrap())
         .serve(rest_app.into_make_service())
