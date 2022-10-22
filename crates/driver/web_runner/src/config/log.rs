@@ -22,9 +22,9 @@ into_fn!(default_formatter: const LogFormatter => LogFormatter::Compact);
 
 const fn default_level() -> LogLevel {
     if cfg!(debug_assertions) {
-        LogLevel::Trace
+        LogLevel::Debug
     } else {
-        LogLevel::Trace
+        LogLevel::Info
     }
 }
 
