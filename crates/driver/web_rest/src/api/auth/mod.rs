@@ -1,5 +1,5 @@
 use axum::Router;
 
-pub fn routes() -> Router {
+pub(super) fn routes() -> Router {
     Router::new()
 }

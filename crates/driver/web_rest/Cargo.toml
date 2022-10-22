@@ -9,8 +9,11 @@ authors.workspace = true
 # crate dependencies
 axum = "0"
 shaku_axum = "0"
+utoipa = { version = "2", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "2", features = ["axum"] }
 
 # workspace dependencies
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+tracing = { workspace = true }
