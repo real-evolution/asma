@@ -119,8 +119,8 @@ pub fn configure_logger_with<'a, C: ConfigService + ?Sized>(
         .with_thread_names(conf.show_thread_names)
         .with_ansi(conf.use_ansi)
         .with_level(conf.show_level)
-        .with_max_level(conf.level)
-        .with_env_filter(EnvFilter::from_env(ENV_LOG_KEY));
+        .with_env_filter(EnvFilter::from_env(ENV_LOG_KEY))
+        .with_max_level(conf.level);
 
     match conf.formatter {
         LogFormatter::Full => set_global_default(fmt.finish()),
