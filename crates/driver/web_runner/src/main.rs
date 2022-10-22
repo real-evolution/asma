@@ -1,39 +1,26 @@
+#[macro_use]
+extern crate common_macros;
+#[macro_use]
+extern crate tracing;
+
 mod config;
+mod launch;
 
-use std::{
-    net::{IpAddr, SocketAddr},
-    sync::Arc,
-};
-
-use common_validation::validators::traits::ValidateString;
-use driver_web_common::di::{build_di, shaku::HasComponent, RootModule};
-use driver_web_rest::app::make_app;
-use kernel_services::config::ConfigService;
-
-use axum::Extension;
+use driver_web_common::di::{build_di, HasComponent};
+use std::process::{ExitCode, Termination};
 
 #[tokio::main]
-async fn main() {
-    let di = build_di().unwrap();
-    let (ip, port) = get_launch_config(&di).unwrap();
+async fn main() -> impl Termination {
+    let di = build_di().expect("could not setup DI");
 
-    let rest_app = make_app().layer(Extension(di));
+    config::log::configure_logger_with(di.resolve_ref())
+        .expect("could not setup logging");
 
-    axum::Server::bind(&SocketAddr::new(ip, port))
-        .serve(rest_app.into_make_service())
-        .await
-        .unwrap();
-}
+    if let Err(err) = launch::launch(di).await {
+        error!("app terminated with error: {}", err);
+        return ExitCode::FAILURE;
+    }
 
-fn get_launch_config(di: &Arc<RootModule>) -> anyhow::Result<(IpAddr, u16)> {
-    let config_svc: &dyn ConfigService = di.resolve_ref();
-
-    let config: config::WebConfig = erased_serde::deserialize(
-        &mut config_svc.get_section(config::WEB_CONFIG_SECTION)?,
-    )?;
-
-    let addr =
-        common_validation::parse::IpEndpoint::parse_str(config.listen_addr)?;
-
-    Ok((addr.ip, addr.port.unwrap_or(config::WEB_DEFAULT_PORT)))
+    info!("app exited normally");
+    return ExitCode::FAILURE;
 }
