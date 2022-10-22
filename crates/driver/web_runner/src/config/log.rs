@@ -18,7 +18,7 @@ into_fn!(default_show_thread_id: const bool => false);
 into_fn!(default_show_thread_names: const bool => false);
 into_fn!(default_show_level: const bool => true);
 into_fn!(default_use_ansi: const bool => true);
-into_fn!(default_formatter: const LogFormatter => LogFormatter::Full);
+into_fn!(default_formatter: const LogFormatter => LogFormatter::Compact);
 
 const fn default_level() -> LogLevel {
     if cfg!(debug_assertions) {
