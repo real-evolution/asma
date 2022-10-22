@@ -5,8 +5,11 @@ use validators::prelude::*;
 use std::net::IpAddr;
 
 #[derive(Validator)]
-#[validator(domain(ipv4(Allow), local(Allow), port(NotAllow)))]
-pub struct Host(pub String);
+#[validator(host(local(Allow), port(Allow)))]
+pub struct Host {
+    pub host: validators::models::Host,
+    pub port: Option<u16>,
+}
 
 #[derive(Validator)]
 #[validator(domain(ipv4(Allow), local(Allow), port(Allow)))]
@@ -21,6 +24,10 @@ pub struct IpEndpoint {
     pub ip: IpAddr,
     pub port: Option<u16>,
 }
+
+#[derive(Validator)]
+#[validator(ip(local(Allow), port(NotAllow)))]
+pub struct IpAddress(pub IpAddr);
 
 #[derive(Validator)]
 #[validator(regex(RE_SUPPORTED_DRIVERS))]
