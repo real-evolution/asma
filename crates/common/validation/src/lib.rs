@@ -1,5 +1,8 @@
-pub extern crate validators;
+mod custom;
+mod parse;
+mod patterns;
 
-pub mod custom;
-pub mod parse;
-pub mod patterns;
+pub use custom::*;
+pub use parse::*;
+pub use patterns::*;
+pub use validators::traits::*;
