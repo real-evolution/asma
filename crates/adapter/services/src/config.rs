@@ -1,4 +1,4 @@
-use kernel_services::config::{ConfigService, ConfigValue};
+use kernel_services::config::*;
 
 use config::{Config, File, FileFormat, Value, ValueKind};
 use erased_serde::*;
@@ -14,13 +14,13 @@ pub struct TomlConfigService {
 }
 
 impl ConfigService for TomlConfigService {
-    fn get_section(
+    fn get_section<'de>(
         &self,
         section: &str,
-    ) -> anyhow::Result<Box<dyn erased_serde::Deserializer>> {
+    ) -> anyhow::Result<ConfigObject<'de>> {
         let val = self.cfg.get::<Value>(section)?;
 
-        Ok(Box::new(<dyn Deserializer>::erase(val)))
+        Ok(ConfigObject::new(Box::new(<dyn Deserializer>::erase(val))))
     }
 
     fn get(&self, key: &str) -> anyhow::Result<ConfigValue> {
