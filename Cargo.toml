@@ -35,6 +35,13 @@ tracing = "0"
 uuid = { version = "1", features = ["v4"] }
 validator = { version = "0", features = ["derive"] }
 
+# build config
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+
 # sqlx-optimization
 [profile.dev.package.sqlx-macros]
 opt-level = 3
