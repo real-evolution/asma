@@ -1,9 +1,8 @@
-use std::sync::Arc;
-
 use super::AdapterServicesModule;
 use adapter_services::config::TomlConfigService;
 
 use shaku::module;
+use std::sync::Arc;
 
 module! {
     pub(crate) AdapterServicesModuleImpl: AdapterServicesModule {
