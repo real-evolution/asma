@@ -1,4 +1,4 @@
-use super::ServicesModule;
+use super::AdapterServicesModule;
 use kernel_services::config::ConfigService;
 
 use shaku::module;
@@ -8,7 +8,7 @@ module! {
         components = [],
         providers = [],
 
-        use dyn ServicesModule {
+        use dyn AdapterServicesModule {
             components = [dyn ConfigService],
             providers = [],
         }
