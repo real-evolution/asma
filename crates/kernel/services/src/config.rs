@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
 use erased_serde::Deserializer;
 use serde::Deserialize;
 use shaku::Interface;
@@ -13,15 +12,17 @@ macro_rules! get_config {
 }
 pub use get_config;
 
+use crate::error::AppResult;
+
 pub trait ConfigService: Interface {
-    fn get_section<'de>(&self, section: &str) -> Result<ConfigObject<'de>>;
-    fn get(&self, key: &str) -> Result<ConfigValue>;
-    fn get_bool(&self, key: &str) -> Result<bool>;
-    fn get_int(&self, key: &str) -> Result<i64>;
-    fn get_float(&self, key: &str) -> Result<f64>;
-    fn get_string(&self, key: &str) -> Result<String>;
-    fn get_array(&self, key: &str) -> Result<Vec<ConfigValue>>;
-    fn get_map(&self, key: &str) -> Result<HashMap<String, ConfigValue>>;
+    fn get_section<'de>(&self, section: &str) -> AppResult<ConfigObject<'de>>;
+    fn get(&self, key: &str) -> AppResult<ConfigValue>;
+    fn get_bool(&self, key: &str) -> AppResult<bool>;
+    fn get_int(&self, key: &str) -> AppResult<i64>;
+    fn get_float(&self, key: &str) -> AppResult<f64>;
+    fn get_string(&self, key: &str) -> AppResult<String>;
+    fn get_array(&self, key: &str) -> AppResult<Vec<ConfigValue>>;
+    fn get_map(&self, key: &str) -> AppResult<HashMap<String, ConfigValue>>;
 }
 
 pub struct ConfigObject<'de>(Box<dyn Deserializer<'de>>);
@@ -42,7 +43,7 @@ impl<'de> ConfigObject<'de> {
         Self(value)
     }
 
-    pub fn try_into<D: Deserialize<'de>>(mut self) -> Result<D> {
+    pub fn try_into<D: Deserialize<'de>>(mut self) -> AppResult<D> {
         Ok(erased_serde::deserialize(&mut self.0)?)
     }
 }
