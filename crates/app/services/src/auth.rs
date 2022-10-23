@@ -1,4 +1,4 @@
-use kernel_services::auth::{AuthService, DeviceInfo};
+use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::error::AppResult;
 
 use shaku::Component;
