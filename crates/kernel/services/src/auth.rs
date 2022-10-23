@@ -1,17 +1,8 @@
+use crate::error::AppResult;
 use kernel_entities::entities::*;
 
 use chrono::{DateTime, Utc};
 use shaku::Interface;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum AuthError {
-    #[error("invalid credentials")]
-    InvalidCredentials,
-
-    #[error("maximum number of seassons ({0}) has been reached")]
-    MaxSessionsCountReached(u32),
-}
 
 #[async_trait::async_trait]
 pub trait AuthService: Interface {
@@ -21,19 +12,19 @@ pub trait AuthService: Interface {
         usrename: &str,
         password: &str,
         device_info: DeviceInfo,
-    ) -> anyhow::Result<Session>;
+    ) -> AppResult<Session>;
 
     async fn refresh_session(
         &mut self,
         refresh_token: &str,
         device_info: DeviceInfo,
-    ) -> anyhow::Result<Session>;
+    ) -> AppResult<Session>;
 
     async fn invalidate_session(
         &mut self,
         refresh_token: &str,
         device_identifier: &str,
-    ) -> anyhow::Result<Session>;
+    ) -> AppResult<Session>;
 }
 
 #[derive(Debug)]
