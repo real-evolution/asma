@@ -1,12 +1,20 @@
-use std::ops::Deref;
+use crate::{util::map_sqlx_error, DbConnection};
 
 use kernel_entities::entities::*;
 use kernel_repositories::{error::RepoResult, AccountsRepo};
 
-use crate::{util::map_sqlx_error, SqlxDatabase};
+use shaku::Component;
+use std::sync::Arc;
+
+#[derive(Component)]
+#[shaku(interface = AccountsRepo)]
+pub struct SqlxAccountsRepo {
+    #[shaku(inject)]
+    db: Arc<dyn DbConnection>,
+}
 
 #[async_trait::async_trait]
-impl AccountsRepo for SqlxDatabase {
+impl AccountsRepo for SqlxAccountsRepo {
     async fn get_of_user_by_name(
         &self,
         user_id: &UserKey,
@@ -17,7 +25,7 @@ impl AccountsRepo for SqlxDatabase {
         )
         .bind(user_id)
         .bind(account_name)
-        .fetch_one(self.deref())
+        .fetch_one(self.db.into_inner_ref())
         .await
         .map_err(map_sqlx_error)?)
     }

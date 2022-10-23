@@ -1,27 +1,30 @@
-use std::{
-    ops::{Deref, DerefMut},
-    time::Duration,
-};
-
-use kernel_entities::traits::BasicEntity;
-use kernel_repositories::Repo;
-
 use crate::DataConfig;
 
-pub type DbType = sqlx::postgres::Postgres;
+use shaku::{Component, Interface};
+use std::time::Duration;
 
+pub type DbType = sqlx::postgres::Postgres;
+pub type PoolType = sqlx::Pool<DbType>;
+
+#[derive(Component)]
+#[shaku(interface = DbConnection)]
 pub struct SqlxDatabase {
-    pool: sqlx::Pool<DbType>,
+    pool: Option<PoolType>,
 }
 
 impl SqlxDatabase {
-    pub fn new(pool: sqlx::Pool<DbType>) -> Self {
-        Self { pool }
+    pub fn new() -> Self {
+        Self { pool: None }
     }
 
-    pub async fn from_config<'a>(
+    pub async fn configure<'a>(
+        &mut self,
         config: &'a DataConfig<'a>,
-    ) -> anyhow::Result<Self> {
+    ) -> anyhow::Result<()> {
+        if self.is_open() {
+            panic!("database connection is already open");
+        }
+
         let url = config.get_connection_string()?;
         let mut opts = sqlx::pool::PoolOptions::<DbType>::new();
 
@@ -47,22 +50,23 @@ impl SqlxDatabase {
             opts.connect(&url).await?
         };
 
-        Ok(Self::new(pool))
+        self.pool = Some(pool);
+
+        Ok(())
     }
 }
 
-impl<E, K> Repo<E, K> for SqlxDatabase where E: BasicEntity<Key = K> {}
-
-impl Deref for SqlxDatabase {
-    type Target = sqlx::Pool<DbType>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.pool
-    }
+pub trait DbConnection: Interface {
+    fn into_inner_ref(&self) -> &PoolType;
+    fn is_open(&self) -> bool;
 }
 
-impl DerefMut for SqlxDatabase {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.pool
+impl DbConnection for SqlxDatabase {
+    fn into_inner_ref(&self) -> &PoolType {
+        self.pool.as_ref().unwrap()
+    }
+
+    fn is_open(&self) -> bool {
+        self.pool.is_some()
     }
 }

@@ -1,19 +1,29 @@
-use std::ops::Deref;
+use crate::{util::map_sqlx_error, DbConnection};
 
 use kernel_entities::entities::*;
-use kernel_repositories::{SessionsRepo, error::RepoResult};
+use kernel_repositories::{error::RepoResult, SessionsRepo};
+use shaku::Component;
 
-use crate::{util::map_sqlx_error, SqlxDatabase};
+use std::sync::Arc;
+
+#[derive(Component)]
+#[shaku(interface = SessionsRepo)]
+pub struct SqlxSessionsRepo {
+    #[shaku(inject)]
+    db: Arc<dyn DbConnection>,
+}
 
 #[async_trait::async_trait]
-impl SessionsRepo for SqlxDatabase {
+impl SessionsRepo for SqlxSessionsRepo {
     async fn get_by_id(&self, id: &SessionKey) -> RepoResult<Session> {
         Ok(
-            sqlx::query_as::<_, Session>("SELECT * FROM sessions WHERE id = $1")
-                .bind(id)
-                .fetch_one(self.deref())
-                .await
-                .map_err(map_sqlx_error)?,
+            sqlx::query_as::<_, Session>(
+                "SELECT * FROM sessions WHERE id = $1",
+            )
+            .bind(id)
+            .fetch_one(self.db.into_inner_ref())
+            .await
+            .map_err(map_sqlx_error)?,
         )
     }
 
@@ -27,7 +37,7 @@ impl SessionsRepo for SqlxDatabase {
         )
         .bind(user_id)
         .bind(account_id)
-        .fetch_all(self.deref())
+        .fetch_all(self.db.into_inner_ref())
         .await
         .map_err(map_sqlx_error)?)
     }
@@ -48,7 +58,7 @@ impl SessionsRepo for SqlxDatabase {
         .bind(user_id)
         .bind(account_id)
         .bind(device_identifier)
-        .fetch_one(self.deref())
+        .fetch_one(self.db.into_inner_ref())
         .await
         .map_err(map_sqlx_error)?)
     }
