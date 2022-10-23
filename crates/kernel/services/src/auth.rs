@@ -1,16 +1,15 @@
 use kernel_entities::entities::*;
 
 use chrono::{DateTime, Utc};
-use derive_more::Display;
 use shaku::Interface;
 use thiserror::Error;
 
-#[derive(Debug, Error, Display)]
+#[derive(Debug, Error)]
 pub enum AuthError {
-    #[display(fmt = "invalid username or password")]
-    InvalidUsernameOrPassword,
+    #[error("invalid credentials")]
+    InvalidCredentials,
 
-    #[display(fmt = "maximum number of seassons ({}) has been reached", _0)]
+    #[error("maximum number of seassons ({0}) has been reached")]
     MaxSessionsCountReached(u32),
 }
 
