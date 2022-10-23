@@ -17,6 +17,6 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
 )]
 struct ApiDoc;
 
-pub(super) fn create_swagger_ui() -> SwaggerUi {
+pub fn create_swagger_ui() -> SwaggerUi {
     SwaggerUi::new(SWAGGER_URL).url(OPENAPI_URL, ApiDoc::openapi())
 }
