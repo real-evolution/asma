@@ -1,6 +1,6 @@
 use kernel_entities::entities::*;
 
-use crate::Repo;
+use crate::{error::RepoResult, Repo};
 
 #[async_trait::async_trait]
 pub trait AccountsRepo: Repo<Account, AccountKey> {
@@ -8,5 +8,5 @@ pub trait AccountsRepo: Repo<Account, AccountKey> {
         &self,
         user_id: &UserKey,
         account_name: &String,
-    ) -> anyhow::Result<Account>;
+    ) -> RepoResult<Account>;
 }
