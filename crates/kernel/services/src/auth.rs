@@ -1,5 +1,4 @@
 use crate::error::AppResult;
-use kernel_entities::entities::*;
 
 use chrono::{DateTime, Utc};
 use shaku::Interface;
@@ -12,19 +11,19 @@ pub trait AuthService: Interface {
         usrename: &str,
         password: &str,
         device_info: DeviceInfo,
-    ) -> AppResult<Session>;
+    ) -> AppResult<()>;
 
     async fn refresh_session(
         &mut self,
         refresh_token: &str,
         device_info: DeviceInfo,
-    ) -> AppResult<Session>;
+    ) -> AppResult<()>;
 
     async fn invalidate_session(
         &mut self,
         refresh_token: &str,
         device_identifier: &str,
-    ) -> AppResult<Session>;
+    ) -> AppResult<()>;
 }
 
 #[derive(Debug)]

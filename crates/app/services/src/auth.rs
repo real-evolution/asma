@@ -1,4 +1,3 @@
-use kernel_entities::entities::Session;
 use kernel_services::auth::{AuthService, DeviceInfo};
 use kernel_services::error::AppResult;
 
@@ -16,7 +15,7 @@ impl AuthService for AppAuthService {
         usrename: &str,
         password: &str,
         device_info: DeviceInfo,
-    ) -> AppResult<Session> {
+    ) -> AppResult<()> {
         todo!()
     }
 
@@ -24,7 +23,7 @@ impl AuthService for AppAuthService {
         &mut self,
         refresh_token: &str,
         device_info: DeviceInfo,
-    ) -> AppResult<Session> {
+    ) -> AppResult<()> {
         todo!()
     }
 
@@ -32,7 +31,7 @@ impl AuthService for AppAuthService {
         &mut self,
         refresh_token: &str,
         device_identifier: &str,
-    ) -> AppResult<Session> {
+    ) -> AppResult<()> {
         todo!()
     }
 }
