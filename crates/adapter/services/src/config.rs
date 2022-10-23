@@ -2,10 +2,15 @@ use kernel_services::config::*;
 
 use config::{Config, File, FileFormat, Value, ValueKind};
 use erased_serde::*;
+use kernel_services::error::{AppResult, ConfigError};
 use shaku::Component;
 
 use std::collections::HashMap;
 use std::{env, io};
+
+const QUALIFIER: &str = "com";
+const ORGANIZATION: &str = "SGSTel";
+const APPLICATION: &str = "asma";
 
 #[derive(Component)]
 #[shaku(interface = ConfigService)]
@@ -14,46 +19,44 @@ pub struct TomlConfigService {
 }
 
 impl ConfigService for TomlConfigService {
-    fn get_section<'de>(
-        &self,
-        section: &str,
-    ) -> anyhow::Result<ConfigObject<'de>> {
-        let val = self.cfg.get::<Value>(section)?;
+    fn get_section<'de>(&self, section: &str) -> AppResult<ConfigObject<'de>> {
+        let val = self.cfg.get::<Value>(section).map_err(map_config_error)?;
 
         Ok(ConfigObject::new(Box::new(<dyn Deserializer>::erase(val))))
     }
 
-    fn get(&self, key: &str) -> anyhow::Result<ConfigValue> {
-        let val = self.cfg.get::<Value>(key)?;
+    fn get(&self, key: &str) -> AppResult<ConfigValue> {
+        let val = self.cfg.get::<Value>(key).map_err(map_config_error)?;
 
         Ok(map_config_value(val.kind))
     }
 
-    fn get_bool(&self, key: &str) -> anyhow::Result<bool> {
-        Ok(self.cfg.get_bool(key)?)
+    fn get_bool(&self, key: &str) -> AppResult<bool> {
+        Ok(self.cfg.get_bool(key).map_err(map_config_error)?)
     }
 
-    fn get_int(&self, key: &str) -> anyhow::Result<i64> {
-        Ok(self.cfg.get_int(key)?)
+    fn get_int(&self, key: &str) -> AppResult<i64> {
+        Ok(self.cfg.get_int(key).map_err(map_config_error)?)
     }
 
-    fn get_float(&self, key: &str) -> anyhow::Result<f64> {
-        Ok(self.cfg.get_float(key)?)
+    fn get_float(&self, key: &str) -> AppResult<f64> {
+        Ok(self.cfg.get_float(key).map_err(map_config_error)?)
     }
 
-    fn get_string(&self, key: &str) -> anyhow::Result<String> {
-        Ok(self.cfg.get_string(key)?)
+    fn get_string(&self, key: &str) -> AppResult<String> {
+        Ok(self.cfg.get_string(key).map_err(map_config_error)?)
     }
 
-    fn get_array(&self, key: &str) -> anyhow::Result<Vec<ConfigValue>> {
-        Ok(map_config_array(self.cfg.get_array(key)?))
+    fn get_array(&self, key: &str) -> AppResult<Vec<ConfigValue>> {
+        Ok(map_config_array(
+            self.cfg.get_array(key).map_err(map_config_error)?,
+        ))
     }
 
-    fn get_map(
-        &self,
-        key: &str,
-    ) -> anyhow::Result<HashMap<String, ConfigValue>> {
-        Ok(map_config_table(self.cfg.get_table(key)?))
+    fn get_map(&self, key: &str) -> AppResult<HashMap<String, ConfigValue>> {
+        Ok(map_config_table(
+            self.cfg.get_table(key).map_err(map_config_error)?,
+        ))
     }
 }
 
@@ -87,10 +90,6 @@ impl TomlConfigService {
     }
 
     fn get_config_files() -> anyhow::Result<Vec<String>> {
-        const QUALIFIER: &str = "com";
-        const ORGANIZATION: &str = "SGSTel";
-        const APPLICATION: &str = "asma";
-
         let mut config_dir = directories::ProjectDirs::from(
             QUALIFIER,
             ORGANIZATION,
@@ -146,4 +145,40 @@ fn map_config_table(
 
 fn map_config_array(val: Vec<Value>) -> Vec<ConfigValue> {
     val.into_iter().map(|v| map_config_value(v.kind)).collect()
+}
+
+fn map_config_error(err: config::ConfigError) -> ConfigError {
+    match err {
+        config::ConfigError::NotFound(key) => ConfigError::NotFound(key),
+        config::ConfigError::Message(msg) => ConfigError::Other(msg),
+
+        config::ConfigError::Frozen => {
+            ConfigError::Other("config is frozen".into())
+        }
+
+        config::ConfigError::PathParse(kind) => {
+            ConfigError::PathParse(kind.description().into())
+        }
+
+        config::ConfigError::FileParse { uri, cause } => {
+            ConfigError::FileParse {
+                uri: uri.unwrap_or("<unknown>".into()),
+                error: cause.to_string(),
+            }
+        }
+
+        config::ConfigError::Type {
+            origin,
+            unexpected,
+            expected,
+            key,
+        } => ConfigError::ValueParse(format!(
+            "key: {:?}, origin: {:?}, expected: {}, got: {}",
+            key, origin, expected, unexpected
+        )),
+
+        config::ConfigError::Foreign(err) => {
+            ConfigError::Other(err.to_string())
+        }
+    }
 }
