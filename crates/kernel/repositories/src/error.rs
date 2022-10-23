@@ -1,14 +1,15 @@
-use derive_more::Display;
 use thiserror::Error;
 
-#[derive(Debug, Error, Display)]
+pub type RepoResult<T> = Result<T, RepoError>;
+
+#[derive(Debug, Error)]
 pub enum RepoError {
-    #[display(fmt = "i/o error: {}", _0)]
+    #[error("i/o error: {0}")]
     Io(std::io::Error),
 
-    #[display(fmt = "data error: {}", _0)]
+    #[error("data error: {0}")]
     Data(anyhow::Error),
 
-    #[display(fmt = "item not found")]
+    #[error("not items were found")]
     NotFound,
 }
