@@ -27,8 +27,9 @@ pub trait AuthService: Interface {
 
 pub mod models {
     use chrono::{DateTime, Utc};
+    use serde::Deserialize;
 
-    #[derive(Debug)]
+    #[derive(Debug, Deserialize)]
     pub struct DeviceInfo {
         pub device_identifier: String,
         pub agent: String,
