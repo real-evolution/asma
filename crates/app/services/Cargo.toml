@@ -1,0 +1,8 @@
+[package]
+name = "services"
+description = "Main application services implementations"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]

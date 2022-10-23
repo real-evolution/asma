@@ -2,6 +2,7 @@
 members = [
   "crates/common/*",
   "crates/kernel/*",
+  "crates/app/*",
   "crates/adapter/*",
   "crates/driver/*",
 ]
