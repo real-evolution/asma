@@ -1,8 +1,15 @@
 [package]
-name = "services"
+name = "app_services"
 description = "Main application services implementations"
 edition.workspace = true
 version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# project dependencies
+kernel_entities = { path = "../../kernel/entities" }
+kernel_services = { path = "../../kernel/services" }
+
+# workspace dependencies
+async-trait = { workspace = true}
+shaku = { workspace = true }
