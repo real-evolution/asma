@@ -14,6 +14,7 @@ utoipa-swagger-ui = { version = "2", features = ["axum"] }
 
 # project dependencies
 common_validation = { path = "../../common/validation" }
+kernel_services = { path = "../../kernel/services" }
 
 # workspace dependencies
 anyhow = { workspace = true }
