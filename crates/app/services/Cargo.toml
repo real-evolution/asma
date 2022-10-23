@@ -8,6 +8,7 @@ authors.workspace = true
 [dependencies]
 # project dependencies
 kernel_entities = { path = "../../kernel/entities" }
+kernel_repositories = { path = "../../kernel/repositories" }
 kernel_services = { path = "../../kernel/services" }
 
 # workspace dependencies

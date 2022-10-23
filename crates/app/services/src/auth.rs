@@ -1,3 +1,6 @@
+use std::sync::Arc;
+
+use kernel_repositories::*;
 use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::error::AppResult;
 
@@ -5,7 +8,19 @@ use shaku::Component;
 
 #[derive(Component)]
 #[shaku(interface = AuthService)]
-pub struct AppAuthService;
+pub struct AppAuthService {
+    #[shaku(inject)]
+    users: Arc<dyn UsersRepo>,
+
+    #[shaku(inject)]
+    accounts: Arc<dyn AccountsRepo>,
+
+    #[shaku(inject)]
+    roles: Arc<dyn AccountsRepo>,
+
+    #[shaku(inject)]
+    sessions: Arc<dyn AccountsRepo>,
+}
 
 #[async_trait::async_trait]
 impl AuthService for AppAuthService {
