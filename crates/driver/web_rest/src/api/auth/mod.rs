@@ -1,5 +1,7 @@
-use axum::Router;
+pub mod signin;
 
-pub(super) fn routes() -> Router {
-    Router::new()
+use axum::{routing::post, Router};
+
+pub fn routes() -> Router {
+    Router::new().route("/signin", post(signin::signin))
 }
