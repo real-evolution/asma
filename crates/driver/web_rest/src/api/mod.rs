@@ -1,9 +1,9 @@
-pub(super) mod auth;
-pub(super) mod diag;
+pub mod auth;
+pub mod diag;
 
 use axum::Router;
 
-pub(super) fn api_routes() -> Router {
+pub fn api_routes() -> Router {
     debug!("creating router with Swagger/OpenAPI support");
 
     Router::new()
