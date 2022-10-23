@@ -13,5 +13,6 @@ kernel_entities = { path = "../entities" }
 async-trait = { workspace = true }
 anyhow = { workspace = true }
 derive_more = { workspace = true }
-uuid = { workspace = true }
+shaku = { workspace = true }
 thiserror = { workspace = true }
+uuid = { workspace = true }

@@ -1,9 +1,10 @@
+use crate::error::RepoResult;
 use kernel_entities::entities::*;
 
-use crate::{error::RepoResult, Repo};
+use shaku::Interface;
 
 #[async_trait::async_trait]
-pub trait AccountsRepo: Repo<Account, AccountKey> {
+pub trait AccountsRepo: Interface {
     async fn get_of_user_by_name(
         &self,
         user_id: &UserKey,

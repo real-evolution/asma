@@ -1,11 +1,15 @@
+use crate::error::RepoResult;
 use kernel_entities::entities::*;
 
-use crate::{Repo, error::RepoResult};
+use shaku::Interface;
 
 #[async_trait::async_trait]
-pub trait RolesRepo: Repo<Role, RoleKey> {
+pub trait RolesRepo: Interface {
     async fn get_all(&self) -> RepoResult<Vec<Role>>;
-    async fn get_account_roles(&self, account_id: &AccountKey) -> RepoResult<Vec<Role>>;
+    async fn get_account_roles(
+        &self,
+        account_id: &AccountKey,
+    ) -> RepoResult<Vec<Role>>;
     async fn is_account_in_role(
         &self,
         account_id: &AccountKey,

@@ -1,9 +1,10 @@
+use crate::error::RepoResult;
 use kernel_entities::entities::*;
 
-use crate::{Repo, error::RepoResult};
+use shaku::Interface;
 
 #[async_trait::async_trait]
-pub trait SessionsRepo: Repo<Session, SessionKey> {
+pub trait SessionsRepo: Interface {
     async fn get_by_id(&self, id: &SessionKey) -> RepoResult<Session>;
 
     async fn get_all_for(
