@@ -1,6 +1,8 @@
 use kernel_repositories::error::RepoError;
 use thiserror::Error;
 
+pub use crate::crypto::error::CryptoError;
+
 pub type AppResult<T> = Result<T, AppError>;
 
 #[derive(Debug, Error)]
@@ -21,7 +23,7 @@ pub enum ConfigError {
     Deserialization(#[from] erased_serde::Error),
 
     #[error("unknown error: {0}")]
-    Other(String)
+    Other(String),
 }
 
 #[derive(Debug, Error)]
@@ -41,6 +43,9 @@ pub enum AppError {
     #[error("config error: {0}")]
     Config(ConfigError),
 
+    #[error("crypto error: {0}")]
+    Crypto(#[from] CryptoError),
+
     #[error("repo error: {0}")]
     Repo(#[from] RepoError),
 
@@ -48,8 +53,8 @@ pub enum AppError {
     Auth(#[from] AuthError),
 }
 
-impl<E: Into<ConfigError>> From<E> for AppError {
-    fn from(err: E) -> Self {
+impl From<erased_serde::Error> for AppError {
+    fn from(err: erased_serde::Error) -> Self {
         AppError::Config(err.into())
     }
 }
