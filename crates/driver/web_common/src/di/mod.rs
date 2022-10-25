@@ -1,37 +1,27 @@
-mod adapter_services;
-mod app_services;
+mod base_services;
 mod repos;
-mod root;
-
-use adapter_repositories_sqlx::DbConnection;
-use kernel_repositories::*;
-use kernel_services::{auth::AuthService, config::ConfigService};
+mod services;
 
 use std::sync::Arc;
 
-pub use shaku::*;
+use adapter_repositories_sqlx::{DataConfig, DATA_CONST_SECTION};
+pub use base_services::base_services_module;
+use kernel_services::{config::ConfigService, di::ServicesModule, get_config};
 
-pub use root::RootModule as DI;
+use crate::di::base_services::BaseServicesModule;
+pub trait DI = ServicesModule;
 
-pub trait ReposModule:
-    HasComponent<dyn DbConnection>
-    + HasComponent<dyn UsersRepo>
-    + HasComponent<dyn AccountsRepo>
-    + HasComponent<dyn RolesRepo>
-    + HasComponent<dyn SessionsRepo>
-{
-}
+pub async fn build_di(
+    base_services: Arc<dyn BaseServicesModule>,
+) -> anyhow::Result<Arc<dyn DI>> {
+    debug!("reading data configuration with key `{DATA_CONST_SECTION}`");
+    let config_svc: &dyn ConfigService = base_services.resolve_ref();
+    let data_conf = get_config!(config_svc, DATA_CONST_SECTION => DataConfig)?;
 
-pub trait AdapterServicesModule: HasComponent<dyn ConfigService> {}
-pub trait AppServicesModule: HasComponent<dyn AuthService> {}
+    debug!("creating DI parts");
+    let data = repos::database_module(data_conf).await?;
+    let repos = repos::repos_module(data)?;
+    let services = services::build_services(base_services, repos)?;
 
-pub fn build_di() -> anyhow::Result<Arc<DI>> {
-    let repos = repos::repos_module()?;
-
-    let adapter_services = adapter_services::adapter_services_module()?;
-    let app_services = app_services::app_services_module(repos.clone())?;
-
-    Ok(Arc::new(
-        DI::builder(repos, adapter_services, app_services).build(),
-    ))
+    Ok(services)
 }
