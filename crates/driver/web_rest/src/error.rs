@@ -45,10 +45,6 @@ impl IntoResponse for ApiError {
             }
 
             ApiError::AppError(err) => match err {
-                AppError::Config(_) | AppError::Unknown(_) => {
-                    status_tuple(StatusCode::INTERNAL_SERVER_ERROR)
-                }
-
                 AppError::Repo(err) => match err {
                     RepoError::NotFound => {
                         (StatusCode::NOT_FOUND, err.to_string())
@@ -59,6 +55,8 @@ impl IntoResponse for ApiError {
                 AppError::Auth(err) => {
                     (StatusCode::UNAUTHORIZED, err.to_string())
                 }
+
+                _ => status_tuple(StatusCode::INTERNAL_SERVER_ERROR),
             },
         };
 
