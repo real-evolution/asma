@@ -1,3 +1,4 @@
+pub mod di;
 pub mod error;
 
 mod accounts;
