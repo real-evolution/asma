@@ -1,4 +1,4 @@
-use crate::{util::map_sqlx_error, DbConnection};
+use crate::{util::map_sqlx_error, DatabaseConnection};
 
 use kernel_entities::entities::*;
 use kernel_repositories::{error::RepoResult, RolesRepo};
@@ -10,14 +10,14 @@ use std::sync::Arc;
 #[shaku(interface = RolesRepo)]
 pub struct SqlxRolesRepo {
     #[shaku(inject)]
-    db: Arc<dyn DbConnection>,
+    db: Arc<dyn DatabaseConnection>,
 }
 
 #[async_trait::async_trait]
 impl RolesRepo for SqlxRolesRepo {
     async fn get_all(&self) -> RepoResult<Vec<Role>> {
         Ok(sqlx::query_as::<_, Role>("SELECT * FROM roles")
-            .fetch_all(self.db.into_inner_ref())
+            .fetch_all(self.db.deref())
             .await
             .map_err(map_sqlx_error)?)
     }
@@ -35,7 +35,7 @@ impl RolesRepo for SqlxRolesRepo {
                    account_roles.account_id = ?"#,
         )
         .bind(account_id)
-        .fetch_all(self.db.into_inner_ref())
+        .fetch_all(self.db.deref())
         .await
         .map_err(map_sqlx_error)?)
     }
@@ -55,7 +55,7 @@ impl RolesRepo for SqlxRolesRepo {
         )
         .bind(account_id)
         .bind(role_id)
-        .fetch_optional(self.db.into_inner_ref())
+        .fetch_optional(self.db.deref())
         .await
         .map_err(map_sqlx_error)?;
 

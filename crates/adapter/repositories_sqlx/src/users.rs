@@ -4,13 +4,13 @@ use kernel_entities::entities::*;
 use kernel_repositories::{error::RepoResult, UsersRepo};
 use shaku::Component;
 
-use crate::{util::map_sqlx_error, DbConnection};
+use crate::{util::map_sqlx_error, DatabaseConnection};
 
 #[derive(Component)]
 #[shaku(interface = UsersRepo)]
 pub struct SqlxUsersRepo {
     #[shaku(inject)]
-    db: Arc<dyn DbConnection>,
+    db: Arc<dyn DatabaseConnection>,
 }
 
 #[async_trait::async_trait]
@@ -19,7 +19,7 @@ impl UsersRepo for SqlxUsersRepo {
         Ok(
             sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
                 .bind(id)
-                .fetch_one(self.db.into_inner_ref())
+                .fetch_one(self.db.deref())
                 .await
                 .map_err(map_sqlx_error)?,
         )
@@ -31,7 +31,7 @@ impl UsersRepo for SqlxUsersRepo {
                 "SELECT * FROM users WHERE username = $1",
             )
             .bind(username)
-            .fetch_one(self.db.into_inner_ref())
+            .fetch_one(self.db.deref())
             .await
             .map_err(map_sqlx_error)?,
         )

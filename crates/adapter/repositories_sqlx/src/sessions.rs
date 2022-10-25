@@ -1,4 +1,4 @@
-use crate::{util::map_sqlx_error, DbConnection};
+use crate::{util::map_sqlx_error, DatabaseConnection};
 
 use kernel_entities::entities::*;
 use kernel_repositories::{error::RepoResult, SessionsRepo};
@@ -10,7 +10,7 @@ use std::sync::Arc;
 #[shaku(interface = SessionsRepo)]
 pub struct SqlxSessionsRepo {
     #[shaku(inject)]
-    db: Arc<dyn DbConnection>,
+    db: Arc<dyn DatabaseConnection>,
 }
 
 #[async_trait::async_trait]
@@ -21,7 +21,7 @@ impl SessionsRepo for SqlxSessionsRepo {
                 "SELECT * FROM sessions WHERE id = $1",
             )
             .bind(id)
-            .fetch_one(self.db.into_inner_ref())
+            .fetch_one(self.db.deref())
             .await
             .map_err(map_sqlx_error)?,
         )
@@ -37,7 +37,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         )
         .bind(user_id)
         .bind(account_id)
-        .fetch_all(self.db.into_inner_ref())
+        .fetch_all(self.db.deref())
         .await
         .map_err(map_sqlx_error)?)
     }
@@ -58,7 +58,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         .bind(user_id)
         .bind(account_id)
         .bind(device_identifier)
-        .fetch_one(self.db.into_inner_ref())
+        .fetch_one(self.db.deref())
         .await
         .map_err(map_sqlx_error)?)
     }
