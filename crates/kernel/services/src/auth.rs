@@ -1,6 +1,6 @@
-use crate::error::AppResult;
-
 use shaku::Interface;
+
+use crate::error::AppResult;
 
 #[async_trait::async_trait]
 pub trait AuthService: Interface {
@@ -35,5 +35,18 @@ pub mod models {
         pub agent: String,
         pub last_address: Option<String>,
         pub last_access: DateTime<Utc>,
+    }
+}
+
+pub mod error {
+    use thiserror::Error;
+
+    #[derive(Debug, Error)]
+    pub enum AuthError {
+        #[error("invalid credentials")]
+        InvalidCredentials,
+
+        #[error("maximum number of seassons ({0}) has been reached")]
+        MaxSessionsCountReached(u32),
     }
 }

@@ -47,3 +47,34 @@ impl<'de> ConfigObject<'de> {
         Ok(erased_serde::deserialize(&mut self.0)?)
     }
 }
+
+pub mod error {
+    use thiserror::Error;
+
+    #[derive(Debug, Error)]
+    pub enum ConfigError {
+        #[error("config key `{0}` not found")]
+        NotFound(String),
+
+        #[error("failed to parse path `{0}`")]
+        PathParse(String),
+
+        #[error("failed to parse file `{uri}`: {error}")]
+        FileParse { uri: String, error: String },
+
+        #[error("failed to parse value: {0}")]
+        ValueParse(String),
+
+        #[error("deserialization error: {0}")]
+        Deserialization(#[from] erased_serde::Error),
+
+        #[error("unknown error: {0}")]
+        Other(String),
+    }
+
+    impl From<erased_serde::Error> for crate::error::AppError {
+        fn from(err: erased_serde::Error) -> Self {
+            Into::<ConfigError>::into(err).into()
+        }
+    }
+}
