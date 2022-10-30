@@ -10,6 +10,7 @@ authors.workspace = true
 config = "0"
 directories = "4"
 toml = "0"
+rand = "0"
 
 # project dependencies
 kernel_services = { path = "../../kernel/services" }
