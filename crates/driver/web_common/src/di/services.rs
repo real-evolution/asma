@@ -3,7 +3,9 @@ use std::sync::Arc;
 use app_services::auth::AppAuthService;
 use kernel_repositories::di::ReposModule;
 use kernel_repositories::*;
-use kernel_services::{config::ConfigService, di::ServicesModule};
+use kernel_services::{
+    config::ConfigService, di::ServicesModule, entropy::EntropyService,
+};
 use shaku::module;
 
 use super::base_services::BaseServicesModule;
@@ -14,7 +16,7 @@ module! {
         providers = [],
 
         use dyn BaseServicesModule {
-            components = [ dyn ConfigService ],
+            components = [ dyn ConfigService, dyn EntropyService ],
             providers = [],
         },
 

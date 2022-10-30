@@ -1,14 +1,19 @@
 use std::sync::Arc;
 
-use adapter_services::config::TomlConfigService;
-use kernel_services::config::ConfigService;
+use adapter_services::{
+    config::TomlConfigService, entropy::SecureEntropyService,
+};
+use kernel_services::{config::ConfigService, entropy::EntropyService};
 use shaku::{module, HasComponent};
 
-pub trait BaseServicesModule: HasComponent<dyn ConfigService> {}
+pub trait BaseServicesModule:
+    HasComponent<dyn ConfigService> + HasComponent<dyn EntropyService>
+{
+}
 
 module! {
     pub BaseServicesModuleImpl: BaseServicesModule {
-        components = [ TomlConfigService ],
+        components = [ TomlConfigService, SecureEntropyService ],
         providers = [],
     }
 }
@@ -18,7 +23,7 @@ pub fn base_services_module() -> anyhow::Result<Arc<dyn BaseServicesModule>> {
 
     Ok(Arc::new(
         BaseServicesModuleImpl::builder()
-            .with_component_override(loaded_config)
+            .with_component_override::<dyn ConfigService>(loaded_config)
             .build(),
     ))
 }
