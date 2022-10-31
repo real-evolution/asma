@@ -4,7 +4,8 @@ use app_services::auth::AppAuthService;
 use kernel_repositories::di::ReposModule;
 use kernel_repositories::*;
 use kernel_services::{
-    config::ConfigService, di::ServicesModule, entropy::EntropyService,
+    config::ConfigService, crypto::hash::CryptoHashService, di::ServicesModule,
+    entropy::EntropyService,
 };
 use shaku::module;
 
@@ -16,7 +17,11 @@ module! {
         providers = [],
 
         use dyn BaseServicesModule {
-            components = [ dyn ConfigService, dyn EntropyService ],
+            components = [
+                dyn ConfigService,
+                dyn EntropyService,
+                dyn CryptoHashService
+            ],
             providers = [],
         },
 
