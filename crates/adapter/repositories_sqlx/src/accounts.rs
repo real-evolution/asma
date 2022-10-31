@@ -18,7 +18,7 @@ impl AccountsRepo for SqlxAccountsRepo {
     async fn get_of_user_by_name(
         &self,
         user_id: &UserKey,
-        account_name: &String,
+        account_name: &str,
     ) -> RepoResult<Account> {
         Ok(sqlx::query_as::<_, Account>(
             "SELECT * FROM accounts WHERE user_id = $1 AND account_name = $2",
