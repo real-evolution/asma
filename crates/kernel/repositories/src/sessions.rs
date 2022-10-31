@@ -1,7 +1,7 @@
-use crate::error::RepoResult;
 use kernel_entities::entities::*;
-
 use shaku::Interface;
+
+use crate::error::RepoResult;
 
 #[async_trait::async_trait]
 pub trait SessionsRepo: Interface {
@@ -19,4 +19,11 @@ pub trait SessionsRepo: Interface {
         account_id: &AccountKey,
         device_identifier: &str,
     ) -> RepoResult<Session>;
+
+    async fn access(
+        &self,
+        id: &SessionKey,
+        address: Option<String>,
+        agent: &str,
+    ) -> RepoResult<()>;
 }

@@ -1,10 +1,10 @@
-use crate::{util::map_sqlx_error, DatabaseConnection};
+use std::sync::Arc;
 
 use kernel_entities::entities::*;
 use kernel_repositories::{error::RepoResult, SessionsRepo};
 use shaku::Component;
 
-use std::sync::Arc;
+use crate::{util::map_sqlx_error, DatabaseConnection};
 
 #[derive(Component)]
 #[shaku(interface = SessionsRepo)]
@@ -63,5 +63,34 @@ impl SessionsRepo for SqlxSessionsRepo {
         .fetch_one(self.db.deref())
         .await
         .map_err(map_sqlx_error)?)
+    }
+
+    async fn access(
+        &self,
+        id: &SessionKey,
+        address: Option<String>,
+        agent: &str,
+    ) -> RepoResult<()> {
+        let now = chrono::Utc::now();
+
+        sqlx::query!(
+            r#"
+            UPDATE sessions SET
+                last_access = $1,
+                last_address = $2,
+                agent = $3,
+                updated_at = $4
+            WHERE id = $5"#,
+            now,
+            address,
+            agent,
+            now,
+            id.0
+        )
+        .execute(self.db.deref())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(())
     }
 }
