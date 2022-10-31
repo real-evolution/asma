@@ -1,19 +1,29 @@
 use std::sync::Arc;
 
 use adapter_services::{
-    config::TomlConfigService, entropy::SecureEntropyService,
+    config::TomlConfigService, crypto::hash::Argon2CryptoHashService,
+    entropy::SecureEntropyService,
 };
-use kernel_services::{config::ConfigService, entropy::EntropyService};
+use kernel_services::{
+    config::ConfigService, crypto::hash::CryptoHashService,
+    entropy::EntropyService,
+};
 use shaku::{module, HasComponent};
 
 pub trait BaseServicesModule:
-    HasComponent<dyn ConfigService> + HasComponent<dyn EntropyService>
+    HasComponent<dyn ConfigService>
+    + HasComponent<dyn EntropyService>
+    + HasComponent<dyn CryptoHashService>
 {
 }
 
 module! {
     pub BaseServicesModuleImpl: BaseServicesModule {
-        components = [ TomlConfigService, SecureEntropyService ],
+        components = [
+            TomlConfigService,
+            SecureEntropyService,
+            Argon2CryptoHashService<'static>
+        ],
         providers = [],
     }
 }
