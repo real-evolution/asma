@@ -8,6 +8,6 @@ pub trait AccountsRepo: Interface {
     async fn get_of_user_by_name(
         &self,
         user_id: &UserKey,
-        account_name: &String,
+        account_name: &str,
     ) -> RepoResult<Account>;
 }
