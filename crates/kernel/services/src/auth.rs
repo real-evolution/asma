@@ -26,7 +26,6 @@ pub trait AuthService: Interface {
 }
 
 pub mod models {
-    use chrono::{DateTime, Utc};
     use serde::Deserialize;
 
     #[derive(Debug, Deserialize)]
@@ -34,7 +33,6 @@ pub mod models {
         pub device_identifier: String,
         pub agent: String,
         pub last_address: Option<String>,
-        pub last_access: DateTime<Utc>,
     }
 }
 
