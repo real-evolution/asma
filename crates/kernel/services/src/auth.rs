@@ -43,6 +43,9 @@ pub mod error {
 
     #[derive(Debug, Error)]
     pub enum AuthError {
+        #[error("account has no password set")]
+        UnsetPassword,
+
         #[error("invalid credentials")]
         InvalidCredentials,
 
