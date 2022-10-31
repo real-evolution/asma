@@ -8,17 +8,14 @@ pub enum CryptoError {
     #[error("memory error: {0}")]
     Memory(String),
 
-    #[error("input was too short (max: {min}, got: {got})")]
-    InputTooShort { min: usize, got: usize },
+    #[error("input was too short")]
+    InputTooShort,
 
-    #[error("input was too long (max: {max}, got: {got})")]
-    InputTooLong { max: usize, got: usize },
+    #[error("input was too long")]
+    InputTooLong,
 
-    #[error("version error: {0}")]
-    Version(String),
-
-    #[error("invalid input: {0}")]
-    InvalidInput(String),
+    #[error("invalid input")]
+    InvalidInput,
 
     #[error("format error: {0}")]
     Format(String),
@@ -29,6 +26,6 @@ pub enum CryptoError {
     #[error("salt error: {0}")]
     Salt(String),
 
-    #[error("unsupported: {0}")]
-    Unsupported(String),
+    #[error("unsupported")]
+    Unsupported,
 }
