@@ -42,7 +42,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         .map_err(map_sqlx_error)?)
     }
 
-    async fn get_for(
+    async fn get_valid_for(
         &self,
         user_id: &UserKey,
         account_id: &AccountKey,
@@ -53,11 +53,13 @@ impl SessionsRepo for SqlxSessionsRepo {
             SELECT * FROM sessions
             WHERE user_id = $1 AND
                   account_id = $2 AND
-                  device_identifier = $3"#,
+                  device_identifier = $3 AND
+                  valid_until > $4"#,
         )
         .bind(user_id)
         .bind(account_id)
         .bind(device_identifier)
+        .bind(chrono::Utc::now())
         .fetch_one(self.db.deref())
         .await
         .map_err(map_sqlx_error)?)
