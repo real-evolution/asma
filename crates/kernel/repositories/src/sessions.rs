@@ -13,7 +13,7 @@ pub trait SessionsRepo: Interface {
         account_id: &AccountKey,
     ) -> RepoResult<Vec<Session>>;
 
-    async fn get_for(
+    async fn get_valid_for(
         &self,
         user_id: &UserKey,
         account_id: &AccountKey,
