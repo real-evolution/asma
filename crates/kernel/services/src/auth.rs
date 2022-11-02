@@ -49,5 +49,8 @@ pub mod error {
 
         #[error("maximum number of seassons ({0}) has been reached")]
         MaxSessionsCountReached(usize),
+
+        #[error("account not withenticated")]
+        NotAuthenticated,
     }
 }
