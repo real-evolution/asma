@@ -7,6 +7,8 @@ authors.workspace = true
 
 [dependencies]
 # project dependencies
+common_validation = { path = "../../common/validation" }
+common_macros = { path = "../../common/macros" }
 kernel_entities = { path = "../../kernel/entities" }
 kernel_repositories = { path = "../../kernel/repositories" }
 kernel_services = { path = "../../kernel/services" }
@@ -15,4 +17,6 @@ kernel_services = { path = "../../kernel/services" }
 async-trait = { workspace = true}
 chrono = { workspace = true }
 shaku = { workspace = true }
+serde = { workspace = true }
 tracing = { workspace = true }
+validator = { workspace = true }
