@@ -12,6 +12,7 @@ kernel_entities = { path = "../entities" }
 # workspace dependencies
 async-trait = { workspace = true }
 anyhow = { workspace = true }
+chrono = { workspace = true }
 derive_more = { workspace = true }
 shaku = { workspace = true }
 thiserror = { workspace = true }
