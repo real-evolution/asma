@@ -8,6 +8,7 @@ use kernel_repositories::{
 };
 use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::crypto::hash::CryptoHashService;
+use kernel_services::entropy::EntropyService;
 use kernel_services::error::{AppResult, AuthError};
 use shaku::Component;
 
@@ -27,6 +28,9 @@ pub struct AppAuthService {
 
     #[shaku(inject)]
     hash_svc: Arc<dyn CryptoHashService>,
+
+    #[shaku(inject)]
+    entropy_svc: Arc<dyn EntropyService>,
 }
 
 #[async_trait::async_trait]
@@ -99,7 +103,9 @@ impl AuthService for AppAuthService {
             address: device_info.last_address,
             valid_until: Utc::now()
                 + Duration::seconds(self.config.signin_validity_seconds),
-            refresh_token: "test token".into(),
+            refresh_token: self
+                .entropy_svc
+                .next_string(self.config.refresh_token_length)?,
         };
 
         self.sessions
