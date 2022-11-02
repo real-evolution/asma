@@ -48,6 +48,6 @@ pub mod error {
         InvalidCredentials,
 
         #[error("maximum number of seassons ({0}) has been reached")]
-        MaxSessionsCountReached(u32),
+        MaxSessionsCountReached(usize),
     }
 }
