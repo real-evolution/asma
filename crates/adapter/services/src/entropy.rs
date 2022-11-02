@@ -1,8 +1,10 @@
+use std::sync::{RwLock, RwLockWriteGuard};
+
 use kernel_services::entropy::{
     CharacterCase, EntropyService, RandomStringOptions,
 };
 use kernel_services::error::{AppError, AppResult};
-use rand::{distributions::Uniform, Rng, RngCore};
+use rand::{Rng, RngCore};
 use shaku::Component;
 
 const UPPER_ALPHA: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -18,63 +20,72 @@ pub type SecureEntropyService = EntropyServiceImpl<rand::rngs::OsRng>;
 #[derive(Component)]
 #[shaku(interface = EntropyService)]
 pub struct EntropyServiceImpl<R: RngCore + Send + Sync + 'static> {
-    rng: R,
+    rng: WriteLock<R>,
 }
 
 impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
-    fn next_bool(&mut self) -> AppResult<bool> {
-        Ok(self.rng.gen())
+    fn next_bool(&self) -> AppResult<bool> {
+        Ok(self.rng.lock()?.gen())
     }
 
-    fn next_u8(&mut self) -> AppResult<u8> {
-        Ok(self.rng.gen())
+    fn next_u8(&self) -> AppResult<u8> {
+        Ok(self.rng.lock()?.gen())
     }
 
-    fn next_u16(&mut self) -> AppResult<u16> {
-        Ok(self.rng.gen())
+    fn next_u16(&self) -> AppResult<u16> {
+        Ok(self.rng.lock()?.gen())
     }
 
-    fn next_u32(&mut self) -> AppResult<u32> {
-        Ok(self.rng.gen())
+    fn next_u32(&self) -> AppResult<u32> {
+        Ok(self.rng.lock()?.gen())
     }
 
-    fn next_u64(&mut self) -> AppResult<u64> {
-        Ok(self.rng.gen())
+    fn next_u64(&self) -> AppResult<u64> {
+        Ok(self.rng.lock()?.gen())
     }
 
-    fn next_u128(&mut self) -> AppResult<u128> {
-        Ok(self.rng.gen())
+    fn next_u128(&self) -> AppResult<u128> {
+        Ok(self.rng.lock()?.gen())
     }
 
-    fn next_u8_ranged(&mut self, min: u8, max: u8) -> AppResult<u8> {
-        Ok(self.rng.gen_range(min..max))
+    fn next_usize(&self) -> AppResult<usize> {
+        Ok(self.rng.lock()?.gen())
     }
 
-    fn next_u16_ranged(&mut self, min: u16, max: u16) -> AppResult<u16> {
-        Ok(self.rng.gen_range(min..max))
+    fn next_u8_ranged(&self, min: u8, max: u8) -> AppResult<u8> {
+        Ok(self.rng.lock()?.gen_range(min..max))
     }
 
-    fn next_u32_ranged(&mut self, min: u32, max: u32) -> AppResult<u32> {
-        Ok(self.rng.gen_range(min..max))
+    fn next_u16_ranged(&self, min: u16, max: u16) -> AppResult<u16> {
+        Ok(self.rng.lock()?.gen_range(min..max))
     }
 
-    fn next_u64_ranged(&mut self, min: u64, max: u64) -> AppResult<u64> {
-        Ok(self.rng.gen_range(min..max))
+    fn next_u32_ranged(&self, min: u32, max: u32) -> AppResult<u32> {
+        Ok(self.rng.lock()?.gen_range(min..max))
     }
 
-    fn next_u128_ranged(&mut self, min: u128, max: u128) -> AppResult<u128> {
-        Ok(self.rng.gen_range(min..max))
+    fn next_u64_ranged(&self, min: u64, max: u64) -> AppResult<u64> {
+        Ok(self.rng.lock()?.gen_range(min..max))
     }
 
-    fn next_bytes_inplace(&mut self, buf: &mut [u8]) -> AppResult<()> {
+    fn next_u128_ranged(&self, min: u128, max: u128) -> AppResult<u128> {
+        Ok(self.rng.lock()?.gen_range(min..max))
+    }
+
+    fn next_usize_ranged(&self, min: usize, max: usize) -> AppResult<usize> {
+        Ok(self.rng.lock()?.gen_range(min..max))
+    }
+
+    fn next_bytes_inplace(&self, buf: &mut [u8]) -> AppResult<()> {
         self.rng
+            .lock()?
             .try_fill_bytes(buf)
             .map_err(|err| AppError::Unknown(err.into()))?;
 
         Ok(())
     }
 
-    fn next_bytes(&mut self, len: usize) -> AppResult<Vec<u8>> {
+    fn next_bytes(&self, len: usize) -> AppResult<Vec<u8>> {
         let mut buf: Vec<u8> = Vec::with_capacity(len);
 
         self.next_bytes_inplace(&mut buf)?;
@@ -82,12 +93,12 @@ impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
         Ok(buf)
     }
 
-    fn next_string(&mut self, len: usize) -> AppResult<String> {
+    fn next_string(&self, len: usize) -> AppResult<String> {
         Ok(self.next_string_with(len, Default::default())?)
     }
 
     fn next_string_with(
-        &mut self,
+        &self,
         len: usize,
         opts: RandomStringOptions,
     ) -> AppResult<String> {
@@ -109,13 +120,18 @@ impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
             pool.push_str(SPECIAL);
         }
 
-        let rng = &mut self.rng;
+        let mut pool_chars = pool.chars();
+        let mut out = String::with_capacity(len);
 
-        Ok(rng
-            .sample_iter(Uniform::new(0, pool.len()))
-            .map(|i| pool.chars().nth(i).unwrap())
-            .take(len)
-            .collect())
+        for _ in 0..pool.len() {
+            let rnd_chr = pool_chars.nth(self.next_usize()?).unwrap();
+            out.push(rnd_chr);
+        }
+
+        Ok(out)
+    }
+}
+
 pub struct WriteLock<T> {
     inner: RwLock<T>,
 }
