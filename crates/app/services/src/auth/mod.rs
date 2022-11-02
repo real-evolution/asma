@@ -1,18 +1,21 @@
+pub mod config;
+
 use std::sync::Arc;
 
 use chrono::{Duration, Utc};
-use kernel_repositories::*;
+use kernel_repositories::{
+    AccountsRepo, InsertSession, SessionsRepo, UsersRepo,
+};
 use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::crypto::hash::CryptoHashService;
 use kernel_services::error::{AppResult, AuthError};
 use shaku::Component;
 
-const MAX_SESSIONS_COUNT: usize = 10;
-const SESSION_VALIDITY_DAYS: i64 = 180;
-
 #[derive(Component)]
 #[shaku(interface = AuthService)]
 pub struct AppAuthService {
+    config: config::AuthConfig,
+
     #[shaku(inject)]
     users: Arc<dyn UsersRepo>,
 
@@ -61,7 +64,7 @@ impl AuthService for AppAuthService {
                     &session.id,
                     device_info.last_address.or(session.last_address),
                     &device_info.agent,
-                    Duration::days(SESSION_VALIDITY_DAYS),
+                    Duration::seconds(self.config.refresh_validity_seconds),
                 )
                 .await?;
 
@@ -77,23 +80,25 @@ impl AuthService for AppAuthService {
             .sessions
             .get_active_sessions_count(&user.id, &account.id)
             .await?
-            >= MAX_SESSIONS_COUNT
+            >= self.config.max_sessions_count
         {
             warn!(
                 "`{}@{}` has reached maximum sessions acount of {}",
-                account_name, username, MAX_SESSIONS_COUNT
+                account_name, username, self.config.max_sessions_count
             );
 
-            return Err(
-                AuthError::MaxSessionsCountReached(MAX_SESSIONS_COUNT).into()
-            );
+            return Err(AuthError::MaxSessionsCountReached(
+                self.config.max_sessions_count,
+            )
+            .into());
         }
 
         let session = InsertSession {
             device_identifier: device_info.device_identifier,
             agent: device_info.agent,
             address: device_info.last_address,
-            valid_until: Utc::now() + Duration::days(SESSION_VALIDITY_DAYS),
+            valid_until: Utc::now()
+                + Duration::seconds(self.config.signin_validity_seconds),
             refresh_token: "test token".into(),
         };
 
@@ -123,7 +128,7 @@ impl AuthService for AppAuthService {
                 &session.id,
                 device_info.last_address.or(session.last_address),
                 &device_info.agent,
-                Duration::days(SESSION_VALIDITY_DAYS),
+                Duration::seconds(self.config.refresh_validity_seconds),
             )
             .await?;
 
