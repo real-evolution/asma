@@ -5,6 +5,7 @@ pub const AUTH_CONFIG_SECTION: &str = "auth";
 
 into_fn!(default_validity_seconds: const i64 => 180 * 24 * 60);
 into_fn!(default_max_sessions_count: const usize => 8);
+into_fn!(default_refresh_token_length: const usize => 128);
 
 #[derive(Debug, Deserialize, Validate)]
 pub struct AuthConfig {
@@ -19,4 +20,8 @@ pub struct AuthConfig {
     #[validate(range(min = 1, max = 255))]
     #[serde(default = "default_max_sessions_count")]
     pub max_sessions_count: usize,
+
+    #[validate(range(min = 32, max = 256))]
+    #[serde(default = "default_refresh_token_length")]
+    pub refresh_token_length: usize,
 }
