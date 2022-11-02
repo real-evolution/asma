@@ -45,19 +45,16 @@ impl SessionsRepo for SqlxSessionsRepo {
 
     async fn get_valid_for(
         &self,
-        user_id: &UserKey,
         account_id: &AccountKey,
         device_identifier: &str,
     ) -> RepoResult<Session> {
         Ok(sqlx::query_as::<_, Session>(
             r#"
             SELECT * FROM sessions
-            WHERE user_id = $1 AND
-                  account_id = $2 AND
+            WHERE account_id = $2 AND
                   device_identifier = $3 AND
                   valid_until > $4"#,
         )
-        .bind(user_id)
         .bind(account_id)
         .bind(device_identifier)
         .bind(chrono::Utc::now())

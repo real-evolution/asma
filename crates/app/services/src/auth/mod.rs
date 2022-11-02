@@ -56,11 +56,7 @@ impl AuthService for AppAuthService {
 
         if let Ok(session) = self
             .sessions
-            .get_valid_for(
-                &user.id,
-                &account.id,
-                &device_info.device_identifier,
-            )
+            .get_valid_for(&account.id, &device_info.device_identifier)
             .await
         {
             self.sessions

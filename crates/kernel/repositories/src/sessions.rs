@@ -16,7 +16,6 @@ pub trait SessionsRepo: Interface {
 
     async fn get_valid_for(
         &self,
-        user_id: &UserKey,
         account_id: &AccountKey,
         device_identifier: &str,
     ) -> RepoResult<Session>;
