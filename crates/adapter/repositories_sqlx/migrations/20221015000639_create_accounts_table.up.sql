@@ -4,7 +4,7 @@ CREATE TABLE accounts
     account_name VARCHAR NOT NULL,
     holder_name VARCHAR NULL,
 
-    password VARCHAR NULL,
+    password_hash VARCHAR NOT NULL,
     valid_until TIMESTAMPTZ NULL,
     is_active BOOLEAN DEFAULT FALSE NOT NULL,
 
