@@ -9,12 +9,14 @@ pub trait EntropyService: Interface {
     fn next_u32(&self) -> AppResult<u32>;
     fn next_u64(&self) -> AppResult<u64>;
     fn next_u128(&self) -> AppResult<u128>;
+    fn next_usize(&self) -> AppResult<usize>;
 
     fn next_u8_ranged(&self, min: u8, max: u8) -> AppResult<u8>;
     fn next_u16_ranged(&self, min: u16, max: u16) -> AppResult<u16>;
     fn next_u32_ranged(&self, min: u32, max: u32) -> AppResult<u32>;
     fn next_u64_ranged(&self, min: u64, max: u64) -> AppResult<u64>;
     fn next_u128_ranged(&self, min: u128, max: u128) -> AppResult<u128>;
+    fn next_usize_ranged(&self, min: usize, max: usize) -> AppResult<usize>;
 
     fn next_bytes_inplace(&self, buf: &mut [u8]) -> AppResult<()>;
     fn next_bytes(&self, len: usize) -> AppResult<Vec<u8>>;
