@@ -1,11 +1,14 @@
 use std::sync::Arc;
 
-use app_services::auth::AppAuthService;
+use app_services::auth::{
+    config::{AuthConfig, AUTH_CONFIG_SECTION},
+    AppAuthService, AppAuthServiceParameters,
+};
 use kernel_repositories::di::ReposModule;
 use kernel_repositories::*;
 use kernel_services::{
     config::ConfigService, crypto::hash::CryptoHashService, di::ServicesModule,
-    entropy::EntropyService,
+    entropy::EntropyService, get_config,
 };
 use shaku::module;
 
@@ -41,7 +44,14 @@ pub(super) fn build_services(
     base_services: Arc<dyn BaseServicesModule>,
     repos: Arc<dyn ReposModule>,
 ) -> anyhow::Result<Arc<dyn ServicesModule>> {
-    Ok(Arc::new(
-        ServicesModuleImpl::builder(base_services, repos).build(),
-    ))
+    let config_svc: &dyn ConfigService = base_services.resolve_ref();
+    let auth_conf = get_config!(config_svc, AUTH_CONFIG_SECTION => AuthConfig)?;
+
+    let services = ServicesModuleImpl::builder(base_services, repos)
+        .with_component_parameters::<AppAuthService>(AppAuthServiceParameters {
+            config: auth_conf,
+        })
+        .build();
+
+    Ok(Arc::new(services))
 }
