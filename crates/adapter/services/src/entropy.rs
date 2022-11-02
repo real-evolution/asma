@@ -116,5 +116,17 @@ impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
             .map(|i| pool.chars().nth(i).unwrap())
             .take(len)
             .collect())
+pub struct WriteLock<T> {
+    inner: RwLock<T>,
+}
+
+impl<T: Send + Sync> WriteLock<T> {
+    fn lock(&self) -> AppResult<RwLockWriteGuard<T>> {
+        match self.inner.try_write() {
+            Ok(inner) => Ok(inner),
+            Err(err) => {
+                Err(AppError::Unknown(anyhow::anyhow!(err.to_string())))
+            }
+        }
     }
 }
