@@ -7,7 +7,7 @@ authors.workspace = true
 
 [dependencies]
 # crate dependencies
-axum = "0"
+shaku_axum = "0"
 
 # project dependencies
 app_services = { path = "../../app/services" }
