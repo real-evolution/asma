@@ -146,3 +146,9 @@ impl<T: Send + Sync> WriteLock<T> {
         }
     }
 }
+
+impl<T: Default> Default for WriteLock<T> {
+    fn default() -> Self {
+        Self { inner: Default::default() }
+    }
+}
