@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
 use adapter_services::{
-    config::TomlConfigService, crypto::hash::Argon2CryptoHashService,
-    entropy::SecureEntropyService,
+    config::TomlConfigService,
+    crypto::hash::{Argon2CryptoHashService, CryptoHashServiceImplParameters},
+    entropy::{EntropyServiceImplParameters, SecureEntropyService},
 };
 use kernel_services::{
     config::ConfigService, crypto::hash::CryptoHashService,
@@ -34,6 +35,16 @@ pub fn base_services_module() -> anyhow::Result<Arc<dyn BaseServicesModule>> {
     Ok(Arc::new(
         BaseServicesModuleImpl::builder()
             .with_component_override::<dyn ConfigService>(loaded_config)
+            .with_component_parameters::<SecureEntropyService>(
+                EntropyServiceImplParameters {
+                    rng: Default::default(),
+                },
+            )
+            .with_component_parameters::<Argon2CryptoHashService<'static>>(
+                CryptoHashServiceImplParameters {
+                    hasher: Default::default(),
+                },
+            )
             .build(),
     ))
 }
