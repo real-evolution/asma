@@ -1,9 +1,11 @@
-use crate::{error::ApiResult, util::validated_json::ValidatedJson};
 use common_validation::username;
+use driver_web_common::di::util::axum::Dep;
+use kernel_services::config::ConfigService;
 use serde::{Deserialize, Serialize};
-
 use utoipa::ToSchema;
 use validator::Validate;
+
+use crate::{error::ApiResult, util::validated_json::ValidatedJson};
 
 #[utoipa::path(
     post,
@@ -16,10 +18,15 @@ use validator::Validate;
 )]
 pub async fn signin(
     ValidatedJson(form): ValidatedJson<UserCredentials>,
+    config_svc: Dep<dyn ConfigService>,
 ) -> ApiResult<String> {
     Ok(format!(
-        "dev={} user={}@{} pass={}",
-        form.device_identifier, form.account_name, form.username, form.password
+        "dev={} user={}@{} pass={} | data host: {}",
+        form.device_identifier,
+        form.account_name,
+        form.username,
+        form.password,
+        config_svc.get_string("xdata.host")?
     ))
 }
 

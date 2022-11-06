@@ -8,7 +8,6 @@ authors.workspace = true
 [dependencies]
 # crate dependencies
 axum = { version = "0", features = [ "macros" ] }
-shaku_axum = "0"
 utoipa = { version = "2", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "2", features = ["axum"] }
 
@@ -16,6 +15,7 @@ utoipa-swagger-ui = { version = "2", features = ["axum"] }
 common_validation = { path = "../../common/validation" }
 kernel_repositories = { path = "../../kernel/repositories" }
 kernel_services = { path = "../../kernel/services" }
+driver_web_common = { path = "../../driver/web_common" }
 
 # workspace dependencies
 anyhow = { workspace = true }
