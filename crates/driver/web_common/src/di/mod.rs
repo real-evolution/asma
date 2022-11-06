@@ -1,7 +1,6 @@
 mod base_services;
 mod repos;
 mod services;
-pub mod util;
 
 use std::sync::Arc;
 

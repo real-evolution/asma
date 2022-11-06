@@ -1,11 +1,12 @@
 use common_validation::username;
-use driver_web_common::di::util::axum::Dep;
 use kernel_services::config::ConfigService;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
-use crate::{error::ApiResult, util::validated_json::ValidatedJson};
+use crate::{
+    error::ApiResult, extractors::di::Dep, util::validated_json::ValidatedJson,
+};
 
 #[utoipa::path(
     post,

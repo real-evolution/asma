@@ -6,9 +6,6 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
-# crate dependencies
-shaku_axum = "0"
-
 # project dependencies
 app_services = { path = "../../app/services" }
 kernel_repositories = { path = "../../kernel/repositories" }
