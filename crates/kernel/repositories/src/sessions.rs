@@ -35,7 +35,7 @@ pub trait SessionsRepo: Interface {
     async fn update(
         &self,
         id: &SessionKey,
-        address: Option<String>,
+        address: &str,
         agent: &str,
         validitiy: Duration,
     ) -> RepoResult<()>;
@@ -54,7 +54,7 @@ pub trait SessionsRepo: Interface {
 pub struct InsertSession {
     pub device_identifier: String,
     pub agent: String,
-    pub address: Option<String>,
+    pub address: String,
     pub valid_until: DateTime<Utc>,
     pub refresh_token: String,
 }

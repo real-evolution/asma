@@ -1,7 +1,7 @@
-use crate::error::RepoResult;
 use kernel_entities::entities::*;
-
 use shaku::Interface;
+
+use crate::error::RepoResult;
 
 #[async_trait::async_trait]
 pub trait RolesRepo: Interface {

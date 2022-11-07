@@ -4,5 +4,5 @@ use serde::Deserialize;
 pub struct DeviceInfo {
     pub device_identifier: String,
     pub agent: String,
-    pub last_address: Option<String>,
+    pub last_address: String,
 }
