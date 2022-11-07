@@ -13,4 +13,7 @@ pub enum AuthError {
 
     #[error("account not withenticated")]
     NotAuthenticated,
+
+    #[error("invalid role: {0}")]
+    InvalidRole(String),
 }
