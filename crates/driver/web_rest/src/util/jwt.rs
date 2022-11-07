@@ -8,7 +8,6 @@ pub struct Claims {
     pub iat: i64,
     pub iss: String,
     pub aud: String,
-    pub jti: String,
     pub user: Uuid,
     pub account: Uuid,
     pub roles: String,
