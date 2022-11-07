@@ -21,6 +21,9 @@ pub enum ApiError {
     ValidationError(#[from] validator::ValidationErrors),
 
     #[error(transparent)]
+    SerializationError(#[from] serde_json::Error),
+
+    #[error(transparent)]
     AppError(#[from] AppError),
 }
 
@@ -33,6 +36,11 @@ impl IntoResponse for ApiError {
         let (status, message) = match &self {
             ApiError::InternalError(err) => {
                 error!("internal error: {err:?}");
+                status_tuple(StatusCode::INTERNAL_SERVER_ERROR)
+            }
+
+            ApiError::SerializationError(err) => {
+                error!("serialization error: {err:?}");
                 status_tuple(StatusCode::INTERNAL_SERVER_ERROR)
             }
 
