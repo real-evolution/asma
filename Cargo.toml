@@ -19,6 +19,7 @@ chrono = { version = "0", features = ["serde"] }
 derive_more = "0"
 erased-serde = "0"
 lazy_static = "1"
+rand = "0"
 regex = "1"
 sqlx = { version = "0", features = [
   "chrono",

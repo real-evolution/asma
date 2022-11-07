@@ -3,6 +3,7 @@ pub mod config;
 use std::sync::Arc;
 
 use chrono::{Duration, Utc};
+use kernel_entities::entities::Session;
 use kernel_repositories::{
     AccountsRepo, InsertSession, SessionsRepo, UsersRepo,
 };
@@ -41,7 +42,7 @@ impl AuthService for AppAuthService {
         username: &str,
         password: &str,
         device_info: DeviceInfo,
-    ) -> AppResult<()> {
+    ) -> AppResult<Session> {
         let user = self.users.get_by_username(username).await?;
         let account = self
             .accounts
@@ -62,7 +63,7 @@ impl AuthService for AppAuthService {
             self.sessions
                 .update(
                     &session.id,
-                    device_info.last_address.or(session.last_address),
+                    device_info.last_address.or(session.last_address.clone()),
                     &device_info.agent,
                     Duration::seconds(self.config.refresh_validity_seconds),
                 )
@@ -73,7 +74,7 @@ impl AuthService for AppAuthService {
                 account_name, username, session.id
             );
 
-            return Ok(());
+            return Ok(session);
         }
 
         if self
@@ -104,18 +105,19 @@ impl AuthService for AppAuthService {
                 .next_string(self.config.refresh_token_length)?,
         };
 
-        self.sessions
+        let session_id = self
+            .sessions
             .create_for(&user.id, &account.id, &session)
             .await?;
 
-        Ok(())
+        Ok(self.sessions.get_by_id(&session_id).await?)
     }
 
     async fn refresh_session(
         &mut self,
         refresh_token: &str,
         device_info: DeviceInfo,
-    ) -> AppResult<()> {
+    ) -> AppResult<Session> {
         let session = self
             .sessions
             .get_optional_valid_by_token(
@@ -128,13 +130,13 @@ impl AuthService for AppAuthService {
         self.sessions
             .update(
                 &session.id,
-                device_info.last_address.or(session.last_address),
+                device_info.last_address.or(session.last_address.clone()),
                 &device_info.agent,
                 Duration::seconds(self.config.refresh_validity_seconds),
             )
             .await?;
 
-        Ok(())
+        Ok(session)
     }
 
     async fn invalidate_session(

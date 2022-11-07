@@ -10,7 +10,6 @@ authors.workspace = true
 config = "0"
 directories = "4"
 toml = "0"
-rand = "0"
 argon2 = "0"
 
 # project dependencies
@@ -20,6 +19,7 @@ kernel_proc_macros = { path = "../../kernel/proc_macros" }
 # workspace dependencies
 anyhow = { workspace = true }
 erased-serde = { workspace = true }
+rand = { workspace = true }
 serde = { workspace = true }
 shaku = { workspace = true }
 validator = { workspace = true }
