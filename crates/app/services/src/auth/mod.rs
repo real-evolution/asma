@@ -1,12 +1,14 @@
 pub mod config;
 
+use std::str::FromStr;
 use std::sync::Arc;
 
 use chrono::{Duration, Utc};
-use kernel_entities::entities::Session;
+use kernel_entities::entities::{AccountKey, Session};
 use kernel_repositories::{
-    AccountsRepo, InsertSession, SessionsRepo, UsersRepo,
+    AccountsRepo, InsertSession, RolesRepo, SessionsRepo, UsersRepo,
 };
+use kernel_services::auth::access::AppAccess;
 use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::crypto::hash::CryptoHashService;
 use kernel_services::entropy::EntropyService;
@@ -23,6 +25,9 @@ pub struct AppAuthService {
 
     #[shaku(inject)]
     accounts: Arc<dyn AccountsRepo>,
+
+    #[shaku(inject)]
+    roles: Arc<dyn RolesRepo>,
 
     #[shaku(inject)]
     sessions: Arc<dyn SessionsRepo>,
@@ -63,7 +68,7 @@ impl AuthService for AppAuthService {
             self.sessions
                 .update(
                     &session.id,
-                    device_info.last_address.or(session.last_address.clone()),
+                    &device_info.last_address,
                     &device_info.agent,
                     Duration::seconds(self.config.refresh_validity_seconds),
                 )
@@ -114,7 +119,7 @@ impl AuthService for AppAuthService {
     }
 
     async fn refresh_session(
-        &mut self,
+        &self,
         refresh_token: &str,
         device_info: DeviceInfo,
     ) -> AppResult<Session> {
@@ -130,7 +135,7 @@ impl AuthService for AppAuthService {
         self.sessions
             .update(
                 &session.id,
-                device_info.last_address.or(session.last_address.clone()),
+                &device_info.last_address,
                 &device_info.agent,
                 Duration::seconds(self.config.refresh_validity_seconds),
             )
@@ -140,7 +145,7 @@ impl AuthService for AppAuthService {
     }
 
     async fn invalidate_session(
-        &mut self,
+        &self,
         refresh_token: &str,
         device_identifier: &str,
     ) -> AppResult<()> {
@@ -151,5 +156,28 @@ impl AuthService for AppAuthService {
             .ok_or(AuthError::NotAuthenticated)?;
 
         Ok(self.sessions.remove(&session.id).await?)
+    }
+
+    async fn get_access_items_for(
+        &self,
+        account_id: &AccountKey,
+    ) -> AppResult<Vec<AppAccess>> {
+        let roles = self.roles.get_account_roles(account_id).await?;
+        let mut access_items: Vec<AppAccess> = Vec::with_capacity(roles.len());
+
+        for role in roles {
+            if let Ok(item) = AppAccess::from_str(&role.code) {
+                access_items.push(item);
+            } else {
+                error!(
+                    "could not parse role `{}` ({})",
+                    role.code,
+                    role.friendly_name
+                        .unwrap_or("no friendly name".to_string())
+                );
+            }
+        }
+
+        Ok(access_items)
     }
 }

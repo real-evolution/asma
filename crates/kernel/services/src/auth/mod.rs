@@ -2,9 +2,10 @@ pub mod access;
 pub mod error;
 pub mod models;
 
-use kernel_entities::entities::Session;
+use kernel_entities::entities::{AccountKey, Session};
 use shaku::Interface;
 
+use self::access::AppAccess;
 use crate::error::AppResult;
 
 #[async_trait::async_trait]
@@ -18,14 +19,19 @@ pub trait AuthService: Interface {
     ) -> AppResult<Session>;
 
     async fn refresh_session(
-        &mut self,
+        &self,
         refresh_token: &str,
         device_info: models::DeviceInfo,
     ) -> AppResult<Session>;
 
     async fn invalidate_session(
-        &mut self,
+        &self,
         refresh_token: &str,
         device_identifier: &str,
     ) -> AppResult<()>;
+
+    async fn get_access_items_for(
+        &self,
+        account_id: &AccountKey,
+    ) -> AppResult<Vec<AppAccess>>;
 }

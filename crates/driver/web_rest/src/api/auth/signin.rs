@@ -1,11 +1,16 @@
+use axum::{headers::UserAgent, Extension, Json, TypedHeader};
+use axum_client_ip::ClientIp;
 use common_validation::username;
-use kernel_services::config::ConfigService;
+use kernel_services::auth::{models::DeviceInfo, AuthService};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
+use super::config::ApiTokenConfig;
 use crate::{
-    error::ApiResult, extractors::di::Dep, util::validated_json::ValidatedJson,
+    error::ApiResult,
+    extractors::di::Dep,
+    util::{jwt::Claims, validated_json::ValidatedJson},
 };
 
 #[utoipa::path(
@@ -18,17 +23,35 @@ use crate::{
     ),
 )]
 pub async fn signin(
+    TypedHeader(agent): TypedHeader<UserAgent>,
+    ClientIp(ip): ClientIp,
     ValidatedJson(form): ValidatedJson<UserCredentials>,
-    config_svc: Dep<dyn ConfigService>,
-) -> ApiResult<String> {
-    Ok(format!(
-        "dev={} user={}@{} pass={} | data host: {}",
-        form.device_identifier,
-        form.account_name,
-        form.username,
-        form.password,
-        config_svc.get_string("xdata.host")?
-    ))
+    Extension(config): Extension<ApiTokenConfig>,
+    auth_svc: Dep<dyn AuthService>,
+) -> ApiResult<Json<TokenPair>> {
+    let device_info = DeviceInfo {
+        device_identifier: form.device_identifier,
+        agent: agent.to_string(),
+        last_address: ip.to_string(),
+    };
+
+    let session = auth_svc
+        .signin(
+            &form.account_name,
+            &form.username,
+            &form.password,
+            device_info,
+        )
+        .await?;
+
+    let access_items =
+        auth_svc.get_access_items_for(&session.account_id).await?;
+    let jwt = Claims::new(&session, access_items, &config);
+
+    Ok(Json(TokenPair {
+        access_token: serde_json::to_string(&jwt)?,
+        refresh_token: session.refresh_token,
+    }))
 }
 
 #[derive(ToSchema, Validate, Deserialize)]
