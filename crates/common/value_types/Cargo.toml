@@ -1,0 +1,8 @@
+[package]
+name = "common_value_types"
+description = "A crate to hold common value types"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
