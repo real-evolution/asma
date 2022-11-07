@@ -31,7 +31,7 @@ async fn launch(
 
     Ok(axum::Server::try_bind(&bind_addr)?
         .serve(
-            make_app()
+            make_app(di.resolve_ref())?
                 .layer(Extension(di))
                 .layer(TraceLayer::new_for_http())
                 .into_make_service(),

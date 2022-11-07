@@ -1,9 +1,18 @@
+mod config;
 mod signin;
+mod util;
 
+use axum::{routing::post, Extension, Router};
+use kernel_services::{config::ConfigService, error::AppResult, get_config};
 pub use signin::*;
 
-use axum::{routing::post, Router};
+use self::config::{ApiTokenConfig, API_TOKEN_CONFIG_SECTION};
 
-pub fn routes() -> Router {
-    Router::new().route("/signin", post(signin))
+pub fn routes(config_svc: &dyn ConfigService) -> AppResult<Router> {
+    let conf =
+        get_config!(config_svc, API_TOKEN_CONFIG_SECTION => ApiTokenConfig)?;
+
+    Ok(Router::new()
+        .route("/signin", post(signin))
+        .layer(Extension(conf)))
 }

@@ -1,9 +1,10 @@
+use axum::Router;
+use kernel_services::{config::ConfigService, error::AppResult};
+
 use crate::{api, doc};
 
-use axum::Router;
-
-pub fn make_app() -> Router {
-    Router::new()
-        .nest("/api", api::api_routes())
-        .merge(doc::create_swagger_ui())
+pub fn make_app(config_svc: &dyn ConfigService) -> AppResult<Router> {
+    Ok(Router::new()
+        .nest("/api", api::api_routes(config_svc)?)
+        .merge(doc::create_swagger_ui()))
 }
