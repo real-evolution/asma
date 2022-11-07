@@ -34,7 +34,7 @@ async fn launch(
             make_app(di.resolve_ref())?
                 .layer(Extension(di))
                 .layer(TraceLayer::new_for_http())
-                .into_make_service(),
+                .into_make_service_with_connect_info::<SocketAddr>(),
         )
         .await?)
 }
