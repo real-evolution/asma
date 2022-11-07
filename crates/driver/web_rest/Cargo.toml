@@ -7,13 +7,17 @@ authors.workspace = true
 
 [dependencies]
 # crate dependencies
-axum = { version = "0", features = [ "macros" ] }
+axum = { version = "0", features = ["macros"] }
+axum-auth = "0"
+jsonwebtoken = "8"
 shaku_axum = "0"
 utoipa = { version = "2", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "2", features = ["axum"] }
 
 # project dependencies
+common_macros = { path = "../../common/macros" }
 common_validation = { path = "../../common/validation" }
+kernel_entities = { path = "../../kernel/entities" }
 kernel_repositories = { path = "../../kernel/repositories" }
 kernel_services = { path = "../../kernel/services" }
 driver_web_common = { path = "../../driver/web_common" }
@@ -21,9 +25,12 @@ driver_web_common = { path = "../../driver/web_common" }
 # workspace dependencies
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+chrono = { workspace = true }
 tokio = { workspace = true }
+rand = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+uuid = { workspace = true }
 validator = { workspace = true }
