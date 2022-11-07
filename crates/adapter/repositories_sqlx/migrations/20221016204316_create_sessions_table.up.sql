@@ -5,7 +5,7 @@ CREATE TABLE sessions
     device_identifier VARCHAR NOT NULL,
     refresh_token VARCHAR NOT NULL,
     agent VARCHAR NOT NULL,
-    last_address VARCHAR NULL,
+    last_address VARCHAR NOT NULL,
 
     user_id UUID NOT NULL,
     account_id UUID NOT NULL,

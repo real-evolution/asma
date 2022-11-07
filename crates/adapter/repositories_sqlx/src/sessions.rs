@@ -107,7 +107,7 @@ impl SessionsRepo for SqlxSessionsRepo {
     async fn update(
         &self,
         id: &SessionKey,
-        new_address: Option<String>,
+        new_address: &str,
         new_agent: &str,
         validitiy: Duration,
     ) -> RepoResult<()> {
