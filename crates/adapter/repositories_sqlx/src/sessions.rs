@@ -2,16 +2,18 @@ use std::sync::Arc;
 
 use chrono::{Duration, Utc};
 use kernel_entities::entities::*;
-use kernel_repositories::{error::RepoResult, InsertSession, SessionsRepo};
+use kernel_repositories::error::RepoResult;
+use kernel_repositories::{InsertSession, SessionsRepo};
 use shaku::Component;
 
-use crate::{util::map_sqlx_error, DatabaseConnection};
+use crate::util::map_sqlx_error;
+use crate::SqlxDatabaseConnection;
 
 #[derive(Component)]
 #[shaku(interface = SessionsRepo)]
 pub struct SqlxSessionsRepo {
     #[shaku(inject)]
-    db: Arc<dyn DatabaseConnection>,
+    db: Arc<dyn SqlxDatabaseConnection>,
 }
 
 #[async_trait::async_trait]
@@ -22,7 +24,7 @@ impl SessionsRepo for SqlxSessionsRepo {
                 "SELECT * FROM sessions WHERE id = $1",
             )
             .bind(id)
-            .fetch_one(self.db.deref())
+            .fetch_one(self.db.get())
             .await
             .map_err(map_sqlx_error)?,
         )
@@ -38,7 +40,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         )
         .bind(user_id)
         .bind(account_id)
-        .fetch_all(self.db.deref())
+        .fetch_all(self.db.get())
         .await
         .map_err(map_sqlx_error)?)
     }
@@ -58,7 +60,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         .bind(account_id)
         .bind(device_identifier)
         .bind(chrono::Utc::now())
-        .fetch_one(self.db.deref())
+        .fetch_one(self.db.get())
         .await
         .map_err(map_sqlx_error)?)
     }
@@ -76,7 +78,7 @@ impl SessionsRepo for SqlxSessionsRepo {
             user_id.0,
             account_id.0
         )
-        .fetch_one(self.db.deref())
+        .fetch_one(self.db.get())
         .await
         .map_err(map_sqlx_error)?
         .count;
@@ -99,7 +101,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         .bind(token)
         .bind(unique_identifier)
         .bind(Utc::now())
-        .fetch_optional(self.db.deref())
+        .fetch_optional(self.db.get())
         .await
         .map_err(map_sqlx_error)?)
     }
@@ -128,7 +130,7 @@ impl SessionsRepo for SqlxSessionsRepo {
             expires_at,
             id.0
         )
-        .execute(self.db.deref())
+        .execute(self.db.get())
         .await
         .map_err(map_sqlx_error)?;
 
@@ -164,7 +166,7 @@ impl SessionsRepo for SqlxSessionsRepo {
             user_id.0,
             account_id.0
         )
-        .fetch_one(self.db.deref())
+        .fetch_one(self.db.get())
         .await
         .map_err(map_sqlx_error)?;
 
@@ -173,7 +175,7 @@ impl SessionsRepo for SqlxSessionsRepo {
 
     async fn remove(&self, id: &SessionKey) -> RepoResult<()> {
         sqlx::query!("DELETE FROM sessions WHERE id = $1", id.0)
-            .execute(self.db.deref())
+            .execute(self.db.get())
             .await
             .map_err(map_sqlx_error)?;
 

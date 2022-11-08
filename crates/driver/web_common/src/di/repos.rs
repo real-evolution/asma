@@ -1,14 +1,17 @@
 use std::sync::Arc;
 
 use adapter_repositories_sqlx::*;
-use kernel_repositories::di::ReposModule;
+use kernel_repositories::{di::ReposModule, TransactionManager};
 use shaku::{module, HasComponent};
 
-pub trait DatabaseModule: HasComponent<dyn DatabaseConnection> {}
+pub trait DatabaseModule:
+    HasComponent<dyn SqlxDatabaseConnection> + HasComponent<dyn TransactionManager>
+{
+}
 
 module! {
     pub DatabaseModuleImpl: DatabaseModule {
-        components = [ SqlxDatabaseConnection ],
+        components = [ SqlxPool, SqlxTransactionManager ],
         providers = [],
     }
 }
@@ -19,12 +22,13 @@ module! {
             SqlxUsersRepo,
             SqlxAccountsRepo,
             SqlxRolesRepo,
-            SqlxSessionsRepo
+            SqlxSessionsRepo,
+            SqlxPool,
         ],
         providers = [],
 
         use dyn DatabaseModule {
-            components = [ dyn DatabaseConnection ],
+            components = [ dyn TransactionManager ],
             providers = [],
         },
 
@@ -39,12 +43,14 @@ pub async fn database_module(
         conf.get_concealed_connection_string()?
     );
 
+    let pool = conf.into_pool().await?;
     let module = Arc::new(
         DatabaseModuleImpl::builder()
-            .with_component_parameters::<SqlxDatabaseConnection>(
-                SqlxDatabaseConnectionParameters {
-                    pool: conf.into_pool().await?,
-                },
+            .with_component_parameters::<SqlxPool>(SqlxPoolParameters {
+                inner: pool.clone(),
+            })
+            .with_component_parameters::<SqlxTransactionManager>(
+                SqlxTransactionManagerParameters { inner: pool },
             )
             .build(),
     );

@@ -1,31 +1,54 @@
-use core::ops::Deref;
+use std::sync::Arc;
+
+use async_trait::async_trait;
+use kernel_repositories::{RepoResult, Transaction, TransactionManager};
 use shaku::{Component, Interface};
+
+use crate::util::map_sqlx_error;
 
 pub type DbType = sqlx::postgres::Postgres;
 pub type PoolType = sqlx::Pool<DbType>;
 
+pub trait SqlxDatabaseConnection: Interface {
+    fn get(&self) -> &PoolType;
+}
+
 #[derive(Component)]
-#[shaku(interface = DatabaseConnection)]
-pub struct SqlxDatabaseConnection {
-    pool: PoolType,
+#[shaku(interface = SqlxDatabaseConnection)]
+pub struct SqlxPool {
+    inner: PoolType,
 }
 
-#[async_trait::async_trait()]
-pub trait DatabaseConnection: Interface + Deref<Target = PoolType> {
-    fn is_closed(&self) -> bool;
+#[derive(Component)]
+#[shaku(interface = TransactionManager)]
+pub struct SqlxTransactionManager {
+    inner: PoolType,
 }
 
-#[async_trait::async_trait()]
-impl DatabaseConnection for SqlxDatabaseConnection {
-    fn is_closed(&self) -> bool {
-        self.pool.is_closed()
+impl SqlxDatabaseConnection for SqlxPool {
+    fn get(&self) -> &PoolType {
+        &self.inner
     }
 }
 
-impl std::ops::Deref for SqlxDatabaseConnection {
-    type Target = PoolType;
+#[async_trait]
+impl TransactionManager for SqlxTransactionManager {
+    async fn begin(&self) -> RepoResult<Arc<dyn Transaction>> {
+        Ok(Arc::new(SqlxTransactionWrapper(
+            self.inner.begin().await.map_err(map_sqlx_error)?,
+        )))
+    }
+}
 
-    fn deref(&self) -> &Self::Target {
-        &self.pool
+struct SqlxTransactionWrapper<'c>(sqlx::Transaction<'c, DbType>);
+
+#[async_trait]
+impl<'c> Transaction for SqlxTransactionWrapper<'c> {
+    async fn commit(self) -> RepoResult<()> {
+        Ok(self.0.commit().await.map_err(map_sqlx_error)?)
+    }
+
+    async fn rollback(self) -> RepoResult<()> {
+        Ok(self.0.rollback().await.map_err(map_sqlx_error)?)
     }
 }
