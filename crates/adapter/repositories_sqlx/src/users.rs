@@ -36,4 +36,17 @@ impl UsersRepo for SqlxUsersRepo {
             .map_err(map_sqlx_error)?,
         )
     }
+
+    async fn get_all_by_level(
+        &self,
+        level: UserLevel,
+    ) -> RepoResult<Vec<User>> {
+        Ok(
+            sqlx::query_as::<_, User>("SELECT * FROM users WHERE level = $1")
+                .bind(level)
+                .fetch_all(self.db.get())
+                .await
+                .map_err(map_sqlx_error)?,
+        )
+    }
 }
