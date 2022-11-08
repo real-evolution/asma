@@ -4,3 +4,4 @@ pub mod crypto;
 pub mod di;
 pub mod entropy;
 pub mod error;
+pub mod setup;
