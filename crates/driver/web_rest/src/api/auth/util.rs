@@ -27,7 +27,7 @@ impl Claims {
             user: session.user_id.0,
             account: session.account_id.0,
             roles: Itertools::intersperse(
-                access_items.iter().map(|i| i.to_string()),
+                access_items.into_iter().flat_map(|i| i.into_string_vec()),
                 ",".to_string(),
             )
             .collect(),
