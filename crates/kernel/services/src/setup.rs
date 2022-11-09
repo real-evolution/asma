@@ -5,18 +5,11 @@ use crate::error::AppResult;
 #[async_trait::async_trait()]
 pub trait SetupService: Interface {
     async fn is_setup(&self) -> AppResult<bool>;
-    async fn setup(&self, root: models::RootDetails) -> AppResult<()>;
-}
-
-pub mod models {
-    use serde::Deserialize;
-
-    #[derive(Clone, Debug, Deserialize)]
-    pub struct RootDetails {
-        pub display_name: String,
-        pub holder_name: Option<String>,
-        pub password: String,
-    }
+    async fn setup(
+        &self,
+        root_holder_name: Option<String>,
+        root_password: String,
+    ) -> AppResult<()>;
 }
 
 pub mod error {

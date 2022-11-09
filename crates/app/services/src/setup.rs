@@ -9,7 +9,7 @@ use kernel_services::{
     auth::access::{AppAccess, AppResource},
     crypto::hash::CryptoHashService,
     error::AppResult,
-    setup::{error::SetupError, models::RootDetails, SetupService},
+    setup::{error::SetupError, SetupService},
 };
 use shaku::Component;
 
@@ -38,33 +38,37 @@ pub struct AppSetupService {
 
 impl AppSetupService {
     async fn create_system_user(&self) -> AppResult<UserKey> {
-        Ok(self
+        let system_user_id = self
             .users
             .create(InsertUser::new_active(
                 SYSTEM_USER_USERNAME.to_owned(),
                 SYSTEM_USER_DISPLAY_NAME.to_owned(),
                 UserLevel::Root,
             ))
-            .await?)
+            .await?;
+
+        Ok(system_user_id)
     }
 
     async fn create_root_account(
         &self,
         user_id: &UserKey,
-        holder_name: Option<String>,
-        password: String,
+        root_holder_name: Option<String>,
+        root_password: String,
     ) -> AppResult<AccountKey> {
-        Ok(self
+        let root_account_id = self
             .accounts
             .create_for(
                 user_id,
                 InsertAccount::new_active(
                     ROOT_ACCOUNT_NAME.to_owned(),
-                    holder_name,
-                    self.hash_svc.hash(&password)?,
+                    root_holder_name,
+                    self.hash_svc.hash(&root_password)?,
                 ),
             )
-            .await?)
+            .await?;
+
+        Ok(root_account_id)
     }
 
     async fn setup_roles(&self, root_account_id: &AccountKey) -> AppResult<()> {
@@ -98,7 +102,11 @@ impl SetupService for AppSetupService {
             .is_empty())
     }
 
-    async fn setup(&self, root: RootDetails) -> AppResult<()> {
+    async fn setup(
+        &self,
+        root_holder_name: Option<String>,
+        root_password: String,
+    ) -> AppResult<()> {
         if self.is_setup().await? {
             return Err(SetupError::AlreadySetup.into());
         }
@@ -110,8 +118,8 @@ impl SetupService for AppSetupService {
             let root_account_id = self
                 .create_root_account(
                     &system_user_id,
-                    root.holder_name,
-                    root.password,
+                    root_holder_name,
+                    root_password,
                 )
                 .await?;
             self.setup_roles(&root_account_id).await?;
