@@ -10,11 +10,37 @@ pub trait RolesRepo: Interface {
         &self,
         account_id: &AccountKey,
     ) -> RepoResult<Vec<Role>>;
+
     async fn is_in_role(
         &self,
         account_id: &AccountKey,
         role_id: &RoleKey,
     ) -> RepoResult<bool>;
+
+    async fn add_to_role(
+        &self,
+        account_id: &AccountKey,
+        role_id: &RoleKey,
+    ) -> RepoResult<()>;
+
+    async fn add_to_roles(
+        &self,
+        account_id: &AccountKey,
+        role_ids: Vec<&RoleKey>,
+    ) -> RepoResult<()>;
+
+    async fn remove_from_role(
+        &self,
+        account_id: &AccountKey,
+        role_id: &RoleKey,
+    ) -> RepoResult<()>;
+
+    async fn toggle_membership(
+        &self,
+        account_id: &AccountKey,
+        role_id: &RoleKey,
+        enabled: bool,
+    ) -> RepoResult<()>;
 
     async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey>;
 }
