@@ -1,7 +1,7 @@
-use crate::api;
-
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+
+use crate::api;
 
 const SWAGGER_URL: &str = "/swagger/*tail";
 const OPENAPI_URL: &str = "/api-doc/openapi.json";
@@ -10,10 +10,12 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
 #[openapi(
     paths(
         api::diag::echo,
+        api::setup::setup,
         api::auth::signin,
     ),
     components(
-        schemas(api::auth::UserCredentials, api::auth::TokenPair)
+        schemas(api::setup::RootAccountDetails,
+                api::auth::UserCredentials, api::auth::TokenPair)
     ),
     tags((
         name = "asma",
