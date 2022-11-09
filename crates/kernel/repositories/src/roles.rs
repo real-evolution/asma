@@ -45,4 +45,7 @@ pub trait RolesRepo: Interface {
     async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey>;
 }
 
-pub type InsertRole = Role;
+pub struct InsertRole {
+    pub code: String,
+    pub friendly_name: Option<String>,
+}
