@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use app_services::auth::{
+use app_services::{auth::{
     config::{AuthConfig, AUTH_CONFIG_SECTION},
     AppAuthService, AppAuthServiceParameters,
-};
+}, setup::AppSetupService};
 use kernel_repositories::di::ReposModule;
 use kernel_repositories::*;
 use kernel_services::{
@@ -16,7 +16,7 @@ use super::base_services::BaseServicesModule;
 
 module! {
     ServicesModuleImpl: ServicesModule {
-        components = [AppAuthService],
+        components = [AppAuthService, AppSetupService],
         providers = [],
 
         use dyn BaseServicesModule {
@@ -30,6 +30,7 @@ module! {
 
         use dyn ReposModule {
             components = [
+                dyn TransactionManager,
                 dyn UsersRepo,
                 dyn AccountsRepo,
                 dyn RolesRepo,
