@@ -5,7 +5,7 @@ use super::*;
 use crate::traits::*;
 
 #[entity]
-#[derive(sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow)]
 pub struct Account {
     pub account_name: String,
     pub holder_name: Option<String>,

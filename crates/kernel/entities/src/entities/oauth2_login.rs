@@ -5,7 +5,7 @@ use kernel_proc_macros::*;
 
 use chrono::{DateTime, Utc};
 
-#[derive(sqlx::types::Type)]
+#[derive(Debug, Clone, sqlx::types::Type)]
 pub enum OAuth2Provider {
     Google,
     Facebook,
@@ -13,7 +13,7 @@ pub enum OAuth2Provider {
 }
 
 #[entity]
-#[derive(sqlx::FromRow)]
+#[derive(Debug, Clone, sqlx::FromRow)]
 pub struct OAuth2Login {
     pub provider: OAuth2Provider,
     pub provided_name: Option<String>,
