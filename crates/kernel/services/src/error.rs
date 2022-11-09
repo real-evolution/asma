@@ -3,6 +3,7 @@ use thiserror::Error;
 pub use crate::auth::error::AuthError;
 pub use crate::config::error::ConfigError;
 pub use crate::crypto::error::CryptoError;
+use crate::setup::error::SetupError;
 
 pub type AppResult<T> = Result<T, AppError>;
 
@@ -16,6 +17,9 @@ pub enum AppError {
 
     #[error("crypto error: {0}")]
     Crypto(#[from] CryptoError),
+
+    #[error("setup error: {0}")]
+    Setup(#[from] SetupError),
 
     #[error("auth error: {0}")]
     Auth(#[from] AuthError),
