@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use kernel_entities::entities::*;
-use kernel_repositories::{error::RepoResult, AccountsRepo};
+use kernel_repositories::{error::RepoResult, AccountsRepo, InsertAccount};
 use shaku::Component;
 
 use crate::{util::map_sqlx_error, SqlxDatabaseConnection};
@@ -28,5 +28,36 @@ impl AccountsRepo for SqlxAccountsRepo {
         .fetch_one(self.db.get())
         .await
         .map_err(map_sqlx_error)?)
+    }
+
+    async fn create_for(
+        &self,
+        user_id: &UserKey,
+        insert: InsertAccount,
+    ) -> RepoResult<AccountKey> {
+        let id = sqlx::query_scalar!(
+            r#"
+            INSERT INTO accounts (
+                account_name,
+                holder_name,
+                password_hash,
+                is_active,
+                valid_until,
+                user_id)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+            "#,
+            insert.account_name,
+            insert.holder_name,
+            insert.password_hash,
+            insert.is_active,
+            insert.valid_until,
+            user_id.0
+        )
+        .fetch_one(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(AccountKey(id))
     }
 }
