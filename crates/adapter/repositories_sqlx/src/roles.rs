@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use kernel_entities::entities::*;
-use kernel_repositories::{error::RepoResult, RolesRepo};
+use kernel_repositories::{error::RepoResult, InsertRole, RolesRepo};
 use shaku::Component;
 
 use crate::{util::map_sqlx_error, SqlxDatabaseConnection};
@@ -63,5 +63,22 @@ impl RolesRepo for SqlxRolesRepo {
             Some(_) => true,
             None => false,
         })
+    }
+
+    async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey> {
+        let id = sqlx::query_scalar!(
+            r#"
+            INSERT INTO roles (code, friendly_name)
+            VALUES ($1, $2)
+            RETURNING id
+            "#,
+            insert.code,
+            insert.friendly_name
+        )
+        .fetch_one(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(RoleKey(id))
     }
 }
