@@ -1,12 +1,13 @@
 use std::{collections::HashMap, str::FromStr};
 
+use convert_case::{Case, Casing};
 use enumflags2::{bitflags, BitFlags};
 use lazy_static::lazy_static;
 
 use crate::error::AuthError;
 
 lazy_static! {
-    static ref RESOURCES_MAP: HashMap<String, AppResource> = vec![
+    static ref AVAILABLE_RESOURCES: Vec<AppResource> = vec![
         AppResource::ThisUser,
         AppResource::ThisAccount,
         AppResource::Users,
@@ -18,10 +19,13 @@ lazy_static! {
         AppResource::Peers,
         AppResource::PeerInstances,
         AppResource::PlatformConnections,
-    ]
-    .into_iter()
-    .map(|r| (r.to_string().to_lowercase(), r))
-    .collect();
+    ];
+    static ref RESOURCES_MAP: HashMap<String, AppResource> =
+        AVAILABLE_RESOURCES
+            .clone()
+            .into_iter()
+            .map(|r| (r.to_string().to_case(Case::Snake), r))
+            .collect();
     static ref MODES_MAP: HashMap<String, AccessMode> = vec![
         AccessMode::View,
         AccessMode::Add,
@@ -29,7 +33,7 @@ lazy_static! {
         AccessMode::Remove,
     ]
     .into_iter()
-    .map(|m| (m.to_string().to_lowercase(), m))
+    .map(|m| (m.to_string().to_case(Case::Snake), m))
     .collect();
 }
 
@@ -48,6 +52,12 @@ pub enum AppResource {
     PlatformConnections,
 }
 
+impl AppResource {
+    pub fn get_all() -> &'static Vec<AppResource> {
+        &AVAILABLE_RESOURCES
+    }
+}
+
 #[bitflags]
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, derive_more::Display)]
@@ -58,17 +68,44 @@ pub enum AccessMode {
     Remove,
 }
 
+#[derive(derive_more::Constructor)]
 pub struct AppAccess {
     pub resource: AppResource,
     pub mode: BitFlags<AccessMode>,
 }
 
-impl ToString for AppAccess {
-    fn to_string(&self) -> String {
+impl AppAccess {
+    pub fn new_full(resource: AppResource) -> Self {
+        Self::new(resource, BitFlags::all())
+    }
+
+    pub fn into_string_vec(self) -> Vec<String> {
+        self.mode.iter().map(|m| self.get_role_string(m)).collect()
+    }
+
+    pub fn into_string_map(self) -> HashMap<String, String> {
+        self.mode
+            .iter()
+            .map(|m| (self.get_role_string(m), self.get_friendly_string(m)))
+            .collect()
+    }
+
+    fn get_friendly_string(&self, mode: AccessMode) -> String {
         format!(
-            "{}_{}",
-            self.mode.to_string().to_lowercase(),
-            self.resource.to_string().to_lowercase()
+            "Can {} {}",
+            mode.to_string().to_lowercase(),
+            self.resource
+                .to_string()
+                .to_case(Case::Title)
+                .to_lowercase()
+        )
+    }
+
+    fn get_role_string(&self, mode: AccessMode) -> String {
+        format!(
+            "{}__{}",
+            mode.to_string().to_case(Case::Snake),
+            self.resource.to_string().to_case(Case::Snake)
         )
     }
 }
@@ -77,7 +114,7 @@ impl FromStr for AppAccess {
     type Err = AuthError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (mode, resource) = match s.split_once('_') {
+        let (mode, resource) = match s.split_once("__") {
             Some(access_tuple) => access_tuple,
             None => return Err(AuthError::InvalidRole(s.to_string())),
         };
