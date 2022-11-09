@@ -15,7 +15,7 @@ use shaku::Component;
 
 const SYSTEM_USER_USERNAME: &str = "system";
 const SYSTEM_USER_DISPLAY_NAME: &str = "System User";
-const ROOT_ACCOUNT_NAME: &str = "system";
+const ROOT_ACCOUNT_NAME: &str = "root";
 
 #[derive(Component)]
 #[shaku(interface = SetupService)]
