@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use kernel_repositories::{RepoResult, Transaction, TransactionManager};
 use shaku::{Component, Interface};
@@ -33,10 +31,10 @@ impl SqlxDatabaseConnection for SqlxPool {
 
 #[async_trait]
 impl TransactionManager for SqlxTransactionManager {
-    async fn begin(&self) -> RepoResult<Arc<dyn Transaction>> {
-        Ok(Arc::new(SqlxTransactionWrapper(
-            self.inner.begin().await.map_err(map_sqlx_error)?,
-        )))
+    async fn begin(&self) -> RepoResult<Box<dyn Transaction>> {
+        let tx = self.inner.begin().await.map_err(map_sqlx_error)?;
+
+        Ok(Box::new(SqlxTransactionWrapper(tx)))
     }
 }
 
@@ -44,11 +42,11 @@ struct SqlxTransactionWrapper<'c>(sqlx::Transaction<'c, DbType>);
 
 #[async_trait]
 impl<'c> Transaction for SqlxTransactionWrapper<'c> {
-    async fn commit(self) -> RepoResult<()> {
+    async fn commit(self: Box<Self>) -> RepoResult<()> {
         Ok(self.0.commit().await.map_err(map_sqlx_error)?)
     }
 
-    async fn rollback(self) -> RepoResult<()> {
+    async fn rollback(self: Box<Self>) -> RepoResult<()> {
         Ok(self.0.rollback().await.map_err(map_sqlx_error)?)
     }
 }
