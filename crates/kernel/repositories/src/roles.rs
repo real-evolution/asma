@@ -10,7 +10,7 @@ pub trait RolesRepo: Interface {
         &self,
         account_id: &AccountKey,
     ) -> RepoResult<Vec<Role>>;
-    async fn is_account_in_role(
+    async fn is_in_role(
         &self,
         account_id: &AccountKey,
         role_id: &RoleKey,

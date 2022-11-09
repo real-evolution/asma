@@ -40,29 +40,25 @@ impl RolesRepo for SqlxRolesRepo {
         .map_err(map_sqlx_error)?)
     }
 
-    async fn is_account_in_role(
+    async fn is_in_role(
         &self,
         account_id: &AccountKey,
         role_id: &RoleKey,
     ) -> RepoResult<bool> {
-        let ret = sqlx::query(
+        let ret = sqlx::query!(
             r#"
             SELECT EXISTS(
-                SELECT account_roles.id
-                    FROM account_roles
-                WHERE enabled = true AND account_id = ? AND role_id = ? 
+                SELECT id FROM account_roles
+                WHERE enabled = true AND account_id = $1 AND role_id = $2 
             )"#,
+            account_id.0,
+            role_id.0
         )
-        .bind(account_id)
-        .bind(role_id)
-        .fetch_optional(self.db.get())
+        .fetch_one(self.db.get())
         .await
         .map_err(map_sqlx_error)?;
 
-        Ok(match ret {
-            Some(_) => true,
-            None => false,
-        })
+        Ok(ret.exists.unwrap_or(false))
     }
 
     async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey> {
