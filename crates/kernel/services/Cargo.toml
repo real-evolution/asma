@@ -8,6 +8,7 @@ authors.workspace = true
 [dependencies]
 # crate dependencies
 enumflags2 = "0"
+convert_case = "0"
 
 # project dependencies
 kernel_entities = { path = "../entities" }
@@ -19,6 +20,7 @@ async-trait = { workspace = true }
 chrono = { workspace = true }
 derive_more = { workspace = true }
 erased-serde = { workspace = true }
+itertools = { workspace = true }
 lazy_static = { workspace = true }
 serde = { workspace = true }
 shaku = { workspace = true }
