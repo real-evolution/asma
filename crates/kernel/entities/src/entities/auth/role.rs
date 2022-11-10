@@ -1,4 +1,3 @@
-use derive_more::Display;
 use kernel_proc_macros::*;
 
 use super::AccountKey;
@@ -17,13 +16,4 @@ pub struct AccountRole {
     pub account_id: AccountKey,
     pub role_id: RoleKey,
     pub enabled: bool,
-}
-
-#[derive(Clone, Debug, Display)]
-pub enum Resource {
-    ThisUser,
-    ThisAccount,
-    Users,
-    Accounts,
-    Roles,
 }
