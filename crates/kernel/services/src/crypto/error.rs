@@ -26,6 +26,9 @@ pub enum CryptoError {
     #[error("salt error: {0}")]
     Salt(String),
 
+    #[error("hash verification failure: {0}")]
+    Verification(String),
+
     #[error("unsupported")]
     Unsupported,
 }
