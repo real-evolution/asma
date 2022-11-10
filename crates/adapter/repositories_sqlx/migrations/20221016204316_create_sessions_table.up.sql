@@ -1,6 +1,6 @@
 CREATE TABLE sessions
 (
-    id UUID NOT NULL PRIMARY KEY,
+    id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
 
     device_identifier VARCHAR NOT NULL,
     refresh_token VARCHAR NOT NULL,

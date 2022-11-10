@@ -1,6 +1,7 @@
 CREATE TABLE accounts
 (
-    id UUID NOT NULL PRIMARY KEY,
+    id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+
     account_name VARCHAR NOT NULL,
     holder_name VARCHAR NULL,
 

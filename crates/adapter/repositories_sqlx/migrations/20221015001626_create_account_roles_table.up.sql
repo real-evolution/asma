@@ -1,6 +1,6 @@
 CREATE TABLE account_roles
 (
-    id UUID NOT NULL PRIMARY KEY,
+    id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
 
     account_id UUID NULL,
     role_id UUID NOT NULL,
