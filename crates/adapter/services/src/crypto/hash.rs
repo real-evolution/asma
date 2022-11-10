@@ -63,7 +63,9 @@ fn map_hash_error(err: Error) -> CryptoError {
         | Error::PhcStringTooShort
         | Error::PhcStringTooLong
         | Error::ParamsMaxExceeded => CryptoError::InvalidInput,
-        Error::Password => todo!(),
+        Error::Password => CryptoError::Verification(
+            "hash does not corrospond to the input".into(),
+        ),
         Error::SaltInvalid(err) => CryptoError::Salt(err.to_string()),
 
         _ => CryptoError::Hash("unknown error".into()),
