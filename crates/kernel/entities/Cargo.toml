@@ -6,6 +6,9 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# crate dependencies
+enumflags2 = "0"
+
 # project dependencies
 kernel_proc_macros = { path = "../proc_macros" }
 

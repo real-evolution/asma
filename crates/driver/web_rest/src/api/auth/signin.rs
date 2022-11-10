@@ -46,10 +46,10 @@ pub async fn signin(
 
     let access_items =
         auth_svc.get_access_items_for(&session.account_id).await?;
-    let jwt = Claims::new(&session, access_items, &config);
+    let jwt = Claims::new(&session, access_items, &config).to_jwt(&config)?;
 
     Ok(Json(TokenPair {
-        access_token: serde_json::to_string(&jwt)?,
+        access_token: jwt,
         refresh_token: session.refresh_token,
     }))
 }

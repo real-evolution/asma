@@ -2,7 +2,8 @@ use std::cmp::min;
 
 use chrono::Utc;
 use itertools::Itertools;
-use kernel_entities::entities::Session;
+use jsonwebtoken::{EncodingKey, Header};
+use kernel_entities::entities::auth::Session;
 use kernel_services::auth::access::AppAccess;
 
 use super::config::ApiTokenConfig;
@@ -32,5 +33,15 @@ impl Claims {
             )
             .collect(),
         }
+    }
+
+    pub fn to_jwt(&self, config: &ApiTokenConfig) -> anyhow::Result<String> {
+        let jwt = jsonwebtoken::encode(
+            &Header::default(),
+            &self,
+            &EncodingKey::from_secret(config.signing_key.as_bytes()),
+        )?;
+
+        Ok(jwt)
     }
 }

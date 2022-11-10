@@ -4,7 +4,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use chrono::{Duration, Utc};
-use kernel_entities::entities::{AccountKey, Session};
+use kernel_entities::entities::auth::*;
 use kernel_repositories::{
     AccountsRepo, InsertSession, RolesRepo, SessionsRepo, UsersRepo,
 };

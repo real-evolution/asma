@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use chrono::{Duration, Utc};
-use kernel_entities::entities::*;
+use kernel_entities::entities::auth::*;
 use kernel_repositories::error::RepoResult;
 use kernel_repositories::{InsertSession, SessionsRepo};
 use shaku::Component;

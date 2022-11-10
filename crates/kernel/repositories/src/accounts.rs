@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use kernel_entities::entities::*;
+use kernel_entities::entities::auth::*;
 use shaku::Interface;
 
 use crate::error::RepoResult;

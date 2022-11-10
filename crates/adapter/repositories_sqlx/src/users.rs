@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use kernel_entities::entities::*;
+use kernel_entities::entities::auth::*;
 use kernel_repositories::{error::RepoResult, InsertUser, UsersRepo};
 use shaku::Component;
 

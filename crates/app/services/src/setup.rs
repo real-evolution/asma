@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use kernel_entities::entities::{AccountKey, UserKey, UserLevel};
+use kernel_entities::entities::auth::*;
 use kernel_repositories::{
     AccountsRepo, InsertAccount, InsertRole, InsertUser, RolesRepo,
     TransactionManager, UsersRepo,

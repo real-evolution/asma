@@ -2,7 +2,7 @@ pub mod access;
 pub mod error;
 pub mod models;
 
-use kernel_entities::entities::{AccountKey, Session};
+use kernel_entities::entities::auth::*;
 use shaku::Interface;
 
 use self::access::AppAccess;
