@@ -14,3 +14,21 @@ pub enum Resource {
     Accounts,
     Roles,
 }
+
+#[bitflags]
+#[repr(u8)]
+#[derive(Debug, Clone, Copy, Display, sqlx::Type)]
+pub enum Action {
+    View,
+    Add,
+    Modify,
+    Remove,
+}
+
+#[entity]
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct Permission {
+    pub resource: Resource,
+    pub actions: BitFlags<Action>,
+    pub role_id: UserKey,
+}
