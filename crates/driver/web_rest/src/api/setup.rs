@@ -31,7 +31,7 @@ pub async fn setup(
 }
 
 pub fn routes() -> Router {
-    Router::new().route("/setup", post(setup))
+    Router::new().route("/", post(setup))
 }
 
 #[derive(Clone, Debug, Deserialize, ToSchema, Validate)]
