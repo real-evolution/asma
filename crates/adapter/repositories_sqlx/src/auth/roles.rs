@@ -67,18 +67,6 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(())
     }
 
-    async fn add_to_roles(
-        &self,
-        account_id: &AccountKey,
-        role_ids: Vec<&RoleKey>,
-    ) -> RepoResult<()> {
-        for role_id in role_ids {
-            self.add_to_role(account_id, role_id).await?;
-        }
-
-        Ok(())
-    }
-
     async fn remove_from_role(
         &self,
         account_id: &AccountKey,

@@ -8,6 +8,7 @@ use crate::traits::*;
 pub struct Role {
     pub code: String,
     pub friendly_name: Option<String>,
+    pub enabled: bool,
 }
 
 #[entity(entity_type = "immutable")]

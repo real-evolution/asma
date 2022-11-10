@@ -19,12 +19,6 @@ pub trait RolesRepo: Interface {
         role_id: &RoleKey,
     ) -> RepoResult<()>;
 
-    async fn add_to_roles(
-        &self,
-        account_id: &AccountKey,
-        role_ids: Vec<&RoleKey>,
-    ) -> RepoResult<()>;
-
     async fn remove_from_role(
         &self,
         account_id: &AccountKey,
