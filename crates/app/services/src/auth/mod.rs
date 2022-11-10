@@ -43,6 +43,10 @@ impl AuthService for AppAuthService {
         password: &str,
         device_info: DeviceInfo,
     ) -> AppResult<Session> {
+
+        // TODO:
+        // validate user & account validity
+
         let user = self.users.get_by_username(username).await?;
         let account = self
             .accounts
@@ -77,10 +81,7 @@ impl AuthService for AppAuthService {
             return Ok(session);
         }
 
-        if self
-            .sessions
-            .get_active_sessions_count(&user.id, &account.id)
-            .await?
+        if self.sessions.get_active_sessions_count(&account.id).await?
             >= self.config.max_sessions_count
         {
             warn!(
@@ -98,17 +99,15 @@ impl AuthService for AppAuthService {
             device_identifier: device_info.device_identifier,
             agent: device_info.agent,
             address: device_info.last_address,
-            valid_until: Utc::now()
+            expires_at: Utc::now()
                 + Duration::seconds(self.config.signin_validity_seconds),
             refresh_token: self
                 .entropy_svc
                 .next_string(self.config.refresh_token_length)?,
         };
 
-        let session_id = self
-            .sessions
-            .create_for(&user.id, &account.id, &session)
-            .await?;
+        let session_id =
+            self.sessions.create_for(&account.id, &session).await?;
 
         Ok(self.sessions.get_by_id(&session_id).await?)
     }

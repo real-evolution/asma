@@ -10,7 +10,6 @@ pub trait SessionsRepo: Interface {
 
     async fn get_all_for(
         &self,
-        user_id: &UserKey,
         account_id: &AccountKey,
     ) -> RepoResult<Vec<Session>>;
 
@@ -22,7 +21,6 @@ pub trait SessionsRepo: Interface {
 
     async fn get_active_sessions_count(
         &self,
-        user_id: &UserKey,
         account_id: &AccountKey,
     ) -> RepoResult<usize>;
 
@@ -37,12 +35,11 @@ pub trait SessionsRepo: Interface {
         id: &SessionKey,
         address: &str,
         agent: &str,
-        validitiy: Duration,
+        validity: Duration,
     ) -> RepoResult<()>;
 
     async fn create_for(
         &self,
-        user_id: &UserKey,
         account_id: &AccountKey,
         insert: &InsertSession,
     ) -> RepoResult<SessionKey>;
@@ -55,6 +52,6 @@ pub struct InsertSession {
     pub device_identifier: String,
     pub agent: String,
     pub address: String,
-    pub valid_until: DateTime<Utc>,
+    pub expires_at: DateTime<Utc>,
     pub refresh_token: String,
 }

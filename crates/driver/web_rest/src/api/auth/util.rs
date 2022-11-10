@@ -17,7 +17,7 @@ impl Claims {
     ) -> Claims {
         let iat = Utc::now().timestamp();
         let exp =
-            min(iat + config.timout_seconds, session.valid_until.timestamp());
+            min(iat + config.timout_seconds, session.expires_at.timestamp());
 
         Claims {
             sub: session.id.0,
@@ -25,7 +25,6 @@ impl Claims {
             exp,
             iss: config.issuer.clone(),
             aud: config.audience.clone(),
-            user: session.user_id.0,
             account: session.account_id.0,
             roles: Itertools::intersperse(
                 access_items.into_iter().flat_map(|i| i.into_string_vec()),

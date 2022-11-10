@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use chrono::{Duration, Utc};
 use kernel_entities::entities::auth::*;
-use kernel_repositories::{auth::{SessionsRepo, InsertSession}, error::RepoResult};
+use kernel_repositories::auth::InsertSession;
+use kernel_repositories::{auth::SessionsRepo, error::RepoResult};
 use shaku::Component;
 
 use crate::{database::SqlxDatabaseConnection, util::map_sqlx_error};
@@ -30,13 +31,11 @@ impl SessionsRepo for SqlxSessionsRepo {
 
     async fn get_all_for(
         &self,
-        user_id: &UserKey,
         account_id: &AccountKey,
     ) -> RepoResult<Vec<Session>> {
         Ok(sqlx::query_as::<_, Session>(
-            "SELECT * FROM sessions WHERE user_id = $1 AND account_id = $2",
+            "SELECT * FROM sessions WHERE account_id = $1",
         )
-        .bind(user_id)
         .bind(account_id)
         .fetch_all(self.db.get())
         .await
@@ -51,13 +50,13 @@ impl SessionsRepo for SqlxSessionsRepo {
         Ok(sqlx::query_as::<_, Session>(
             r#"
             SELECT * FROM sessions
-            WHERE account_id = $2 AND
-                  device_identifier = $3 AND
-                  valid_until > $4"#,
+            WHERE account_id = $1 AND
+                  device_identifier = $2 AND
+                  expires_at > $3"#,
         )
         .bind(account_id)
         .bind(device_identifier)
-        .bind(chrono::Utc::now())
+        .bind(Utc::now())
         .fetch_one(self.db.get())
         .await
         .map_err(map_sqlx_error)?)
@@ -65,16 +64,15 @@ impl SessionsRepo for SqlxSessionsRepo {
 
     async fn get_active_sessions_count(
         &self,
-        user_id: &UserKey,
         account_id: &AccountKey,
     ) -> RepoResult<usize> {
         let count = sqlx::query!(
             r#"
             SELECT COUNT(id) FROM SESSIONS
-            WHERE user_id = $1 AND account_id = $2
+            WHERE account_id = $1 AND expires_at > $2
                      "#,
-            user_id.0,
-            account_id.0
+            account_id.0,
+            Utc::now(),
         )
         .fetch_one(self.db.get())
         .await
@@ -94,7 +92,7 @@ impl SessionsRepo for SqlxSessionsRepo {
             SELECT * FROM sessions
             WHERE refresh_token = $1 AND
                   device_identifier = $2 AND
-                  valid_until > $2"#,
+                  valid_until > $3"#,
         )
         .bind(token)
         .bind(unique_identifier)
@@ -109,24 +107,21 @@ impl SessionsRepo for SqlxSessionsRepo {
         id: &SessionKey,
         new_address: &str,
         new_agent: &str,
-        validitiy: Duration,
+        validity: Duration,
     ) -> RepoResult<()> {
-        let now = Utc::now();
-        let expires_at = now + validitiy;
-
         sqlx::query!(
             r#"
             UPDATE sessions SET
-                last_access = $1,
-                last_address = $2,
-                agent = $3,
+                last_address = $1,
+                agent = $2,
+                expires_at = $3,
                 updated_at = $4
             WHERE id = $5"#,
-            now,
             new_address,
             new_agent,
-            expires_at,
-            id.0
+            Utc::now() + validity,
+            Utc::now(),
+            id.0,
         )
         .execute(self.db.get())
         .await
@@ -137,7 +132,6 @@ impl SessionsRepo for SqlxSessionsRepo {
 
     async fn create_for(
         &self,
-        user_id: &UserKey,
         account_id: &AccountKey,
         insert: &InsertSession,
     ) -> RepoResult<SessionKey> {
@@ -147,22 +141,18 @@ impl SessionsRepo for SqlxSessionsRepo {
                 device_identifier,
                 agent,
                 last_address,
-                last_access,
-                valid_until,
                 refresh_token,
-                user_id,
-                account_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                account_id,
+                expires_at)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
             "#,
             insert.device_identifier,
             insert.agent,
             insert.address,
-            chrono::Utc::now(),
-            insert.valid_until,
             insert.refresh_token,
-            user_id.0,
-            account_id.0
+            account_id.0,
+            insert.expires_at,
         )
         .fetch_one(self.db.get())
         .await

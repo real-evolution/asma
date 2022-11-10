@@ -10,10 +10,8 @@ use chrono::{DateTime, Utc};
 pub struct Session {
     pub device_identifier: String,
     pub agent: String,
-    pub last_address: Option<String>,
-    pub last_access: DateTime<Utc>,
-    pub valid_until: DateTime<Utc>,
     pub refresh_token: String,
-    pub user_id: UserKey,
+    pub last_address: Option<String>,
     pub account_id: AccountKey,
+    pub expires_at: DateTime<Utc>,
 }
