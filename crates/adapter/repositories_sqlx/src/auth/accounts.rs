@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use kernel_entities::entities::auth::*;
-use kernel_repositories::{auth::{AccountsRepo, InsertAccount}, error::RepoResult};
+use kernel_repositories::{
+    auth::{AccountsRepo, InsertAccount},
+    error::RepoResult,
+};
 use shaku::Component;
 
 use crate::{database::SqlxDatabaseConnection, util::map_sqlx_error};
@@ -59,5 +62,22 @@ impl AccountsRepo for SqlxAccountsRepo {
         .map_err(map_sqlx_error)?;
 
         Ok(AccountKey(id))
+    }
+
+    async fn get_roles(
+        &self,
+        account_id: &AccountKey,
+    ) -> RepoResult<Vec<Role>> {
+        Ok(sqlx::query_as::<_, Role>(
+            r#"
+            SELECT roles.* FROM roles
+            INNER JOIN account_roles
+                ON roles.id = account_roles.role_id AND
+                   account_roles.account_id = $1"#,
+        )
+        .bind(account_id)
+        .fetch_all(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?)
     }
 }

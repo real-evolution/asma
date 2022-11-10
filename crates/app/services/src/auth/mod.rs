@@ -25,9 +25,6 @@ pub struct AppAuthService {
     accounts: Arc<dyn AccountsRepo>,
 
     #[shaku(inject)]
-    roles: Arc<dyn RolesRepo>,
-
-    #[shaku(inject)]
     sessions: Arc<dyn SessionsRepo>,
 
     #[shaku(inject)]
@@ -160,7 +157,7 @@ impl AuthService for AppAuthService {
         &self,
         account_id: &AccountKey,
     ) -> AppResult<Vec<AppAccess>> {
-        let roles = self.roles.get_account_roles(account_id).await?;
+        let roles = self.accounts.get_roles(account_id).await?;
         let mut access_items: Vec<AppAccess> = Vec::with_capacity(roles.len());
 
         for role in roles {

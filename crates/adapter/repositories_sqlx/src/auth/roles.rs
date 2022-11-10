@@ -22,23 +22,6 @@ impl RolesRepo for SqlxRolesRepo {
             .map_err(map_sqlx_error)?)
     }
 
-    async fn get_account_roles(
-        &self,
-        account_id: &AccountKey,
-    ) -> RepoResult<Vec<Role>> {
-        Ok(sqlx::query_as::<_, Role>(
-            r#"
-            SELECT roles.* FROM roles
-            INNER JOIN account_roles
-                ON roles.id = account_roles.role_id AND
-                   account_roles.account_id = $1"#,
-        )
-        .bind(account_id)
-        .fetch_all(self.db.get())
-        .await
-        .map_err(map_sqlx_error)?)
-    }
-
     async fn is_in_role(
         &self,
         account_id: &AccountKey,
