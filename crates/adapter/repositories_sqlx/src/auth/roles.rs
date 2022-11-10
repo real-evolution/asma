@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use kernel_entities::entities::auth::*;
-use kernel_repositories::{auth::{RolesRepo, InsertRole}, error::RepoResult};
+use kernel_repositories::{
+    auth::{InsertRole, RolesRepo},
+    error::RepoResult,
+};
 use shaku::Component;
 
 use crate::{database::SqlxDatabaseConnection, util::map_sqlx_error};
@@ -86,29 +89,6 @@ impl RolesRepo for SqlxRolesRepo {
             DELETE FROM account_roles
             WHERE account_id = $1 AND role_id = $2
             "#,
-            account_id.0,
-            role_id.0,
-        )
-        .execute(self.db.get())
-        .await
-        .map_err(map_sqlx_error)?;
-
-        Ok(())
-    }
-
-    async fn toggle_membership(
-        &self,
-        account_id: &AccountKey,
-        role_id: &RoleKey,
-        enabled: bool,
-    ) -> RepoResult<()> {
-        sqlx::query_scalar!(
-            r#"
-            UPDATE account_roles
-            SET enabled = $1
-            WHERE account_id = $2 AND role_id = $3
-            "#,
-            enabled,
             account_id.0,
             role_id.0,
         )

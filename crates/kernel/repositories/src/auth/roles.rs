@@ -31,13 +31,6 @@ pub trait RolesRepo: Interface {
         role_id: &RoleKey,
     ) -> RepoResult<()>;
 
-    async fn toggle_membership(
-        &self,
-        account_id: &AccountKey,
-        role_id: &RoleKey,
-        enabled: bool,
-    ) -> RepoResult<()>;
-
     async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey>;
 }
 
