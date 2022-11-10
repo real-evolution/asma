@@ -28,11 +28,10 @@ impl RolesRepo for SqlxRolesRepo {
     ) -> RepoResult<Vec<Role>> {
         Ok(sqlx::query_as::<_, Role>(
             r#"
-            SELECT roles.*
-                FROM roles
+            SELECT roles.* FROM roles
             INNER JOIN account_roles
-                ON roles.role_id = account_roles.role_id AND
-                   account_roles.account_id = ?"#,
+                ON roles.id = account_roles.role_id AND
+                   account_roles.account_id = $1"#,
         )
         .bind(account_id)
         .fetch_all(self.db.get())
