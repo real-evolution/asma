@@ -57,14 +57,14 @@ impl UsersRepo for SqlxUsersRepo {
                 username,
                 display_name,
                 level,
-                state)
+                is_active)
             VALUES ($1, $2, $3, $4)
             RETURNING id
             "#,
             insert.username,
             insert.display_name,
             insert.level as i32,
-            insert.state as i32,
+            insert.is_active,
         )
         .fetch_one(self.db.get())
         .await

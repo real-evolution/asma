@@ -1,4 +1,3 @@
-use chrono::{DateTime, Utc};
 use kernel_entities::entities::auth::*;
 use shaku::Interface;
 
@@ -18,11 +17,8 @@ pub trait AccountsRepo: Interface {
         insert: InsertAccount,
     ) -> RepoResult<AccountKey>;
 
-    async fn get_roles(
-        &self,
-        account_id: &AccountKey,
-    ) -> RepoResult<Vec<Role>>;
-
+    async fn get_roles(&self, account_id: &AccountKey)
+        -> RepoResult<Vec<Role>>;
 }
 
 #[derive(Debug)]
@@ -30,8 +26,7 @@ pub struct InsertAccount {
     pub account_name: String,
     pub holder_name: Option<String>,
     pub password_hash: String,
-    pub is_active: bool,
-    pub valid_until: Option<DateTime<Utc>>,
+    pub state: AccountState,
 }
 
 impl InsertAccount {
@@ -44,8 +39,7 @@ impl InsertAccount {
             account_name,
             holder_name,
             password_hash,
-            valid_until: None,
-            is_active: true,
+            state: AccountState::Active,
         }
     }
 }

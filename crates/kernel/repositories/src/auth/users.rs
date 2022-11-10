@@ -18,7 +18,7 @@ pub struct InsertUser {
     pub username: String,
     pub display_name: String,
     pub level: UserLevel,
-    pub state: UserState,
+    pub is_active: bool,
 }
 
 impl InsertUser {
@@ -31,7 +31,7 @@ impl InsertUser {
             username,
             display_name,
             level,
-            state: UserState::Active,
+            is_active: true,
         }
     }
 }

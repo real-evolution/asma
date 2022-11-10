@@ -44,17 +44,15 @@ impl AccountsRepo for SqlxAccountsRepo {
                 account_name,
                 holder_name,
                 password_hash,
-                is_active,
-                valid_until,
+                state,
                 user_id)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING id
             "#,
             insert.account_name,
             insert.holder_name,
             insert.password_hash,
-            insert.is_active,
-            insert.valid_until,
+            insert.state as i32,
             user_id.0
         )
         .fetch_one(self.db.get())

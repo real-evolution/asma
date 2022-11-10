@@ -6,9 +6,7 @@ CREATE TABLE accounts
     holder_name VARCHAR NULL,
 
     password_hash VARCHAR NOT NULL,
-    valid_until TIMESTAMPTZ NULL,
-    is_active BOOLEAN DEFAULT FALSE NOT NULL,
-
+    state INTEGER DEFAULT 0 NOT NULL,
     user_id UUID NOT NULL,
 
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
