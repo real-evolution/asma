@@ -23,12 +23,14 @@ module! {
             SqlxAccountsRepo,
             SqlxRolesRepo,
             SqlxSessionsRepo,
-            SqlxPool,
         ],
         providers = [],
 
         use dyn DatabaseModule {
-            components = [ dyn TransactionManager ],
+            components = [
+                dyn SqlxDatabaseConnection,
+                dyn TransactionManager
+            ],
             providers = [],
         },
 
