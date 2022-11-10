@@ -4,7 +4,7 @@ mod services;
 
 use std::sync::Arc;
 
-use adapter_repositories_sqlx::{DataConfig, DATA_CONST_SECTION};
+use adapter_repositories_sqlx::config::{DATA_CONST_SECTION, DataConfig};
 pub use base_services::base_services_module;
 use kernel_services::{config::ConfigService, di::ServicesModule, get_config};
 

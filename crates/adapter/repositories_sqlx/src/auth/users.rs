@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use kernel_entities::entities::auth::*;
-use kernel_repositories::{error::RepoResult, InsertUser, UsersRepo};
+use kernel_repositories::{auth::{UsersRepo, InsertUser}, error::RepoResult};
 use shaku::Component;
 
-use crate::{util::map_sqlx_error, SqlxDatabaseConnection};
+use crate::{database::SqlxDatabaseConnection, util::map_sqlx_error};
 
 #[derive(Component)]
 #[shaku(interface = UsersRepo)]

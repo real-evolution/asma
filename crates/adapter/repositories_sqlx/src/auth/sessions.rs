@@ -2,12 +2,10 @@ use std::sync::Arc;
 
 use chrono::{Duration, Utc};
 use kernel_entities::entities::auth::*;
-use kernel_repositories::error::RepoResult;
-use kernel_repositories::{InsertSession, SessionsRepo};
+use kernel_repositories::{auth::{SessionsRepo, InsertSession}, error::RepoResult};
 use shaku::Component;
 
-use crate::util::map_sqlx_error;
-use crate::SqlxDatabaseConnection;
+use crate::{database::SqlxDatabaseConnection, util::map_sqlx_error};
 
 #[derive(Component)]
 #[shaku(interface = SessionsRepo)]

@@ -5,9 +5,7 @@ use std::sync::Arc;
 
 use chrono::{Duration, Utc};
 use kernel_entities::entities::auth::*;
-use kernel_repositories::{
-    AccountsRepo, InsertSession, RolesRepo, SessionsRepo, UsersRepo,
-};
+use kernel_repositories::auth::*;
 use kernel_services::auth::access::AppAccess;
 use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::crypto::hash::CryptoHashService;

@@ -1,6 +1,6 @@
 use shaku::HasComponent;
 
-use crate::*;
+use crate::{auth::*, TransactionManager};
 
 pub trait ReposModule:
     HasComponent<dyn TransactionManager>

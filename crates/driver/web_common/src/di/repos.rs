@@ -1,6 +1,13 @@
 use std::sync::Arc;
 
-use adapter_repositories_sqlx::*;
+use adapter_repositories_sqlx::{
+    auth::*,
+    config::DataConfig,
+    database::{
+        SqlxDatabaseConnection, SqlxPool, SqlxPoolParameters,
+        SqlxTransactionManager, SqlxTransactionManagerParameters,
+    },
+};
 use kernel_repositories::{di::ReposModule, TransactionManager};
 use shaku::{module, HasComponent};
 

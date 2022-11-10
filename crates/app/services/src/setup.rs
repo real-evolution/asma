@@ -1,10 +1,7 @@
 use std::sync::Arc;
 
 use kernel_entities::entities::auth::*;
-use kernel_repositories::{
-    AccountsRepo, InsertAccount, InsertRole, InsertUser, RolesRepo,
-    TransactionManager, UsersRepo,
-};
+use kernel_repositories::{auth::*, TransactionManager};
 use kernel_services::{
     auth::access::{AppAccess, AppResource},
     crypto::hash::CryptoHashService,

@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use shaku::Interface;
 
-use crate::RepoResult;
+use crate::error::RepoResult;
 
 #[async_trait]
 pub trait TransactionManager: Interface {

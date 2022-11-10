@@ -1,8 +1,9 @@
 use async_trait::async_trait;
-use kernel_repositories::{RepoResult, Transaction, TransactionManager};
+use kernel_repositories::{TransactionManager, error::RepoResult, Transaction};
 use shaku::{Component, Interface};
 
 use crate::util::map_sqlx_error;
+
 
 pub type DbType = sqlx::postgres::Postgres;
 pub type PoolType = sqlx::Pool<DbType>;

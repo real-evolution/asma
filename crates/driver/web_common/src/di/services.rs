@@ -1,11 +1,9 @@
 use std::sync::Arc;
 
-use app_services::{auth::{
-    config::{AuthConfig, AUTH_CONFIG_SECTION},
-    AppAuthService, AppAuthServiceParameters,
-}, setup::AppSetupService};
-use kernel_repositories::di::ReposModule;
+use app_services::auth::{config::*, *};
+use app_services::setup::AppSetupService;
 use kernel_repositories::*;
+use kernel_repositories::{auth::*, di::ReposModule};
 use kernel_services::{
     config::ConfigService, crypto::hash::CryptoHashService, di::ServicesModule,
     entropy::EntropyService, get_config,
