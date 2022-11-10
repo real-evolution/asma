@@ -120,11 +120,13 @@ impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
             pool.push_str(SPECIAL);
         }
 
-        let mut pool_chars = pool.chars();
         let mut out = String::with_capacity(len);
 
-        for _ in 0..pool.len() {
-            let rnd_chr = pool_chars.nth(self.next_usize()?).unwrap();
+        for _ in 0..len {
+            let rnd_chr = pool
+                .chars()
+                .nth(self.next_usize_ranged(0, pool.len() - 1)?)
+                .unwrap();
             out.push(rnd_chr);
         }
 
@@ -149,6 +151,8 @@ impl<T: Send + Sync> WriteLock<T> {
 
 impl<T: Default> Default for WriteLock<T> {
     fn default() -> Self {
-        Self { inner: Default::default() }
+        Self {
+            inner: Default::default(),
+        }
     }
 }
