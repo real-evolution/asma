@@ -17,6 +17,7 @@ anyhow = "1"
 async-trait = "0"
 chrono = { version = "0", features = ["serde"] }
 derive_more = "0"
+enumflags2 = "0"
 erased-serde = "0"
 itertools = "0"
 lazy_static = "1"
