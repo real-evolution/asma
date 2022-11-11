@@ -103,4 +103,44 @@ impl RolesRepo for SqlxRolesRepo {
 
         Ok(RoleKey(id))
     }
+
+    async fn add_permission_to(
+        &self,
+        role_id: &RoleKey,
+        resource: Resource,
+        actions: Actions,
+    ) -> RepoResult<PermissionKey> {
+        let id = sqlx::query_scalar!(
+            r#"
+            INSERT INTO permissions (resource, actions, role_id)
+            VALUES ($1, $2, $3)
+            RETURNING id
+            "#,
+            resource as i64,
+            actions.inner(),
+            role_id.0,
+        )
+        .fetch_one(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(PermissionKey(id))
+    }
+
+    async fn remove_permission_from(
+        &self,
+        role_id: &RoleKey,
+        permission_id: &PermissionKey,
+    ) -> RepoResult<()> {
+        sqlx::query!(
+            r#"DELETE FROM permissions WHERE id = $1 AND role_id = $2"#,
+            permission_id.0,
+            role_id.0
+        )
+        .execute(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(())
+    }
 }
