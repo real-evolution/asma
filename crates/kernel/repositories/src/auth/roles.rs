@@ -26,6 +26,19 @@ pub trait RolesRepo: Interface {
     ) -> RepoResult<()>;
 
     async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey>;
+
+    async fn add_permission_to(
+        &self,
+        role_id: &RoleKey,
+        resouce: Resource,
+        actions: Actions,
+    ) -> RepoResult<PermissionKey>;
+
+    async fn remove_permission_from(
+        &self,
+        role_id: &RoleKey,
+        permission_id: &PermissionKey,
+    ) -> RepoResult<()>;
 }
 
 pub struct InsertRole {
