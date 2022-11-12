@@ -15,7 +15,9 @@ kernel_proc_macros = { path = "../proc_macros" }
 # workspace dependencies
 chrono = { workspace = true }
 derive_more = { workspace = true }
-enumflags2 = { workspace = true}
+enumflags2 = { workspace = true }
+serde = { workspace = true }
+serde_repr = { workspace = true }
 sqlx = { workspace = true }
 uuid = { workspace = true }
 validator = { workspace = true }

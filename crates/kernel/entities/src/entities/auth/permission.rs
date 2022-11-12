@@ -3,12 +3,24 @@ use std::ops::{BitAnd, BitOr, BitXor, Not};
 use derive_more::Display;
 use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use super::UserKey;
 use crate::traits::*;
 
 #[EnumRepr(type = "i64")]
-#[derive(Clone, Debug, Display, sqlx::Type)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize_repr,
+    Display,
+    Eq,
+    PartialEq,
+    Serialize_repr,
+    sqlx::Type,
+)]
 pub enum Resource {
     Users = 0,
     Accounts = 1,
@@ -16,7 +28,7 @@ pub enum Resource {
 }
 
 #[repr(i32)]
-#[derive(Debug, Clone, Copy, Display, sqlx::Type)]
+#[derive(Clone, Copy, Debug, Deserialize, Display, Serialize, sqlx::Type)]
 pub enum Action {
     Global = 1,
     View = 2,
@@ -34,7 +46,7 @@ pub struct Permission {
 }
 
 #[repr(transparent)]
-#[derive(Debug, Clone)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Actions(i32);
 
 impl Resource {
@@ -58,6 +70,10 @@ impl Actions {
 
     pub fn inner(self) -> i32 {
         self.0 as i32
+    }
+
+    pub fn has(&self, rhs: Self) -> bool {
+        (self.0 & rhs.0) == rhs.0
     }
 }
 

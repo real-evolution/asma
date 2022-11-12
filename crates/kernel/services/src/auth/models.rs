@@ -1,6 +1,6 @@
 use derive_more::Constructor;
-use kernel_entities::entities::auth::{Resource, Actions};
-use serde::Deserialize;
+use kernel_entities::entities::auth::{Actions, Resource};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
 pub struct DeviceInfo {
@@ -9,8 +9,8 @@ pub struct DeviceInfo {
     pub last_address: String,
 }
 
-#[derive(Debug, Constructor)]
+#[derive(Clone, Constructor, Debug, Deserialize, Serialize)]
 pub struct AccessRule {
     pub role_code: String,
-    pub permissions: Vec<(Resource, Actions)>
+    pub permissions: Vec<(Resource, Actions)>,
 }
