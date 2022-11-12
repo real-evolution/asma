@@ -12,19 +12,19 @@ pub type ApiResult<T> = Result<T, ApiError>;
 #[derive(Error, Debug)]
 pub enum ApiError {
     #[error("internal error occured")]
-    InternalError(#[from] anyhow::Error),
+    Internal(#[from] anyhow::Error),
 
     #[error(transparent)]
-    JsonError(#[from] JsonRejection),
+    Json(#[from] JsonRejection),
 
     #[error(transparent)]
-    ValidationError(#[from] validator::ValidationErrors),
+    Validation(#[from] validator::ValidationErrors),
 
     #[error(transparent)]
-    SerializationError(#[from] serde_json::Error),
+    Serialization(#[from] serde_json::Error),
 
     #[error(transparent)]
-    AppError(#[from] AppError),
+    App(#[from] AppError),
 }
 
 fn status_tuple(status: StatusCode) -> (StatusCode, String) {
@@ -34,25 +34,25 @@ fn status_tuple(status: StatusCode) -> (StatusCode, String) {
 impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {
         let (status, message) = match &self {
-            ApiError::InternalError(err) => {
+            ApiError::Internal(err) => {
                 error!("internal error: {err:?}");
                 status_tuple(StatusCode::INTERNAL_SERVER_ERROR)
             }
 
-            ApiError::SerializationError(err) => {
+            ApiError::Serialization(err) => {
                 error!("serialization error: {err:?}");
                 status_tuple(StatusCode::INTERNAL_SERVER_ERROR)
             }
 
-            ApiError::JsonError(_) => {
+            ApiError::Json(_) => {
                 (StatusCode::BAD_REQUEST, "invalid request schema".into())
             }
 
-            ApiError::ValidationError(_) => {
+            ApiError::Validation(_) => {
                 (StatusCode::BAD_REQUEST, "invalid request data".into())
             }
 
-            ApiError::AppError(err) => match err {
+            ApiError::App(err) => match err {
                 AppError::Repo(err) => match err {
                     RepoError::NotFound => {
                         (StatusCode::NOT_FOUND, err.to_string())
