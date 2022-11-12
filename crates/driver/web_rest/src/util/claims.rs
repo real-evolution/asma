@@ -57,6 +57,7 @@ impl Claims {
                 .collect(),
         }
     }
+
     pub fn encode(&self, key: &[u8]) -> ApiResult<String> {
         let jwt = jsonwebtoken::encode(
             &Header::default(),

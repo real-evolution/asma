@@ -6,7 +6,7 @@ use jsonwebtoken::{DecodingKey, Validation};
 
 use crate::config::ApiConfig;
 use crate::error::ApiError;
-use crate::util::jwt::Claims;
+use crate::util::claims::Claims;
 
 #[async_trait::async_trait]
 impl<B> FromRequest<B> for Claims

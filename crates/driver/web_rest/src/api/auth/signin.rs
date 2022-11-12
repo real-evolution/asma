@@ -10,7 +10,7 @@ use crate::config::ApiConfig;
 use crate::error::ApiResult;
 use crate::extractors::di::Dep;
 use crate::extractors::validated_json::ValidatedJson;
-use crate::util::jwt::Claims;
+use crate::util::claims::Claims;
 
 #[utoipa::path(
     post,
