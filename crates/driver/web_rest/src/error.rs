@@ -23,6 +23,9 @@ pub enum ApiError {
     #[error(transparent)]
     Serialization(#[from] serde_json::Error),
 
+    #[error("jwt error: {0}")]
+    Jwt(#[from] jsonwebtoken::errors::Error),
+
     #[error(transparent)]
     App(#[from] AppError),
 }
@@ -51,6 +54,8 @@ impl IntoResponse for ApiError {
             ApiError::Validation(_) => {
                 (StatusCode::BAD_REQUEST, "invalid request data".into())
             }
+
+            ApiError::Jwt(err) => (StatusCode::UNAUTHORIZED, err.to_string()),
 
             ApiError::App(err) => match err {
                 AppError::Repo(err) => match err {
