@@ -1,14 +1,16 @@
 use std::{cmp::min, collections::HashMap};
 
 use chrono::Utc;
-use itertools::Itertools;
 use jsonwebtoken::{EncodingKey, Header};
-use kernel_entities::entities::auth::Session;
+use kernel_entities::entities::auth::{Actions, Resource, Session};
 use kernel_services::auth::models::AccessRule;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{config::ApiConfig, error::ApiResult};
+use crate::{
+    config::ApiConfig,
+    error::{ApiError, ApiResult},
+};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Claims {
@@ -18,7 +20,7 @@ pub struct Claims {
     pub iss: String,
     pub aud: String,
     pub account: Uuid,
-    pub roles: HashMap<String, String>,
+    pub roles: HashMap<String, Vec<(Resource, Actions)>>,
 }
 
 impl Claims {
@@ -42,18 +44,7 @@ impl Claims {
             account: session.account_id.0,
             roles: access_rules
                 .into_iter()
-                .map(|i| {
-                    (
-                        i.role_code,
-                        Itertools::intersperse(
-                            i.permissions.into_iter().map(|p| {
-                                format!("{:X}:{:X}", p.0.repr(), p.1.inner())
-                            }),
-                            ",".to_string(),
-                        )
-                        .collect(),
-                    )
-                })
+                .map(|a| (a.role_code, a.permissions))
                 .collect(),
         }
     }
@@ -66,5 +57,52 @@ impl Claims {
         )?;
 
         Ok(jwt)
+    }
+
+    pub fn require_role(&self, role: &str) -> ApiResult<()> {
+        if !self.roles.contains_key(role) {
+            return Err(ApiError::Authorization(format!(
+                "role `{role}` not found in claims"
+            )));
+        }
+
+        Ok(())
+    }
+
+    pub fn require_roles(&self, roles: &Vec<&str>) -> ApiResult<()> {
+        for role in roles {
+            self.require_role(role)?;
+        }
+
+        Ok(())
+    }
+
+    pub fn require_permission(
+        &self,
+        resource: Resource,
+        actions: Actions,
+    ) -> ApiResult<()> {
+        if !self
+            .roles
+            .iter()
+            .any(|r| r.1.iter().any(|a| a.0 == resource && a.1.has(actions)))
+        {
+            return Err(ApiError::Authorization(
+                "insufficient permissions".into(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    pub fn require_permissions(
+        &self,
+        permissions: Vec<(Resource, Actions)>,
+    ) -> ApiResult<()> {
+        for (resource, actions) in permissions {
+            self.require_permission(resource, actions)?;
+        }
+
+        Ok(())
     }
 }

@@ -26,6 +26,9 @@ pub enum ApiError {
     #[error("jwt error: {0}")]
     Jwt(#[from] jsonwebtoken::errors::Error),
 
+    #[error("authorization error: {0}")]
+    Authorization(String),
+
     #[error(transparent)]
     App(#[from] AppError),
 }
@@ -56,6 +59,10 @@ impl IntoResponse for ApiError {
             }
 
             ApiError::Jwt(err) => (StatusCode::UNAUTHORIZED, err.to_string()),
+
+            ApiError::Authorization(err) => {
+                (StatusCode::FORBIDDEN, err.to_owned())
+            }
 
             ApiError::App(err) => match err {
                 AppError::Repo(err) => match err {
