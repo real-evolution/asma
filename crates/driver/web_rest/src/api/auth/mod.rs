@@ -1,4 +1,3 @@
-mod config;
 mod signin;
 mod util;
 pub mod templates;
