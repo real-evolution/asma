@@ -1,28 +1,28 @@
 use std::ops::{BitAnd, BitOr, BitXor, Not};
 
 use derive_more::Display;
+use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
 
 use super::UserKey;
 use crate::traits::*;
 
-#[repr(i64)]
+#[EnumRepr(type = "i64")]
 #[derive(Clone, Debug, Display, sqlx::Type)]
 pub enum Resource {
-    ThisUser,
-    ThisAccount,
-    Users,
-    Accounts,
-    Roles,
+    Users = 0,
+    Accounts = 1,
+    Roles = 2,
 }
 
 #[repr(i32)]
 #[derive(Debug, Clone, Copy, Display, sqlx::Type)]
 pub enum Action {
-    View,
-    Add,
-    Modify,
-    Remove,
+    Global = 1,
+    View = 2,
+    Add = 4,
+    Modify = 8,
+    Remove = 16,
 }
 
 #[entity]
@@ -37,7 +37,25 @@ pub struct Permission {
 #[derive(Debug, Clone)]
 pub struct Actions(i32);
 
+impl Resource {
+    pub fn all() -> Vec<Self> {
+        vec![Resource::Users, Resource::Accounts, Resource::Roles]
+    }
+}
+
 impl Actions {
+    pub fn from_bits(inner: i32) -> Self {
+        Self(inner)
+    }
+
+    pub fn all() -> Self {
+        Action::Global
+            | Action::View
+            | Action::Add
+            | Action::Modify
+            | Action::Remove
+    }
+
     pub fn inner(self) -> i32 {
         self.0 as i32
     }

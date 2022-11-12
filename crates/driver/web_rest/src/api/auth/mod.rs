@@ -1,6 +1,7 @@
 mod config;
 mod signin;
 mod util;
+pub mod templates;
 
 use axum::{routing::post, Extension, Router};
 use kernel_services::{config::ConfigService, error::AppResult, get_config};

@@ -1,11 +1,10 @@
-pub mod access;
 pub mod error;
 pub mod models;
 
 use kernel_entities::entities::auth::*;
 use shaku::Interface;
 
-use self::access::AppAccess;
+use self::models::AccessRule;
 use crate::error::AppResult;
 
 #[async_trait::async_trait]
@@ -30,8 +29,8 @@ pub trait AuthService: Interface {
         device_identifier: &str,
     ) -> AppResult<()>;
 
-    async fn get_access_items_for(
+    async fn get_access_rules_for(
         &self,
         account_id: &AccountKey,
-    ) -> AppResult<Vec<AppAccess>>;
+    ) -> AppResult<Vec<AccessRule>>;
 }

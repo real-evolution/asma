@@ -12,4 +12,7 @@ pub enum RepoError {
 
     #[error("not items were found")]
     NotFound,
+
+    #[error("duplicate item: {0}")]
+    DuplicateValue(String),
 }

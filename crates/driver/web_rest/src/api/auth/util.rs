@@ -4,7 +4,7 @@ use chrono::Utc;
 use itertools::Itertools;
 use jsonwebtoken::{EncodingKey, Header};
 use kernel_entities::entities::auth::Session;
-use kernel_services::auth::access::AppAccess;
+use kernel_services::auth::models::AccessRule;
 
 use super::config::ApiTokenConfig;
 use crate::util::jwt::Claims;
@@ -12,7 +12,7 @@ use crate::util::jwt::Claims;
 impl Claims {
     pub fn new(
         session: &Session,
-        access_items: Vec<AppAccess>,
+        access_rules: Vec<AccessRule>,
         config: &ApiTokenConfig,
     ) -> Claims {
         let iat = Utc::now().timestamp();
@@ -26,11 +26,21 @@ impl Claims {
             iss: config.issuer.clone(),
             aud: config.audience.clone(),
             account: session.account_id.0,
-            roles: Itertools::intersperse(
-                access_items.into_iter().flat_map(|i| i.into_string_vec()),
-                ",".to_string(),
-            )
-            .collect(),
+            roles: access_rules
+                .into_iter()
+                .map(|i| {
+                    (
+                        i.role_code,
+                        Itertools::intersperse(
+                            i.permissions.into_iter().map(|p| {
+                                format!("{:X}:{:X}", p.0.repr(), p.1.inner())
+                            }),
+                            ",".to_string(),
+                        )
+                        .collect(),
+                    )
+                })
+                .collect(),
         }
     }
 

@@ -3,7 +3,6 @@ use std::sync::Arc;
 use kernel_entities::entities::auth::*;
 use kernel_repositories::{auth::*, TransactionManager};
 use kernel_services::{
-    auth::access::{AppAccess, AppResource},
     crypto::hash::CryptoHashService,
     error::AppResult,
     setup::{error::SetupError, SetupService},
@@ -13,6 +12,8 @@ use shaku::Component;
 const SYSTEM_USER_USERNAME: &str = "system";
 const SYSTEM_USER_DISPLAY_NAME: &str = "System User";
 const ROOT_ACCOUNT_NAME: &str = "root";
+const ROOT_ROLE_NAME: &str = "root";
+const ROOT_ROLE_DESCRIPTION: &str = "Full system access";
 
 #[derive(Component)]
 #[shaku(interface = SetupService)]
@@ -69,21 +70,24 @@ impl AppSetupService {
     }
 
     async fn setup_roles(&self, root_account_id: &AccountKey) -> AppResult<()> {
-        let all_roles = AppResource::get_all()
-            .iter()
-            .flat_map(|r| AppAccess::new_full(r.clone()).into_string_map());
+        // create root role
+        let role_id = self
+            .roles
+            .create(InsertRole::new(
+                ROOT_ROLE_NAME.to_owned(),
+                Some(ROOT_ROLE_DESCRIPTION.to_owned()),
+            ))
+            .await?;
 
-        for (code, friendly_name) in all_roles {
-            let role_id = self
-                .roles
-                .create(InsertRole {
-                    code,
-                    friendly_name: Some(friendly_name),
-                })
+        // set root role permissions
+        for res in Resource::all() {
+            self.roles
+                .add_permission_to(&role_id, res, Actions::all())
                 .await?;
-
-            self.roles.add_to_role(root_account_id, &role_id).await?;
         }
+
+        // add account to root role
+        self.roles.add_to_role(root_account_id, &role_id).await?;
 
         Ok(())
     }

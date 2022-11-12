@@ -44,9 +44,9 @@ pub async fn signin(
         )
         .await?;
 
-    let access_items =
-        auth_svc.get_access_items_for(&session.account_id).await?;
-    let jwt = Claims::new(&session, access_items, &config).to_jwt(&config)?;
+    let access_rules =
+        auth_svc.get_access_rules_for(&session.account_id).await?;
+    let jwt = Claims::new(&session, access_rules, &config).to_jwt(&config)?;
 
     Ok(Json(TokenPair {
         access_token: jwt,

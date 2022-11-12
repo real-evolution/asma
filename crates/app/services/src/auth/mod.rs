@@ -1,12 +1,11 @@
 pub mod config;
 
-use std::str::FromStr;
 use std::sync::Arc;
 
 use chrono::{Duration, Utc};
 use kernel_entities::entities::auth::*;
 use kernel_repositories::auth::*;
-use kernel_services::auth::access::AppAccess;
+use kernel_services::auth::models::AccessRule;
 use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::crypto::hash::CryptoHashService;
 use kernel_services::entropy::EntropyService;
@@ -23,6 +22,9 @@ pub struct AppAuthService {
 
     #[shaku(inject)]
     accounts: Arc<dyn AccountsRepo>,
+
+    #[shaku(inject)]
+    roles: Arc<dyn RolesRepo>,
 
     #[shaku(inject)]
     sessions: Arc<dyn SessionsRepo>,
@@ -43,7 +45,6 @@ impl AuthService for AppAuthService {
         password: &str,
         device_info: DeviceInfo,
     ) -> AppResult<Session> {
-
         // TODO:
         // validate user & account validity
 
@@ -152,26 +153,16 @@ impl AuthService for AppAuthService {
         Ok(self.sessions.remove(&session.id).await?)
     }
 
-    async fn get_access_items_for(
+    async fn get_access_rules_for(
         &self,
         account_id: &AccountKey,
-    ) -> AppResult<Vec<AppAccess>> {
-        let roles = self.accounts.get_roles(account_id).await?;
-        let mut access_items: Vec<AppAccess> = Vec::with_capacity(roles.len());
-
-        for role in roles {
-            if let Ok(item) = AppAccess::from_str(&role.code) {
-                access_items.push(item);
-            } else {
-                error!(
-                    "could not parse role `{}` ({})",
-                    role.code,
-                    role.friendly_name
-                        .unwrap_or("no friendly name".to_string())
-                );
-            }
-        }
-
-        Ok(access_items)
+    ) -> AppResult<Vec<AccessRule>> {
+        Ok(self
+            .roles
+            .get_roles_with_permissions_for(account_id)
+            .await?
+            .into_iter()
+            .map(|i| AccessRule::new(i.0, i.1))
+            .collect())
     }
 }

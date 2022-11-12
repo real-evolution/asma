@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -9,5 +11,5 @@ pub struct Claims {
     pub iss: String,
     pub aud: String,
     pub account: Uuid,
-    pub roles: String,
+    pub roles: HashMap<String, String>,
 }
