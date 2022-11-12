@@ -1,10 +1,17 @@
-use axum::Router;
-use kernel_services::{config::ConfigService, error::AppResult};
+use axum::{Extension, Router};
+use kernel_services::{config::ConfigService, error::AppResult, get_config};
 
-use crate::{api, doc};
+use crate::{
+    api,
+    config::{ApiConfig, API_CONFIG_SECTION},
+    doc,
+};
 
 pub fn make_app(config_svc: &dyn ConfigService) -> AppResult<Router> {
+    let conf = get_config!(config_svc, API_CONFIG_SECTION => ApiConfig)?;
+
     Ok(Router::new()
-        .nest("/api", api::api_routes(config_svc)?)
+        .nest("/api", api::api_routes()?)
+        .layer(Extension(conf))
         .merge(doc::create_swagger_ui()))
 }

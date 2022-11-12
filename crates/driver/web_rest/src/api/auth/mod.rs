@@ -1,16 +1,9 @@
 mod signin;
 
-use axum::{routing::post, Extension, Router};
-use kernel_services::{config::ConfigService, error::AppResult, get_config};
+use axum::{routing::post, Router};
+use kernel_services::error::AppResult;
 pub use signin::*;
 
-use crate::util::jwt::config::{ApiTokenConfig, API_TOKEN_CONFIG_SECTION};
-
-pub fn routes(config_svc: &dyn ConfigService) -> AppResult<Router> {
-    let conf =
-        get_config!(config_svc, API_TOKEN_CONFIG_SECTION => ApiTokenConfig)?;
-
-    Ok(Router::new()
-        .route("/signin", post(signin))
-        .layer(Extension(conf)))
+pub fn routes() -> AppResult<Router> {
+    Ok(Router::new().route("/signin", post(signin)))
 }

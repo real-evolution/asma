@@ -8,3 +8,4 @@ mod util;
 mod extractors;
 
 pub mod app;
+pub mod config;

@@ -6,10 +6,11 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
+use crate::config::ApiConfig;
 use crate::error::ApiResult;
 use crate::extractors::di::Dep;
 use crate::extractors::validated_json::ValidatedJson;
-use crate::util::jwt::{config::ApiTokenConfig, Claims};
+use crate::util::jwt::Claims;
 
 #[utoipa::path(
     post,
@@ -24,7 +25,7 @@ pub async fn signin(
     TypedHeader(agent): TypedHeader<UserAgent>,
     ClientIp(ip): ClientIp,
     ValidatedJson(form): ValidatedJson<UserCredentials>,
-    Extension(config): Extension<ApiTokenConfig>,
+    Extension(config): Extension<ApiConfig>,
     auth_svc: Dep<dyn AuthService>,
 ) -> ApiResult<Json<TokenPair>> {
     let device_info = DeviceInfo {
@@ -45,7 +46,7 @@ pub async fn signin(
     let access_rules =
         auth_svc.get_access_rules_for(&session.account_id).await?;
     let jwt = Claims::new(&session, access_rules, &config)
-        .encode(&config.signing_key.as_bytes())?;
+        .encode(&config.token.signing_key.as_bytes())?;
 
     Ok(Json(TokenPair {
         access_token: jwt,
