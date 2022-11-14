@@ -14,6 +14,7 @@ pub trait ChannelsRepo: Interface {
 #[derive(Constructor, Debug)]
 pub struct InsertChannel {
     pub name: String,
+    pub platform: ChannelPlatform,
     pub api_key: String,
     pub is_active: bool,
     pub valid_until: Option<DateTime<Utc>>,

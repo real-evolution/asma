@@ -35,14 +35,16 @@ impl ChannelsRepo for SqlxChannelsRepo {
             r#"
             INSERT INTO channels (
                 name,
+                platform,
                 api_key,
                 is_active,
                 valid_until,
                 user_id)
-            VALUES ($1, $2, $3, $4, $5)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
             "#,
             insert.name,
+            insert.platform as i32,
             insert.api_key,
             insert.is_active,
             insert.valid_until,
