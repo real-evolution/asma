@@ -4,6 +4,7 @@ CREATE TABLE roles
 
     code VARCHAR NOT NULL UNIQUE,
     friendly_name VARCHAR NULL,
+    is_active BOOLEAN DEFAULT true NOT NULL,
 
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL

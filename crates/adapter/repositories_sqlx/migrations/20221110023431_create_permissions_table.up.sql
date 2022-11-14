@@ -7,5 +7,7 @@ CREATE TABLE permissions
     role_id UUID NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
 
-    CONSTRAINT role_fk FOREIGN KEY (role_id) REFERENCES roles(id)
+    CONSTRAINT role_fk FOREIGN KEY (role_id)
+                       REFERENCES roles(id)
+                       ON DELETE CASCADE
 );

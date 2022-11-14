@@ -12,5 +12,7 @@ CREATE TABLE accounts
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
 
-    CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES users(id)
+    CONSTRAINT user_fk FOREIGN KEY (user_id)
+                       REFERENCES users(id)
+                       ON DELETE CASCADE
 );
