@@ -1,6 +1,6 @@
 use std::{cmp::min, collections::HashMap};
 
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use jsonwebtoken::{EncodingKey, Header};
 use kernel_entities::entities::auth::{Actions, Resource, Session};
 use kernel_services::auth::models::AccessRule;
@@ -30,10 +30,11 @@ impl Claims {
         config: &ApiConfig,
     ) -> Claims {
         let iat = Utc::now().timestamp();
-        let exp = min(
-            iat + config.token.timout_seconds,
-            session.expires_at.timestamp(),
-        );
+        let conf_exp = iat + config.token.timout_seconds;
+        let exp = match session.expires_at {
+            Some(session_exp) => min(conf_exp, session_exp.timestamp()),
+            None => conf_exp,
+        };
 
         Claims {
             sub: session.id.0,
