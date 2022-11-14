@@ -16,7 +16,7 @@ pub struct InsertChannel {
     pub name: String,
     pub platform: ChannelPlatform,
     pub api_key: String,
-    pub is_active: bool,
     pub valid_until: Option<DateTime<Utc>>,
+    pub is_active: bool,
     pub user_id: UserKey,
 }

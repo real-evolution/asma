@@ -5,7 +5,7 @@ use crate::{traits::*, entities::auth::UserKey};
 
 #[repr(i32)]
 #[derive(Debug, Clone, sqlx::Type)]
-pub enum ChannelType {
+pub enum ChannelPlatform {
     Telegram = 0,
     WhatsApp = 1,
 }
@@ -14,8 +14,9 @@ pub enum ChannelType {
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct Channel {
     pub name: String,
+    pub platform: ChannelPlatform,
     pub api_key: String,
-    pub is_active: bool,
     pub valid_until: Option<DateTime<Utc>>,
+    pub is_active: bool,
     pub user_id: UserKey,
 }
