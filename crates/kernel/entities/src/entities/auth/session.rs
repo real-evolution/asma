@@ -13,5 +13,5 @@ pub struct Session {
     pub refresh_token: String,
     pub last_address: Option<String>,
     pub account_id: AccountKey,
-    pub expires_at: DateTime<Utc>,
+    pub expires_at: Option<DateTime<Utc>>,
 }
