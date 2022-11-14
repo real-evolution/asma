@@ -66,11 +66,13 @@ impl RolesRepo for SqlxRolesRepo {
         account_id: &AccountKey,
         role_id: &RoleKey,
     ) -> RepoResult<bool> {
-        let ret = sqlx::query!(
+        let ret = sqlx::query_scalar!(
             r#"
             SELECT EXISTS(
-                SELECT id FROM account_roles
-                WHERE enabled = true AND account_id = $1 AND role_id = $2 
+                SELECT 1 FROM account_roles
+                WHERE is_active = true AND
+                      account_id = $1 AND
+                      role_id = $2 
             )"#,
             account_id.0,
             role_id.0
@@ -79,7 +81,7 @@ impl RolesRepo for SqlxRolesRepo {
         .await
         .map_err(map_sqlx_error)?;
 
-        Ok(ret.exists.unwrap_or(false))
+        Ok(ret.unwrap_or(false))
     }
 
     async fn add_to_role(
@@ -87,14 +89,13 @@ impl RolesRepo for SqlxRolesRepo {
         account_id: &AccountKey,
         role_id: &RoleKey,
     ) -> RepoResult<()> {
-        sqlx::query_scalar!(
+        sqlx::query!(
             r#"
-            INSERT INTO account_roles (account_id, role_id, enabled)
-            VALUES ($1, $2, $3)
+            INSERT INTO account_roles (account_id, role_id, is_active)
+            VALUES ($1, $2, true)
             "#,
             account_id.0,
             role_id.0,
-            true
         )
         .execute(self.db.get())
         .await
@@ -108,7 +109,7 @@ impl RolesRepo for SqlxRolesRepo {
         account_id: &AccountKey,
         role_id: &RoleKey,
     ) -> RepoResult<()> {
-        sqlx::query_scalar!(
+        sqlx::query!(
             r#"
             DELETE FROM account_roles
             WHERE account_id = $1 AND role_id = $2

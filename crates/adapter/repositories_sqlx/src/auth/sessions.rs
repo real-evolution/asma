@@ -66,7 +66,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         &self,
         account_id: &AccountKey,
     ) -> RepoResult<usize> {
-        let count = sqlx::query!(
+        let count = sqlx::query_scalar!(
             r#"
             SELECT COUNT(id) FROM SESSIONS
             WHERE account_id = $1 AND expires_at > $2
@@ -76,8 +76,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         )
         .fetch_one(self.db.get())
         .await
-        .map_err(map_sqlx_error)?
-        .count;
+        .map_err(map_sqlx_error)?;
 
         Ok(count.unwrap_or(0) as usize)
     }

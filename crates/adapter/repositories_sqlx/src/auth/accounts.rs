@@ -24,7 +24,10 @@ impl AccountsRepo for SqlxAccountsRepo {
         account_name: &str,
     ) -> RepoResult<Account> {
         Ok(sqlx::query_as::<_, Account>(
-            "SELECT * FROM accounts WHERE user_id = $1 AND account_name = $2",
+            r#"
+            SELECT * FROM accounts
+            WHERE user_id = $1 AND account_name = $2
+            "#,
         )
         .bind(user_id)
         .bind(account_name)
