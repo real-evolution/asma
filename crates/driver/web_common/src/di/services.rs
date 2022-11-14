@@ -2,8 +2,10 @@ use std::sync::Arc;
 
 use app_services::auth::{config::*, *};
 use app_services::setup::AppSetupService;
+use kernel_repositories::auth::*;
+use kernel_repositories::di::ReposModule;
+use kernel_repositories::link::*;
 use kernel_repositories::*;
-use kernel_repositories::{auth::*, di::ReposModule};
 use kernel_services::{
     config::ConfigService, crypto::hash::CryptoHashService, di::ServicesModule,
     entropy::EntropyService, get_config,
@@ -32,7 +34,8 @@ module! {
                 dyn UsersRepo,
                 dyn AccountsRepo,
                 dyn RolesRepo,
-                dyn SessionsRepo
+                dyn SessionsRepo,
+                dyn ChannelsRepo,
             ],
             providers = [],
         },
