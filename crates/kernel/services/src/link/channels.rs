@@ -1,11 +1,9 @@
 use kernel_entities::entities::{auth::UserKey, link::ChannelKey};
 use shaku::Interface;
 
-use self::models::ChannelInfo;
 use crate::error::AppResult;
 
-pub mod error;
-pub mod models;
+use crate::link::models::ChannelInfo;
 
 #[async_trait::async_trait]
 pub trait ChannelsService: Interface {
