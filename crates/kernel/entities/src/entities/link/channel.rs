@@ -1,10 +1,10 @@
 use chrono::{DateTime, Utc};
 use kernel_proc_macros::*;
 
-use crate::{traits::*, entities::auth::UserKey};
+use crate::{entities::auth::UserKey, traits::*};
 
 #[repr(i32)]
-#[derive(Debug, Clone, sqlx::Type)]
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, sqlx::Type)]
 pub enum ChannelPlatform {
     Telegram = 0,
     WhatsApp = 1,
