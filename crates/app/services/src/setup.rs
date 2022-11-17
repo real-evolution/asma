@@ -12,7 +12,6 @@ use shaku::Component;
 const SYSTEM_USER_USERNAME: &str = "system";
 const SYSTEM_USER_DISPLAY_NAME: &str = "System User";
 const ROOT_ACCOUNT_NAME: &str = "root";
-const ROOT_ROLE_NAME: &str = "root";
 const ROOT_ROLE_DESCRIPTION: &str = "Full system access";
 
 #[derive(Component)]
@@ -74,7 +73,7 @@ impl AppSetupService {
         let role_id = self
             .roles
             .create(InsertRole::new(
-                ROOT_ROLE_NAME.to_owned(),
+                KnownRoles::Root.to_string(),
                 Some(ROOT_ROLE_DESCRIPTION.to_owned()),
             ))
             .await?;
