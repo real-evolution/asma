@@ -8,6 +8,13 @@ use crate::error::RepoResult;
 
 #[async_trait::async_trait]
 pub trait RolesRepo: Interface {
+    async fn get_by_id(&self, id: &RoleKey) -> RepoResult<Role>;
+
+    async fn get_permissions_of(
+        &self,
+        role_id: &RoleKey,
+    ) -> RepoResult<Vec<Permission>>;
+
     async fn get_all(&self) -> RepoResult<Vec<Role>>;
 
     async fn is_in_role(
