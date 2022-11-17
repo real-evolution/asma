@@ -48,7 +48,7 @@ pub enum Action {
     Remove = 16,
 }
 
-#[entity]
+#[entity(entity_type = "immutable")]
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct Permission {
     pub resource: Resource,
