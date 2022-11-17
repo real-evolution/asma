@@ -6,7 +6,7 @@ use crate::setup::SetupService;
 
 pub trait ServicesModule:
     HasComponent<dyn ConfigService>
-    + HasComponent<dyn SetupService>
     + HasComponent<dyn AuthService>
+    + HasComponent<dyn SetupService>
 {
 }
