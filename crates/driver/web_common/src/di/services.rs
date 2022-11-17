@@ -6,10 +6,10 @@ use kernel_repositories::auth::*;
 use kernel_repositories::di::ReposModule;
 use kernel_repositories::link::*;
 use kernel_repositories::*;
-use kernel_services::{
-    config::ConfigService, crypto::hash::CryptoHashService, di::ServicesModule,
-    entropy::EntropyService, get_config,
-};
+use kernel_services::config::ConfigService;
+use kernel_services::crypto::hash::CryptoHashService;
+use kernel_services::di::ServicesModule;
+use kernel_services::{entropy::EntropyService, get_config};
 use shaku::module;
 
 use super::base_services::BaseServicesModule;
@@ -42,7 +42,7 @@ module! {
     }
 }
 
-pub(super) fn build_services(
+pub fn build_services(
     base_services: Arc<dyn BaseServicesModule>,
     repos: Arc<dyn ReposModule>,
 ) -> anyhow::Result<Arc<dyn ServicesModule>> {
