@@ -16,9 +16,6 @@ pub trait AccountsRepo: Interface {
         user_id: &UserKey,
         insert: InsertAccount,
     ) -> RepoResult<AccountKey>;
-
-    async fn get_roles(&self, account_id: &AccountKey)
-        -> RepoResult<Vec<Role>>;
 }
 
 #[derive(Debug)]
