@@ -1,5 +1,7 @@
 pub mod auth;
 pub mod diag;
+pub mod dtos;
+pub mod roles;
 pub mod setup;
 
 use axum::Router;
