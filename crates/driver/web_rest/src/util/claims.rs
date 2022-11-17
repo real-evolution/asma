@@ -1,16 +1,14 @@
 use std::{cmp::min, collections::HashMap};
 
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use jsonwebtoken::{EncodingKey, Header};
 use kernel_entities::entities::auth::{Actions, Resource, Session};
 use kernel_services::auth::models::AccessRule;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{
-    config::ApiConfig,
-    error::{ApiError, ApiResult},
-};
+use crate::config::ApiConfig;
+use crate::error::{ApiError, ApiResult};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Claims {
@@ -59,15 +57,15 @@ impl Claims {
 
         Ok(jwt)
     }
+}
 
+impl Claims {
     pub fn require_role(&self, role: &str) -> ApiResult<()> {
-        if !self.roles.contains_key(role) {
-            return Err(ApiError::Authorization(format!(
-                "role `{role}` not found in claims"
-            )));
+        if self.roles.contains_key(role) {
+            return Ok(());
         }
 
-        Ok(())
+        Self::insufficient_permissions()
     }
 
     pub fn require_roles(&self, roles: &Vec<&str>) -> ApiResult<()> {
@@ -78,22 +76,36 @@ impl Claims {
         Ok(())
     }
 
+    pub fn require_any_role(&self, roles: &Vec<&str>) -> ApiResult<()> {
+        if roles.into_iter().any(|r| self.require_role(r).is_ok()) {
+            return Ok(());
+        }
+
+        Self::insufficient_permissions()
+    }
+
+    pub fn require_all_roles(&self, roles: &Vec<&str>) -> ApiResult<()> {
+        if roles.into_iter().all(|r| self.require_role(r).is_ok()) {
+            return Ok(());
+        }
+
+        Self::insufficient_permissions()
+    }
+
     pub fn require_permission(
         &self,
         resource: Resource,
         actions: Actions,
     ) -> ApiResult<()> {
-        if !self
+        if self
             .roles
             .iter()
             .any(|r| r.1.iter().any(|a| a.0 == resource && a.1.has(actions)))
         {
-            return Err(ApiError::Authorization(
-                "insufficient permissions".into(),
-            ));
+            return Ok(());
         }
 
-        Ok(())
+        Self::insufficient_permissions()
     }
 
     pub fn require_permissions(
@@ -105,5 +117,53 @@ impl Claims {
         }
 
         Ok(())
+    }
+
+    pub fn require_role_with_permission(
+        &self,
+        role: &str,
+        permission: (Resource, Actions),
+    ) -> ApiResult<()> {
+        self.require_role(role)?;
+        self.require_permission(permission.0, permission.1)?;
+
+        Ok(())
+    }
+
+    pub fn require_role_with_permissions(
+        &self,
+        role: &str,
+        permissions: Vec<(Resource, Actions)>,
+    ) -> ApiResult<()> {
+        self.require_role(role)?;
+        self.require_permissions(permissions)?;
+
+        Ok(())
+    }
+
+    pub fn require_any_role_with_permission(
+        &self,
+        roles: Vec<&str>,
+        permission: (Resource, Actions),
+    ) -> ApiResult<()> {
+        self.require_any_role(&roles)?;
+        self.require_permission(permission.0, permission.1)?;
+
+        Ok(())
+    }
+
+    pub fn require_any_role_with_permissions(
+        &self,
+        roles: Vec<&str>,
+        permissions: Vec<(Resource, Actions)>,
+    ) -> ApiResult<()> {
+        self.require_any_role(&roles)?;
+        self.require_permissions(permissions)?;
+
+        Ok(())
+    }
+
+    fn insufficient_permissions() -> ApiResult<()> {
+        Err(ApiError::Authorization("insufficient permissions".into()))
     }
 }
