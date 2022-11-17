@@ -89,8 +89,6 @@ pub fn expand_entity(
     let id_type =
         Ident::new(&format!("{}Key", &input.ident), Span::call_site());
     let id_struct = quote! {
-        #[derive(Copy, Debug, Clone, sqlx::Type, derive_more::Into)]
-        #[sqlx(transparent)]
         pub struct #id_type(pub #id_inner_type);
     };
 
@@ -104,10 +102,21 @@ pub fn expand_entity(
     }
 
     quote! {
+        #[derive(serde::Deserialize, serde::Serialize)]
         #input
 
         #(#impls)*
 
+        #[derive(Clone,
+                 Copy,
+                 Debug,
+                 serde::Serialize,
+                 serde::Deserialize,
+                 sqlx::Type,
+                 derive_more::Into,
+                 derive_more::From)]
+        #[sqlx(transparent)]
+        #[repr(transparent)]
         #id_struct
     }
     .into()
