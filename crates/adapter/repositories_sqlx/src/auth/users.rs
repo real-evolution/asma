@@ -15,7 +15,7 @@ pub struct SqlxUsersRepo {
 
 #[async_trait::async_trait]
 impl UsersRepo for SqlxUsersRepo {
-    async fn get_by_id(&self, id: &UserKey) -> RepoResult<User> {
+    async fn get(&self, id: &UserKey) -> RepoResult<User> {
         Ok(
             sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
                 .bind(id)

@@ -20,7 +20,7 @@ pub struct SqlxRolesRepo {
 
 #[async_trait::async_trait]
 impl RolesRepo for SqlxRolesRepo {
-    async fn get_by_id(&self, id: &RoleKey) -> RepoResult<Role> {
+    async fn get(&self, id: &RoleKey) -> RepoResult<Role> {
         let role =
             sqlx::query_as::<_, Role>("SELECT * FROM roles WHERE id = $1")
                 .bind(id)
