@@ -85,3 +85,9 @@ impl IntoResponse for ApiError {
         (status, Json(json!({ "error": message }))).into_response()
     }
 }
+
+impl From<RepoError> for ApiError {
+    fn from(value: RepoError) -> Self {
+        AppError::from(value).into()
+    }
+}
