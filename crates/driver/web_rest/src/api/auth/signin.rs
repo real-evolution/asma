@@ -1,11 +1,9 @@
 use axum::{headers::UserAgent, Extension, Json, TypedHeader};
 use axum_client_ip::ClientIp;
-use common_validation::username;
 use kernel_services::auth::{models::DeviceInfo, AuthService};
-use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
-use validator::Validate;
 
+use crate::api::dtos::auth::{TokenPair, UserCredentials};
 use crate::config::ApiConfig;
 use crate::error::ApiResult;
 use crate::extractors::di::Dep;
@@ -52,22 +50,4 @@ pub async fn signin(
         access_token: jwt,
         refresh_token: session.refresh_token,
     }))
-}
-
-#[derive(ToSchema, Validate, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct UserCredentials {
-    #[validate(custom = "username")]
-    account_name: String,
-    #[validate(custom = "username")]
-    username: String,
-    device_identifier: String,
-    password: String,
-}
-
-#[derive(ToSchema, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TokenPair {
-    access_token: String,
-    refresh_token: String,
 }
