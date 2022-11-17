@@ -3,11 +3,22 @@ use std::ops::{BitAnd, BitOr, BitXor, Not};
 use derive_more::Display;
 use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
+use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use super::UserKey;
 use crate::traits::*;
+
+lazy_static! {
+    static ref ALL_ACTIONS: Vec<Action> = vec![
+        Action::Global,
+        Action::View,
+        Action::Add,
+        Action::Modify,
+        Action::Remove,
+    ];
+}
 
 #[EnumRepr(type = "i64")]
 #[derive(
@@ -61,11 +72,11 @@ impl Actions {
     }
 
     pub fn all() -> Self {
-        Action::Global
-            | Action::View
-            | Action::Add
-            | Action::Modify
-            | Action::Remove
+        Self::all_iter().fold(Self(0), |a, b| a | b)
+    }
+
+    pub fn all_iter() -> impl Iterator<Item = Action> {
+        ALL_ACTIONS.clone().into_iter()
     }
 
     pub fn inner(self) -> i32 {
