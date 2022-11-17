@@ -14,6 +14,7 @@ jsonwebtoken = "8"
 shaku_axum = "0"
 utoipa = { version = "2", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "2", features = ["axum"] }
+mapper = { git = "https://github.com/kumarmo2/mapper.git", branch = "v0.1" }
 
 # project dependencies
 common_macros = { path = "../../common/macros" }
