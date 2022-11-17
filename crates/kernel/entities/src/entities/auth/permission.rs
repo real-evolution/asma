@@ -66,6 +66,12 @@ impl Resource {
     }
 }
 
+impl From<Action> for Actions {
+    fn from(value: Action) -> Self {
+        Self(value as i32)
+    }
+}
+
 impl Actions {
     pub fn from_bits(inner: i32) -> Self {
         Self(inner)
