@@ -4,7 +4,7 @@ use super::*;
 use crate::traits::*;
 
 #[repr(i32)]
-#[derive(Debug, Clone, sqlx::Type)]
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, sqlx::Type)]
 pub enum AccountState {
     Inactive = 0,
     Active = 1,

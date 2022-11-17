@@ -57,7 +57,9 @@ pub struct Permission {
 }
 
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, sqlx::Type,
+)]
 pub struct Actions(i32);
 
 impl Resource {

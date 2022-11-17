@@ -3,7 +3,7 @@ use kernel_proc_macros::*;
 use crate::traits::*;
 
 #[repr(i32)]
-#[derive(Debug, Clone, sqlx::Type)]
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, sqlx::Type)]
 pub enum UserLevel {
     Root = 0,
     Admin = 1,
