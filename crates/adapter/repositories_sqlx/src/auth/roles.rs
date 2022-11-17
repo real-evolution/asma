@@ -20,6 +20,32 @@ pub struct SqlxRolesRepo {
 
 #[async_trait::async_trait]
 impl RolesRepo for SqlxRolesRepo {
+    async fn get_by_id(&self, id: &RoleKey) -> RepoResult<Role> {
+        let role =
+            sqlx::query_as::<_, Role>("SELECT * FROM roles WHERE id = $1")
+                .bind(id)
+                .fetch_one(self.db.get())
+                .await
+                .map_err(map_sqlx_error)?;
+
+        Ok(role)
+    }
+
+    async fn get_permissions_of(
+        &self,
+        role_id: &RoleKey,
+    ) -> RepoResult<Vec<Permission>> {
+        let permissions = sqlx::query_as::<_, Permission>(
+            "SELECT * FROM permissions WHERE role_id = $1",
+        )
+        .bind(role_id)
+        .fetch_all(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(permissions)
+    }
+
     async fn get_all(&self) -> RepoResult<Vec<Role>> {
         Ok(sqlx::query_as::<_, Role>("SELECT * FROM roles")
             .fetch_all(self.db.get())
