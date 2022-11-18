@@ -13,5 +13,6 @@ pub fn api_routes() -> AppResult<Router> {
     Ok(Router::new()
         .nest("/diag", diag::routes())
         .nest("/setup", setup::routes())
-        .nest("/auth", auth::routes()?))
+        .nest("/auth", auth::routes())
+        .nest("/roles", roles::routes()))
 }

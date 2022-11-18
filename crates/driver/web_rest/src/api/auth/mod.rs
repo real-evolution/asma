@@ -1,9 +1,7 @@
-mod signin;
+pub mod signin;
 
 use axum::{routing::post, Router};
-use kernel_services::error::AppResult;
-pub use signin::*;
 
-pub fn routes() -> AppResult<Router> {
-    Ok(Router::new().route("/signin", post(signin)))
+pub fn routes() -> Router {
+    Router::new().route("/signin", post(signin::signin))
 }
