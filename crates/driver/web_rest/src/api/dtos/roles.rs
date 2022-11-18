@@ -2,8 +2,9 @@ use chrono::{DateTime, Utc};
 use kernel_entities::entities::auth::*;
 use mapper::Mapper;
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct RoleDto {
     #[serde(flatten)]
@@ -11,7 +12,7 @@ pub struct RoleDto {
     pub permissions: Vec<PermissionDto>,
 }
 
-#[derive(Debug, Deserialize, Mapper, Serialize)]
+#[derive(Debug, Deserialize, Mapper, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 #[from(Permission)]
 pub struct PermissionDto {

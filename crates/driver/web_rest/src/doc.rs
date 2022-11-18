@@ -12,11 +12,14 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::diag::echo,
         api::setup::setup,
         api::auth::signin,
+        api::roles::get_by_id,
     ),
     components(
         schemas(dtos::setup::RootAccountDetails,
                 dtos::auth::UserCredentials,
                 dtos::auth::TokenPair,
+                dtos::roles::RoleDto,
+                dtos::roles::PermissionDto,
         )
     ),
     tags((
