@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use kernel_entities::entities::auth::*;
-use kernel_repositories::{auth::*, TransactionManager};
+use kernel_repositories::{auth::*, error::RepoError, TransactionManager};
 use kernel_services::{
     crypto::hash::CryptoHashService,
     error::AppResult,
@@ -37,10 +37,10 @@ impl AppSetupService {
     async fn create_system_user(&self) -> AppResult<UserKey> {
         let system_user_id = self
             .users
-            .create(InsertUser::new_active(
+            .create(InsertUser::new(
                 SYSTEM_USER_USERNAME.to_owned(),
                 SYSTEM_USER_DISPLAY_NAME.to_owned(),
-                UserLevel::Root,
+                true,
             ))
             .await?;
 
@@ -81,7 +81,7 @@ impl AppSetupService {
         // set root role permissions
         for res in Resource::all() {
             self.roles
-                .add_permission_to(&role_id, res, Actions::all())
+                .add_permission(&role_id, res, Actions::all())
                 .await?;
         }
 
@@ -95,11 +95,11 @@ impl AppSetupService {
 #[async_trait::async_trait()]
 impl SetupService for AppSetupService {
     async fn is_setup(&self) -> AppResult<bool> {
-        Ok(!self
-            .users
-            .get_all_by_level(UserLevel::Root)
-            .await?
-            .is_empty())
+        match self.users.get_by_username(SYSTEM_USER_USERNAME).await {
+            Ok(_) => Ok(true),
+            Err(RepoError::NotFound) => return Ok(false),
+            Err(err) => return Err(err.into()),
+        }
     }
 
     async fn setup(
