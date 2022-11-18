@@ -1,9 +1,10 @@
-mod add;
-mod remove;
-mod update;
-mod view;
+pub mod add;
+pub mod remove;
+pub mod update;
+pub mod view;
 
-pub use add::*;
-pub use remove::*;
-pub use update::*;
-pub use view::*;
+use axum::{routing::get, Router};
+
+pub fn routes() -> Router {
+    Router::new().route("/", get(view::get_by_id))
+}

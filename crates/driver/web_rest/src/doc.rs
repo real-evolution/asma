@@ -11,8 +11,8 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
     paths(
         api::diag::echo,
         api::setup::setup,
-        api::auth::signin,
-        api::roles::get_by_id,
+        api::auth::signin::signin,
+        api::roles::view::get_by_id,
     ),
     components(
         schemas(dtos::setup::RootAccountDetails,
