@@ -167,7 +167,7 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(RoleKey(id))
     }
 
-    async fn add_permission_to(
+    async fn add_permission(
         &self,
         role_id: &RoleKey,
         resource: Resource,
@@ -211,7 +211,7 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(PermissionKey(id))
     }
 
-    async fn remove_permission_from(
+    async fn remove_permission(
         &self,
         permission_id: &PermissionKey,
     ) -> RepoResult<()> {

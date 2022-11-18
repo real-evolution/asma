@@ -10,12 +10,17 @@ use crate::error::RepoResult;
 pub trait RolesRepo: Interface {
     async fn get(&self, id: &RoleKey) -> RepoResult<Role>;
 
+    async fn get_all(&self) -> RepoResult<Vec<Role>>;
+
     async fn get_permissions_of(
         &self,
         role_id: &RoleKey,
     ) -> RepoResult<Vec<Permission>>;
 
-    async fn get_all(&self) -> RepoResult<Vec<Role>>;
+    async fn get_roles_with_permissions_for(
+        &self,
+        account_id: &AccountKey,
+    ) -> RepoResult<HashMap<String, Vec<(Resource, Actions)>>>;
 
     async fn is_in_role(
         &self,
@@ -23,10 +28,7 @@ pub trait RolesRepo: Interface {
         role_id: &RoleKey,
     ) -> RepoResult<bool>;
 
-    async fn get_roles_with_permissions_for(
-        &self,
-        account_id: &AccountKey,
-    ) -> RepoResult<HashMap<String, Vec<(Resource, Actions)>>>;
+    async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey>;
 
     async fn add_to_role(
         &self,
@@ -40,9 +42,7 @@ pub trait RolesRepo: Interface {
         role_id: &RoleKey,
     ) -> RepoResult<()>;
 
-    async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey>;
-
-    async fn add_permission_to(
+    async fn add_permission(
         &self,
         role_id: &RoleKey,
         resouce: Resource,
