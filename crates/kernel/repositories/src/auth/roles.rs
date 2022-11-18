@@ -30,13 +30,13 @@ pub trait RolesRepo: Interface {
 
     async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey>;
 
-    async fn add_to_role(
+    async fn add_to(
         &self,
         account_id: &AccountKey,
         role_id: &RoleKey,
     ) -> RepoResult<()>;
 
-    async fn remove_from_role(
+    async fn remove_from(
         &self,
         account_id: &AccountKey,
         role_id: &RoleKey,

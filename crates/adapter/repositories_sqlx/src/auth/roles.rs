@@ -110,7 +110,7 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(ret.unwrap_or(false))
     }
 
-    async fn add_to_role(
+    async fn add_to(
         &self,
         account_id: &AccountKey,
         role_id: &RoleKey,
@@ -130,7 +130,7 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(())
     }
 
-    async fn remove_from_role(
+    async fn remove_from(
         &self,
         account_id: &AccountKey,
         role_id: &RoleKey,

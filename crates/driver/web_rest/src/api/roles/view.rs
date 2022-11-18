@@ -26,7 +26,7 @@ pub async fn get_by_id(
         (Resource::Roles, Action::View.into()),
     )?;
 
-    let role = roles_repo.get_by_id(&id).await?;
+    let role = roles_repo.get(&id).await?;
     let permissions: Vec<PermissionDto> = roles_repo
         .get_permissions_of(&role.id)
         .await?

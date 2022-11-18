@@ -86,7 +86,7 @@ impl AppSetupService {
         }
 
         // add account to root role
-        self.roles.add_to_role(root_account_id, &role_id).await?;
+        self.roles.add_to(root_account_id, &role_id).await?;
 
         Ok(())
     }
