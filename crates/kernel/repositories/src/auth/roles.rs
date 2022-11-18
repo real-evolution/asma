@@ -49,9 +49,8 @@ pub trait RolesRepo: Interface {
         actions: Actions,
     ) -> RepoResult<PermissionKey>;
 
-    async fn remove_permission_from(
+    async fn remove_permission(
         &self,
-        role_id: &RoleKey,
         permission_id: &PermissionKey,
     ) -> RepoResult<()>;
 }
