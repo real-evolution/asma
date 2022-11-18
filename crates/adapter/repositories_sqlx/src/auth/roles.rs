@@ -176,19 +176,23 @@ impl RolesRepo for SqlxRolesRepo {
         let resource = resource as i64;
         let actions = actions.inner();
 
-        let id = sqlx::query_scalar!(
+        let exists = sqlx::query_scalar!(
             r#"
-            SELECT id FROM permissions
-            WHERE resource = $1 AND actions = $2 AND role_id = $3"#,
+            SELECT EXISTS (
+                SELECT 1 FROM permissions
+                WHERE resource = $1 AND
+                      actions = $2
+                      AND role_id = $3
+            )"#,
             resource,
             actions,
             role_id.0
         )
-        .fetch_optional(self.db.get())
+        .fetch_one(self.db.get())
         .await
         .map_err(map_sqlx_error)?;
 
-        if let Some(_) = id {
+        if exists.unwrap_or(false) {
             return Err(RepoError::DuplicateValue(format!(
                 "permission {resource}:{actions:b} was already added to role #{role_id:?}"
             )));
