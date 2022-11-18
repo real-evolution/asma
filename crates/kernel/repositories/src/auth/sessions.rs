@@ -24,11 +24,11 @@ pub trait SessionsRepo: Interface {
         account_id: &AccountKey,
     ) -> RepoResult<usize>;
 
-    async fn get_optional_valid_by_token(
+    async fn get_active_by_token(
         &self,
         token: &str,
         unique_identifier: &str,
-    ) -> RepoResult<Option<Session>>;
+    ) -> RepoResult<Session>;
 
     async fn update(
         &self,

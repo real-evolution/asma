@@ -119,13 +119,8 @@ impl AuthService for AppAuthService {
         device_info: DeviceInfo,
     ) -> AppResult<Session> {
         let session = self
-            .sessions
-            .get_optional_valid_by_token(
-                refresh_token,
-                &device_info.device_identifier,
-            )
-            .await?
-            .ok_or(AuthError::NotAuthenticated)?;
+            .get_session_by_token(refresh_token, &device_info.device_identifier)
+            .await?;
 
         self.sessions
             .update(
@@ -145,10 +140,8 @@ impl AuthService for AppAuthService {
         device_identifier: &str,
     ) -> AppResult<()> {
         let session = self
-            .sessions
-            .get_optional_valid_by_token(refresh_token, device_identifier)
-            .await?
-            .ok_or(AuthError::NotAuthenticated)?;
+            .get_session_by_token(refresh_token, device_identifier)
+            .await?;
 
         Ok(self.sessions.remove(&session.id).await?)
     }
@@ -164,5 +157,25 @@ impl AuthService for AppAuthService {
             .into_iter()
             .map(|i| AccessRule::new(i.0, i.1))
             .collect())
+    }
+}
+
+impl AppAuthService {
+    async fn get_session_by_token(
+        &self,
+        refresh_token: &str,
+        device_identifier: &str,
+    ) -> AppResult<Session> {
+        match self
+            .sessions
+            .get_active_by_token(refresh_token, device_identifier)
+            .await
+        {
+            Ok(session) => Ok(session),
+            Err(RepoError::NotFound) => {
+                return Err(AuthError::NotAuthenticated.into())
+            }
+            Err(err) => return Err(err.into()),
+        }
     }
 }

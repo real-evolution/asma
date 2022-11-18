@@ -85,7 +85,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         &self,
         token: &str,
         unique_identifier: &str,
-    ) -> RepoResult<Option<Session>> {
+    ) -> RepoResult<Session> {
         Ok(sqlx::query_as::<_, Session>(
             r#"
             SELECT * FROM sessions
@@ -96,7 +96,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         .bind(token)
         .bind(unique_identifier)
         .bind(Utc::now())
-        .fetch_optional(self.db.get())
+        .fetch_one(self.db.get())
         .await
         .map_err(map_sqlx_error)?)
     }
