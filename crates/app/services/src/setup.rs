@@ -57,10 +57,11 @@ impl AppSetupService {
             .accounts
             .create_for(
                 user_id,
-                InsertAccount::new_active(
+                InsertAccount::new(
                     ROOT_ACCOUNT_NAME.to_owned(),
                     root_holder_name,
                     self.hash_svc.hash(&root_password)?,
+                    AccountState::Active,
                 ),
             )
             .await?;
