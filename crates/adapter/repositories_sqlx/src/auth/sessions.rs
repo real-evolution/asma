@@ -17,7 +17,7 @@ pub struct SqlxSessionsRepo {
 
 #[async_trait::async_trait]
 impl SessionsRepo for SqlxSessionsRepo {
-    async fn get_by_id(&self, id: &SessionKey) -> RepoResult<Session> {
+    async fn get(&self, id: &SessionKey) -> RepoResult<Session> {
         Ok(
             sqlx::query_as::<_, Session>(
                 "SELECT * FROM sessions WHERE id = $1",
@@ -42,7 +42,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         .map_err(map_sqlx_error)?)
     }
 
-    async fn get_valid_for(
+    async fn get_active_for(
         &self,
         account_id: &AccountKey,
         device_identifier: &str,
@@ -62,7 +62,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         .map_err(map_sqlx_error)?)
     }
 
-    async fn get_active_sessions_count(
+    async fn get_active_count_for(
         &self,
         account_id: &AccountKey,
     ) -> RepoResult<usize> {
@@ -81,7 +81,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         Ok(count.unwrap_or(0) as usize)
     }
 
-    async fn get_optional_valid_by_token(
+    async fn get_active_by_token(
         &self,
         token: &str,
         unique_identifier: &str,

@@ -6,20 +6,20 @@ use crate::error::RepoResult;
 
 #[async_trait::async_trait]
 pub trait SessionsRepo: Interface {
-    async fn get_by_id(&self, id: &SessionKey) -> RepoResult<Session>;
+    async fn get(&self, id: &SessionKey) -> RepoResult<Session>;
 
     async fn get_all_for(
         &self,
         account_id: &AccountKey,
     ) -> RepoResult<Vec<Session>>;
 
-    async fn get_valid_for(
+    async fn get_active_for(
         &self,
         account_id: &AccountKey,
         device_identifier: &str,
     ) -> RepoResult<Session>;
 
-    async fn get_active_sessions_count(
+    async fn get_active_count_for(
         &self,
         account_id: &AccountKey,
     ) -> RepoResult<usize>;
@@ -30,6 +30,12 @@ pub trait SessionsRepo: Interface {
         unique_identifier: &str,
     ) -> RepoResult<Session>;
 
+    async fn create_for(
+        &self,
+        account_id: &AccountKey,
+        insert: &InsertSession,
+    ) -> RepoResult<SessionKey>;
+
     async fn update(
         &self,
         id: &SessionKey,
@@ -37,12 +43,6 @@ pub trait SessionsRepo: Interface {
         agent: &str,
         validity: Duration,
     ) -> RepoResult<()>;
-
-    async fn create_for(
-        &self,
-        account_id: &AccountKey,
-        insert: &InsertSession,
-    ) -> RepoResult<SessionKey>;
 
     async fn remove(&self, id: &SessionKey) -> RepoResult<()>;
 }

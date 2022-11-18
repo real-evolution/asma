@@ -5,6 +5,7 @@ use std::sync::Arc;
 use chrono::{Duration, Utc};
 use kernel_entities::entities::auth::*;
 use kernel_repositories::auth::*;
+use kernel_repositories::error::RepoError;
 use kernel_services::auth::models::AccessRule;
 use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::crypto::hash::CryptoHashService;
@@ -62,7 +63,7 @@ impl AuthService for AppAuthService {
 
         if let Ok(session) = self
             .sessions
-            .get_valid_for(&account.id, &device_info.device_identifier)
+            .get_active_for(&account.id, &device_info.device_identifier)
             .await
         {
             self.sessions
@@ -82,7 +83,7 @@ impl AuthService for AppAuthService {
             return Ok(session);
         }
 
-        if self.sessions.get_active_sessions_count(&account.id).await?
+        if self.sessions.get_active_count_for(&account.id).await?
             >= self.config.max_sessions_count
         {
             warn!(
@@ -110,7 +111,7 @@ impl AuthService for AppAuthService {
         let session_id =
             self.sessions.create_for(&account.id, &session).await?;
 
-        Ok(self.sessions.get_by_id(&session_id).await?)
+        Ok(self.sessions.get(&session_id).await?)
     }
 
     async fn refresh_session(
