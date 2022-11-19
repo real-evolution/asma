@@ -36,6 +36,7 @@ pub enum Resource {
     Users = 0,
     Accounts = 1,
     Roles = 2,
+    Permissions = 3,
 }
 
 #[repr(i32)]
@@ -64,7 +65,12 @@ pub struct Actions(i32);
 
 impl Resource {
     pub fn all() -> Vec<Self> {
-        vec![Resource::Users, Resource::Accounts, Resource::Roles]
+        vec![
+            Resource::Users,
+            Resource::Accounts,
+            Resource::Roles,
+            Resource::Permissions,
+        ]
     }
 }
 
