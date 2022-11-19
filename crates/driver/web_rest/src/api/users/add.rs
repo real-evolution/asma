@@ -1,5 +1,5 @@
 use kernel_entities::entities::auth::*;
-use kernel_repositories::auth::{InsertRole, InsertUser, RolesRepo, UsersRepo};
+use kernel_repositories::auth::{InsertUser, UsersRepo};
 
 use super::dtos::AddUserDto;
 use crate::{
