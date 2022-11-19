@@ -14,6 +14,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::auth::signin::signin,
         api::roles::view::get_all,
         api::roles::view::get_by_id,
+        api::roles::add::add,
     ),
     components(
         schemas(
@@ -22,6 +23,8 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
             dtos::auth::TokenPair,
             dtos::roles::RoleDto,
             dtos::roles::PermissionDto,
+            dtos::roles::RoleWithPermissionsDto,
+            dtos::roles::AddRoleDto,
         ),
     ),
     tags((

@@ -1,8 +1,9 @@
-use kernel_entities::entities::auth::{Action, KnownRoles, Resource, RoleKey};
+use axum::{extract::Path, Json};
+use kernel_entities::entities::auth::*;
 use kernel_repositories::auth::RolesRepo;
 
 use crate::{
-    api::dtos::roles::AddRoleDto,
+    api::dtos::roles::{AddPermissionDto, AddRoleDto},
     error::ApiResult,
     extractors::{di::Dep, validated_json::ValidatedJson},
     util::{claims::Claims, response::Created},
@@ -25,5 +26,6 @@ pub async fn add(
 
     let id = roles_repo.create(form.into()).await?;
 
-    Ok(Created("/api/roles", id))
+    Ok(Created("/api/roles", id).into())
 }
+
