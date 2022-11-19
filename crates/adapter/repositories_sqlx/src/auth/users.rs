@@ -80,4 +80,13 @@ impl UsersRepo for SqlxUsersRepo {
 
         Ok(UserKey(id))
     }
+
+    async fn remove(&self, user_id: &UserKey) -> RepoResult<()> {
+        sqlx::query!(r#"DELETE FROM users WHERE id = $1"#, user_id.0)
+            .execute(self.db.get())
+            .await
+            .map_err(map_sqlx_error)?;
+
+        Ok(())
+    }
 }
