@@ -1,5 +1,5 @@
 use axum::body::HttpBody;
-use axum::extract::{FromRequest, Json as ExtractJson, RequestParts};
+use axum::extract::{FromRequest, Json, RequestParts};
 use axum::BoxError;
 use serde::de::DeserializeOwned;
 use validator::Validate;
@@ -22,7 +22,7 @@ where
     async fn from_request(
         req: &mut RequestParts<B>,
     ) -> Result<Self, Self::Rejection> {
-        let ExtractJson(value) = ExtractJson::<T>::from_request(req).await?;
+        let Json(value) = Json::<T>::from_request(req).await?;
 
         value.validate()?;
 
