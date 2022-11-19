@@ -33,6 +33,7 @@ pub trait RolesRepo: Interface {
         role_id: &RoleKey,
         update: UpdateRole,
     ) -> RepoResult<()>;
+
     async fn remove(&self, role_id: &RoleKey) -> RepoResult<()>;
 
     async fn add_to(
