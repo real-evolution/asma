@@ -8,6 +8,26 @@ use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
 
 #[utoipa::path(
     delete,
+    path = "/api/roles/{role_id}",
+    responses((status = 200, description = "Role removed")),
+)]
+pub async fn remove(
+    claims: Claims,
+    Path(id): Path<RoleKey>,
+    roles_repo: Dep<dyn RolesRepo>,
+) -> ApiResult<()> {
+    claims.require_role_with_permission(
+        KnownRoles::Root,
+        (Resource::Roles, Action::Remove),
+    )?;
+
+    roles_repo.remove(&id).await?;
+
+    Ok(())
+}
+
+#[utoipa::path(
+    delete,
     path = "/api/roles/{role_id}/permissions/{permission_id}",
     responses((status = 200, description = "Permission removed")),
 )]

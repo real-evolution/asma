@@ -16,6 +16,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::roles::view::get_by_id,
         api::roles::add::add,
         api::roles::add::add_permission,
+        api::roles::remove::remove,
         api::roles::remove::remove_permission,
     ),
     components(

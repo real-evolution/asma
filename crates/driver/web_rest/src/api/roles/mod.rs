@@ -8,7 +8,7 @@ use axum::{routing::*, Router};
 pub fn routes() -> Router {
     Router::new()
         .route("/", get(view::get_all).post(add::add))
-        .route("/:id", get(view::get_by_id))
+        .route("/:id", get(view::get_by_id).delete(remove::remove))
         .nest(
             ":role_id/permissions",
             Router::new()
