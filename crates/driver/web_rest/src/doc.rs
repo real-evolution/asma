@@ -33,8 +33,8 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
             dtos::setup::RootAccountDetails,
 
             // auth
-            dtos::auth::UserCredentials,
-            dtos::auth::TokenPair,
+            api::auth::dtos::UserCredentials,
+            api::auth::dtos::TokenPair,
 
             // roles
             api::roles::dtos::RoleDto,
