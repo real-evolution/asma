@@ -38,6 +38,13 @@ pub struct AddRoleDto {
     pub friendly_name: Option<String>,
 }
 
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct AddPermissionDto {
+    pub resource: Resource,
+    pub actions: Actions,
+}
+
 impl Into<InsertRole> for AddRoleDto {
     fn into(self) -> InsertRole {
         InsertRole::new(self.code, self.friendly_name)
