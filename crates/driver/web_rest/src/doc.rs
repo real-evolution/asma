@@ -26,6 +26,9 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::roles::update::update,
         api::roles::remove::remove,
         api::roles::remove::remove_permission,
+
+        // users
+        api::users::view::get_by_id,
     ),
     components(
         schemas(
@@ -43,6 +46,9 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
             api::roles::dtos::AddRoleDto,
             api::roles::dtos::AddPermissionDto,
             api::roles::dtos::UpdateRoleDto,
+
+            // users
+            api::users::dtos::UserDto,
         ),
     ),
     tags((
