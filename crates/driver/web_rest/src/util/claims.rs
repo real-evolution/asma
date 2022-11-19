@@ -68,17 +68,6 @@ impl Claims {
         Self::insufficient_permissions()
     }
 
-    pub fn require_roles<'a, R: Into<&'a str>>(
-        &self,
-        roles: Vec<R>,
-    ) -> ApiResult<()> {
-        for role in roles {
-            self.require_role(role)?;
-        }
-
-        Ok(())
-    }
-
     pub fn require_any_role<'a, R: Into<&'a str>>(
         &self,
         roles: Vec<R>,
