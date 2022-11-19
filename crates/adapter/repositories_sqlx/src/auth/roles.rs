@@ -180,6 +180,15 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(RoleKey(id))
     }
 
+    async fn remove(&self, role_id: &RoleKey) -> RepoResult<()> {
+        sqlx::query!(r#"DELETE FROM roles WHERE id = $1"#, role_id.0)
+            .execute(self.db.get())
+            .await
+            .map_err(map_sqlx_error)?;
+
+        Ok(())
+    }
+
     async fn add_permission(
         &self,
         role_id: &RoleKey,
