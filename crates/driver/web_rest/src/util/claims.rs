@@ -95,10 +95,13 @@ impl Claims {
         resource: Resource,
         actions: A,
     ) -> ApiResult<()> {
-        if self.roles.iter().any(|r| {
-            r.1.iter()
-                .any(|a| a.0 == resource && a.1.has(actions.into()))
-        }) {
+        let actions: Actions = actions.into();
+
+        if self
+            .roles
+            .iter()
+            .any(|r| r.1.iter().any(|a| a.0 == resource && a.1.has(actions)))
+        {
             return Ok(());
         }
 
