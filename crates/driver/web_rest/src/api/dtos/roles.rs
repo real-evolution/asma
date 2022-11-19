@@ -9,7 +9,6 @@ use utoipa::ToSchema;
 pub struct RoleDto {
     #[serde(flatten)]
     pub role: Role,
-    pub permissions: Vec<PermissionDto>,
 }
 
 #[derive(Debug, Deserialize, Mapper, Serialize, ToSchema)]
@@ -20,4 +19,11 @@ pub struct PermissionDto {
     pub resource: Resource,
     pub actions: Actions,
     pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+pub struct RoleWithPermissionsDto {
+    #[serde(flatten)]
+    pub role: RoleDto,
+    pub permissions: Vec<PermissionDto>,
 }
