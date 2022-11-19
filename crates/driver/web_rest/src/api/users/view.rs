@@ -1,9 +1,43 @@
 use axum::{extract::Path, Json};
-use kernel_entities::entities::auth::{Action, Resource, UserKey};
+use itertools::Itertools;
+use kernel_entities::entities::auth::{Action, KnownRoles, Resource, UserKey};
 use kernel_repositories::auth::UsersRepo;
 
 use super::dtos::UserDto;
-use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
+use crate::{
+    api::dtos::pagination::Pagination,
+    error::ApiResult,
+    extractors::{di::Dep, validated_query::ValidatedQuery},
+    util::claims::Claims,
+};
+
+#[utoipa::path(
+    get,
+    path = "/api/users",
+    responses(
+        (status = 200, description = "All available users", body = Vec<UserDto>),
+    ),
+    params(("pagination" = Pagination, Query, description = "Pagination parameters"))
+)]
+pub async fn get_all(
+    claims: Claims,
+    ValidatedQuery(pagination): ValidatedQuery<Pagination>,
+    users_repo: Dep<dyn UsersRepo>,
+) -> ApiResult<Json<Vec<UserDto>>> {
+    claims.require_any_role_with_permission(
+        vec![KnownRoles::Root, KnownRoles::Admin],
+        (Resource::Roles, Action::View | Action::Global),
+    )?;
+
+    let users = users_repo
+        .get_all(pagination.into())
+        .await?
+        .into_iter()
+        .map(|r| UserDto::new(r))
+        .collect_vec();
+
+    Ok(Json(users))
+}
 
 #[utoipa::path(
     get,

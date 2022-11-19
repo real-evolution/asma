@@ -29,6 +29,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
 
         // users
         api::users::view::get_by_id,
+        api::users::view::get_all,
     ),
     components(
         schemas(
