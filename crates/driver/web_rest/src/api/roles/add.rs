@@ -1,6 +1,6 @@
 use axum::{extract::Path, Json};
 use kernel_entities::entities::auth::*;
-use kernel_repositories::auth::RolesRepo;
+use kernel_repositories::auth::{RolesRepo, InsertRole};
 
 use crate::{
     api::dtos::roles::{AddPermissionDto, AddRoleDto},
@@ -12,6 +12,7 @@ use crate::{
 #[utoipa::path(
     post,
     path = "/api/roles",
+    request_body = AddRoleDto,
     responses((status = 201, description = "Role created", body = RoleKey)),
 )]
 pub async fn add(
@@ -24,7 +25,9 @@ pub async fn add(
         (Resource::Roles, Action::Add),
     )?;
 
-    let id = roles_repo.create(form.into()).await?;
+    let id = roles_repo
+        .create(InsertRole::new(form.code, form.friendly_name))
+        .await?;
 
     Ok(Created("/api/roles", id).into())
 }
@@ -32,6 +35,7 @@ pub async fn add(
 #[utoipa::path(
     post,
     path = "/api/roles/{role_id}/permissions",
+    request_body = AddPermissionDto,
     responses(
         (
             status = 201,

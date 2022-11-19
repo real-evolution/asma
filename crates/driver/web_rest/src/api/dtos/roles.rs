@@ -1,6 +1,5 @@
 use chrono::{DateTime, Utc};
 use kernel_entities::entities::auth::*;
-use kernel_repositories::auth::InsertRole;
 use mapper::Mapper;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -35,6 +34,7 @@ pub struct RoleWithPermissionsDto {
 pub struct AddRoleDto {
     #[validate(length(min = 4))]
     pub code: String,
+    #[validate(length(min = 1))]
     pub friendly_name: Option<String>,
 }
 
@@ -45,8 +45,9 @@ pub struct AddPermissionDto {
     pub actions: Actions,
 }
 
-impl Into<InsertRole> for AddRoleDto {
-    fn into(self) -> InsertRole {
-        InsertRole::new(self.code, self.friendly_name)
-    }
+#[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateRoleDto {
+    #[validate(length(min = 1))]
+    pub friendly_name: Option<String>,
 }
