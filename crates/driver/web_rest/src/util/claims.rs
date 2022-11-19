@@ -60,15 +60,18 @@ impl Claims {
 }
 
 impl Claims {
-    pub fn require_role(&self, role: &str) -> ApiResult<()> {
-        if self.roles.contains_key(role) {
+    pub fn require_role<'a, R: Into<&'a str>>(&self, role: R) -> ApiResult<()> {
+        if self.roles.contains_key(role.into()) {
             return Ok(());
         }
 
         Self::insufficient_permissions()
     }
 
-    pub fn require_roles(&self, roles: &Vec<&str>) -> ApiResult<()> {
+    pub fn require_roles<'a, R: Into<&'a str>>(
+        &self,
+        roles: Vec<R>,
+    ) -> ApiResult<()> {
         for role in roles {
             self.require_role(role)?;
         }
@@ -76,7 +79,10 @@ impl Claims {
         Ok(())
     }
 
-    pub fn require_any_role(&self, roles: &Vec<&str>) -> ApiResult<()> {
+    pub fn require_any_role<'a, R: Into<&'a str>>(
+        &self,
+        roles: Vec<R>,
+    ) -> ApiResult<()> {
         if roles.into_iter().any(|r| self.require_role(r).is_ok()) {
             return Ok(());
         }
@@ -84,25 +90,24 @@ impl Claims {
         Self::insufficient_permissions()
     }
 
-    pub fn require_permission(
+    pub fn require_permission<A: Into<Actions>>(
         &self,
         resource: Resource,
-        actions: Actions,
+        actions: A,
     ) -> ApiResult<()> {
-        if self
-            .roles
-            .iter()
-            .any(|r| r.1.iter().any(|a| a.0 == resource && a.1.has(actions)))
-        {
+        if self.roles.iter().any(|r| {
+            r.1.iter()
+                .any(|a| a.0 == resource && a.1.has(actions.into()))
+        }) {
             return Ok(());
         }
 
         Self::insufficient_permissions()
     }
 
-    pub fn require_permissions(
+    pub fn require_permissions<A: Into<Actions>>(
         &self,
-        permissions: Vec<(Resource, Actions)>,
+        permissions: Vec<(Resource, A)>,
     ) -> ApiResult<()> {
         for (resource, actions) in permissions {
             self.require_permission(resource, actions)?;
@@ -111,21 +116,29 @@ impl Claims {
         Ok(())
     }
 
-    pub fn require_role_with_permission(
+    pub fn require_role_with_permission<
+        'a,
+        R: Into<&'a str>,
+        A: Into<Actions>,
+    >(
         &self,
-        role: &str,
-        permission: (Resource, Actions),
+        role: R,
+        permission: (Resource, A),
     ) -> ApiResult<()> {
-        self.require_role(role)?;
-        self.require_permission(permission.0, permission.1)?;
+        self.require_role(role.into())?;
+        self.require_permission(permission.0, permission.1.into())?;
 
         Ok(())
     }
 
-    pub fn require_role_with_permissions(
+    pub fn require_role_with_permissions<
+        'a,
+        R: Into<&'a str>,
+        A: Into<Actions>,
+    >(
         &self,
-        role: &str,
-        permissions: Vec<(Resource, Actions)>,
+        role: R,
+        permissions: Vec<(Resource, A)>,
     ) -> ApiResult<()> {
         self.require_role(role)?;
         self.require_permissions(permissions)?;
@@ -133,23 +146,31 @@ impl Claims {
         Ok(())
     }
 
-    pub fn require_any_role_with_permission(
+    pub fn require_any_role_with_permission<
+        'a,
+        R: Into<&'a str>,
+        A: Into<Actions>,
+    >(
         &self,
-        roles: Vec<&str>,
-        permission: (Resource, Actions),
+        roles: Vec<R>,
+        permission: (Resource, A),
     ) -> ApiResult<()> {
-        self.require_any_role(&roles)?;
+        self.require_any_role(roles)?;
         self.require_permission(permission.0, permission.1)?;
 
         Ok(())
     }
 
-    pub fn require_any_role_with_permissions(
+    pub fn require_any_role_with_permissions<
+        'a,
+        R: Into<&'a str>,
+        A: Into<Actions>,
+    >(
         &self,
-        roles: Vec<&str>,
-        permissions: Vec<(Resource, Actions)>,
+        roles: Vec<R>,
+        permissions: Vec<(Resource, A)>,
     ) -> ApiResult<()> {
-        self.require_any_role(&roles)?;
+        self.require_any_role(roles)?;
         self.require_permissions(permissions)?;
 
         Ok(())
