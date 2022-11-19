@@ -128,7 +128,7 @@ impl Claims {
         role: R,
         permission: (Resource, A),
     ) -> ApiResult<()> {
-        self.require_role(role.into())?;
+        self.require_role(role)?;
         self.require_permission(permission.0, permission.1.into())?;
 
         Ok(())

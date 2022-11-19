@@ -1,6 +1,6 @@
 use axum::{extract::Path, Json};
 use kernel_entities::entities::auth::*;
-use kernel_repositories::auth::{RolesRepo, InsertRole};
+use kernel_repositories::auth::{InsertRole, RolesRepo};
 
 use crate::{
     api::dtos::roles::{AddPermissionDto, AddRoleDto},
@@ -43,10 +43,17 @@ pub async fn add(
             body = PermissionKey,
         )
     ),
+    params(
+        (
+            "role_id" = RoleKey,
+            Path,
+            description = "Id of the role to add the permission to"
+        ),
+    )
 )]
 pub async fn add_permission(
     claims: Claims,
-    Path(id): Path<RoleKey>,
+    Path(role_id): Path<RoleKey>,
     Json(form): Json<AddPermissionDto>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<Created<PermissionKey>> {
@@ -59,8 +66,8 @@ pub async fn add_permission(
     )?;
 
     let permission_id = roles_repo
-        .add_permission(&id, form.resource, form.actions)
+        .add_permission(&role_id, form.resource, form.actions)
         .await?;
 
-    Ok(Created(format!("/api/roles/{id}"), permission_id))
+    Ok(Created(format!("/api/roles/{role_id}"), permission_id))
 }

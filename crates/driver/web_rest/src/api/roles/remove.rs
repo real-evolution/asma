@@ -10,6 +10,9 @@ use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
     delete,
     path = "/api/roles/{role_id}",
     responses((status = 200, description = "Role removed")),
+    params(
+        ("role_id" = RoleKey, Path, description = "Id of the role to remove"),
+    )
 )]
 pub async fn remove(
     claims: Claims,
@@ -30,6 +33,18 @@ pub async fn remove(
     delete,
     path = "/api/roles/{role_id}/permissions/{permission_id}",
     responses((status = 200, description = "Permission removed")),
+    params(
+        (
+            "role_id" = RoleKey,
+            Path,
+            description = "Id of the role to remove the permission from"
+        ),
+        (
+            "permission_id" = RoleKey,
+            Path,
+            description = "Id of the permission to be removed"
+        ),
+    )
 )]
 pub async fn remove_permission(
     claims: Claims,

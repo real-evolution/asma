@@ -14,10 +14,17 @@ use crate::{
     path = "/api/roles/{role_id}",
     request_body = UpdateRoleDto,
     responses((status = 200, description = "Role updated")),
+    params(
+        (
+            "role_id" = RoleKey,
+            Path,
+            description = "Id of the role to be updated"
+        ),
+    )
 )]
 pub async fn update(
     claims: Claims,
-    Path(id): Path<RoleKey>,
+    Path(role_id): Path<RoleKey>,
     ValidatedJson(form): ValidatedJson<UpdateRoleDto>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<()> {
@@ -27,7 +34,7 @@ pub async fn update(
     )?;
 
     roles_repo
-        .update(&id, UpdateRole::new(form.friendly_name))
+        .update(&role_id, UpdateRole::new(form.friendly_name))
         .await?;
 
     Ok(())
