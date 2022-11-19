@@ -3,11 +3,12 @@ use kernel_entities::entities::auth::*;
 use kernel_repositories::auth::{InsertRole, RolesRepo};
 
 use crate::{
-    api::dtos::roles::{AddPermissionDto, AddRoleDto},
     error::ApiResult,
     extractors::{di::Dep, validated_json::ValidatedJson},
     util::{claims::Claims, response::Created},
 };
+
+use super::dtos::{AddRoleDto, AddPermissionDto};
 
 #[utoipa::path(
     post,

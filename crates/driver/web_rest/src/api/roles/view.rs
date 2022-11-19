@@ -3,8 +3,8 @@ use itertools::Itertools;
 use kernel_entities::entities::auth::{Action, KnownRoles, Resource, RoleKey};
 use kernel_repositories::auth::RolesRepo;
 
+use super::dtos::{PermissionDto, RoleDto, RoleWithPermissionsDto};
 use crate::api::dtos::pagination::Pagination;
-use crate::api::dtos::roles::{PermissionDto, RoleDto, RoleWithPermissionsDto};
 use crate::error::ApiResult;
 use crate::extractors::di::Dep;
 use crate::extractors::validated_query::ValidatedQuery;

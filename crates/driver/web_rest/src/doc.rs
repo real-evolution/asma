@@ -9,9 +9,16 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
 #[derive(OpenApi)]
 #[openapi(
     paths(
+        // diagnostics
         api::diag::echo,
+
+        // setup
         api::setup::setup,
+
+        // auth
         api::auth::signin::signin,
+
+        // roles
         api::roles::view::get_all,
         api::roles::view::get_by_id,
         api::roles::add::add,
@@ -22,15 +29,20 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
     ),
     components(
         schemas(
+            // setup
             dtos::setup::RootAccountDetails,
+
+            // auth
             dtos::auth::UserCredentials,
             dtos::auth::TokenPair,
-            dtos::roles::RoleDto,
-            dtos::roles::PermissionDto,
-            dtos::roles::RoleWithPermissionsDto,
-            dtos::roles::AddRoleDto,
-            dtos::roles::AddPermissionDto,
-            dtos::roles::UpdateRoleDto,
+
+            // roles
+            api::roles::dtos::RoleDto,
+            api::roles::dtos::PermissionDto,
+            api::roles::dtos::RoleWithPermissionsDto,
+            api::roles::dtos::AddRoleDto,
+            api::roles::dtos::AddPermissionDto,
+            api::roles::dtos::UpdateRoleDto,
         ),
     ),
     tags((

@@ -2,8 +2,8 @@ use axum::extract::Path;
 use kernel_entities::entities::auth::{Action, KnownRoles, Resource, RoleKey};
 use kernel_repositories::auth::{RolesRepo, UpdateRole};
 
+use super::dtos::UpdateRoleDto;
 use crate::{
-    api::dtos::roles::UpdateRoleDto,
     error::ApiResult,
     extractors::{di::Dep, validated_json::ValidatedJson},
     util::claims::Claims,
