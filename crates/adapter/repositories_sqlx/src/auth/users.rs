@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use chrono::{DateTime, Utc};
 use kernel_entities::entities::auth::*;
 use kernel_repositories::{
     auth::{InsertUser, UsersRepo},
@@ -38,6 +39,25 @@ impl UsersRepo for SqlxUsersRepo {
             .await
             .map_err(map_sqlx_error)?,
         )
+    }
+
+    async fn get_all(
+        &self,
+        pagination: (DateTime<Utc>, usize),
+    ) -> RepoResult<Vec<User>> {
+        Ok(sqlx::query_as::<_, User>(
+            r#"
+            SELECT * FROM users
+            WHERE created_at < $1
+            ORDER BY created_at DESC
+            LIMIT $2
+            "#,
+        )
+        .bind(pagination.0)
+        .bind(pagination.1 as i64)
+        .fetch_all(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?)
     }
 
     async fn create(&self, insert: InsertUser) -> RepoResult<UserKey> {
