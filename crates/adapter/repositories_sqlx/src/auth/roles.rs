@@ -230,11 +230,13 @@ impl RolesRepo for SqlxRolesRepo {
 
     async fn remove_permission(
         &self,
+        role_id: &RoleKey,
         permission_id: &PermissionKey,
     ) -> RepoResult<()> {
         sqlx::query!(
-            r#"DELETE FROM permissions WHERE id = $1"#,
+            r#"DELETE FROM permissions WHERE id = $1 AND role_id = $2"#,
             permission_id.0,
+            role_id.0,
         )
         .execute(self.db.get())
         .await
