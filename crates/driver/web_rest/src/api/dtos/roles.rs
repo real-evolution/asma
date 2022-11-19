@@ -4,6 +4,7 @@ use kernel_repositories::auth::InsertRole;
 use mapper::Mapper;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use validator::Validate;
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -29,9 +30,10 @@ pub struct RoleWithPermissionsDto {
     pub permissions: Vec<PermissionDto>,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct AddRoleDto {
+    #[validate(length(min = 4))]
     pub code: String,
     pub friendly_name: Option<String>,
 }
