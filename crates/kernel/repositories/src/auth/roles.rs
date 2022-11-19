@@ -33,7 +33,11 @@ pub trait RolesRepo: Interface {
     ) -> RepoResult<bool>;
 
     async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey>;
-
+    async fn update(
+        &self,
+        role_id: &RoleKey,
+        update: UpdateRole,
+    ) -> RepoResult<()>;
     async fn remove(&self, role_id: &RoleKey) -> RepoResult<()>;
 
     async fn add_to(
@@ -65,5 +69,10 @@ pub trait RolesRepo: Interface {
 #[derive(Constructor)]
 pub struct InsertRole {
     pub code: String,
+    pub friendly_name: Option<String>,
+}
+
+#[derive(Constructor)]
+pub struct UpdateRole {
     pub friendly_name: Option<String>,
 }

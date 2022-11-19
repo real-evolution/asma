@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use itertools::Itertools;
 use kernel_entities::entities::auth::*;
 use kernel_repositories::{
-    auth::{InsertRole, RolesRepo},
+    auth::{InsertRole, RolesRepo, UpdateRole},
     error::{RepoError, RepoResult},
 };
 use shaku::Component;
@@ -178,6 +178,23 @@ impl RolesRepo for SqlxRolesRepo {
         .map_err(map_sqlx_error)?;
 
         Ok(RoleKey(id))
+    }
+
+    async fn update(
+        &self,
+        role_id: &RoleKey,
+        update: UpdateRole,
+    ) -> RepoResult<()> {
+        sqlx::query!(
+            r#"UPDATE roles SET friendly_name = $1 WHERE id = $2"#,
+            update.friendly_name,
+            role_id.0
+        )
+        .execute(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(())
     }
 
     async fn remove(&self, role_id: &RoleKey) -> RepoResult<()> {
