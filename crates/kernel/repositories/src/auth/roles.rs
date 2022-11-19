@@ -26,13 +26,8 @@ pub trait RolesRepo: Interface {
         account_id: &AccountKey,
     ) -> RepoResult<HashMap<String, Vec<(Resource, Actions)>>>;
 
-    async fn is_in_role(
-        &self,
-        account_id: &AccountKey,
-        role_id: &RoleKey,
-    ) -> RepoResult<bool>;
-
     async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey>;
+
     async fn update(
         &self,
         role_id: &RoleKey,
