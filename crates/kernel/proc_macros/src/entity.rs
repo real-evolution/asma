@@ -114,7 +114,8 @@ pub fn expand_entity(
                  serde::Deserialize,
                  sqlx::Type,
                  derive_more::Into,
-                 derive_more::From)]
+                 derive_more::From,
+                 derive_more::Display)]
         #[sqlx(transparent)]
         #[repr(transparent)]
         #id_struct
