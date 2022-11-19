@@ -1,7 +1,6 @@
 use axum::{headers::UserAgent, Extension, Json, TypedHeader};
 use axum_client_ip::ClientIp;
 use kernel_services::auth::{models::DeviceInfo, AuthService};
-use utoipa::ToSchema;
 
 use crate::api::dtos::auth::{TokenPair, UserCredentials};
 use crate::config::ApiConfig;
