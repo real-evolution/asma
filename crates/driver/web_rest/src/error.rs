@@ -1,6 +1,8 @@
 use axum::{
-    extract::rejection::JsonRejection, http::StatusCode,
-    response::IntoResponse, Json,
+    extract::rejection::{JsonRejection, QueryRejection},
+    http::StatusCode,
+    response::IntoResponse,
+    Json,
 };
 use kernel_repositories::error::RepoError;
 use kernel_services::error::AppError;
@@ -16,6 +18,9 @@ pub enum ApiError {
 
     #[error(transparent)]
     Json(#[from] JsonRejection),
+
+    #[error(transparent)]
+    Query(#[from] QueryRejection),
 
     #[error(transparent)]
     Validation(#[from] validator::ValidationErrors),
@@ -50,8 +55,8 @@ impl IntoResponse for ApiError {
                 status_tuple(StatusCode::INTERNAL_SERVER_ERROR)
             }
 
-            ApiError::Json(_) => {
-                (StatusCode::BAD_REQUEST, "invalid request schema".into())
+            ApiError::Json(_) | ApiError::Query(_) => {
+                (StatusCode::BAD_REQUEST, "invalid request data".into())
             }
 
             ApiError::Validation(_) => {
