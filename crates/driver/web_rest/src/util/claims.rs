@@ -84,14 +84,6 @@ impl Claims {
         Self::insufficient_permissions()
     }
 
-    pub fn require_all_roles(&self, roles: &Vec<&str>) -> ApiResult<()> {
-        if roles.into_iter().all(|r| self.require_role(r).is_ok()) {
-            return Ok(());
-        }
-
-        Self::insufficient_permissions()
-    }
-
     pub fn require_permission(
         &self,
         resource: Resource,
