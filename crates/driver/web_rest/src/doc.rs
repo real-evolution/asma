@@ -25,6 +25,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
             dtos::roles::PermissionDto,
             dtos::roles::RoleWithPermissionsDto,
             dtos::roles::AddRoleDto,
+            dtos::roles::AddPermissionDto,
         ),
     ),
     tags((

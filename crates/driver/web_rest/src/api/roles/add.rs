@@ -29,3 +29,34 @@ pub async fn add(
     Ok(Created("/api/roles", id).into())
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/roles/{role_id}/permissions",
+    responses(
+        (
+            status = 201,
+            description = "Permission created",
+            body = PermissionKey,
+        )
+    ),
+)]
+pub async fn add_permission(
+    claims: Claims,
+    Path(id): Path<RoleKey>,
+    Json(form): Json<AddPermissionDto>,
+    roles_repo: Dep<dyn RolesRepo>,
+) -> ApiResult<Created<PermissionKey>> {
+    claims.require_role_with_permissions(
+        KnownRoles::Root,
+        vec![
+            (Resource::Roles, Action::Modify),
+            (Resource::Permissions, Action::Add),
+        ],
+    )?;
+
+    let permission_id = roles_repo
+        .add_permission(&id, form.resource, form.actions)
+        .await?;
+
+    Ok(Created(format!("/api/roles/{id}"), permission_id))
+}
