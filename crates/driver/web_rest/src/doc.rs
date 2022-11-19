@@ -31,6 +31,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::users::view::get_by_id,
         api::users::view::get_all,
         api::users::add::add,
+        api::users::remove::remove,
     ),
     components(
         schemas(
