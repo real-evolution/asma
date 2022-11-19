@@ -1,5 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
+use chrono::{DateTime, Utc};
 use itertools::Itertools;
 use kernel_entities::entities::auth::*;
 use kernel_repositories::{
@@ -31,6 +32,25 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(role)
     }
 
+    async fn get_all(
+        &self,
+        pagination: (DateTime<Utc>, usize),
+    ) -> RepoResult<Vec<Role>> {
+        Ok(sqlx::query_as::<_, Role>(
+            r#"
+            SELECT * FROM roles
+            WHERE created_at < $1
+            ORDER BY created_at DESC
+            LIMIT $2
+            "#,
+        )
+        .bind(pagination.0)
+        .bind(pagination.1 as i64)
+        .fetch_all(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?)
+    }
+
     async fn get_permissions_of(
         &self,
         role_id: &RoleKey,
@@ -44,13 +64,6 @@ impl RolesRepo for SqlxRolesRepo {
         .map_err(map_sqlx_error)?;
 
         Ok(permissions)
-    }
-
-    async fn get_all(&self) -> RepoResult<Vec<Role>> {
-        Ok(sqlx::query_as::<_, Role>("SELECT * FROM roles")
-            .fetch_all(self.db.get())
-            .await
-            .map_err(map_sqlx_error)?)
     }
 
     async fn get_roles_with_permissions_for(
