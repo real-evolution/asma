@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::{DateTime, Utc};
 use derive_more::Constructor;
 use kernel_entities::entities::auth::*;
 use shaku::Interface;
@@ -10,7 +11,10 @@ use crate::error::RepoResult;
 pub trait RolesRepo: Interface {
     async fn get(&self, id: &RoleKey) -> RepoResult<Role>;
 
-    async fn get_all(&self) -> RepoResult<Vec<Role>>;
+    async fn get_all(
+        &self,
+        pagination: (DateTime<Utc>, usize),
+    ) -> RepoResult<Vec<Role>>;
 
     async fn get_permissions_of(
         &self,
