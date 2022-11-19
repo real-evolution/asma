@@ -16,3 +16,5 @@ CREATE TABLE sessions
                           REFERENCES accounts(id)
                           ON DELETE CASCADE
 );
+
+CREATE INDEX sessions_created_at_idx ON sessions USING btree (created_at);

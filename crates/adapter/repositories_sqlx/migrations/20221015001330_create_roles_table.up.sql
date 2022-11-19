@@ -9,3 +9,5 @@ CREATE TABLE roles
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
+
+CREATE INDEX roles_created_at_idx ON roles USING btree (created_at);

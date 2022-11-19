@@ -11,3 +11,5 @@ CREATE TABLE permissions
                        REFERENCES roles(id)
                        ON DELETE CASCADE
 );
+
+CREATE INDEX permissions_created_at_idx ON permissions USING btree (created_at);

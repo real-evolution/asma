@@ -16,3 +16,5 @@ CREATE TABLE channels
                        REFERENCES users(id)
                        ON DELETE CASCADE
 );
+
+CREATE INDEX channels_created_at_idx ON channels USING btree (created_at);

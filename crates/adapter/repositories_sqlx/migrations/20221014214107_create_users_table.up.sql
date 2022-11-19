@@ -9,3 +9,5 @@ CREATE TABLE users
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
+
+CREATE INDEX users_created_at_idx ON users USING btree (created_at);
