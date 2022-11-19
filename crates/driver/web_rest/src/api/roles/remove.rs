@@ -10,13 +10,14 @@ use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
     delete,
     path = "/api/roles/{role_id}",
     responses((status = 200, description = "Role removed")),
+    responses((status = 404, description = "Role not found")),
     params(
         ("role_id" = RoleKey, Path, description = "Id of the role to remove"),
     )
 )]
 pub async fn remove(
     claims: Claims,
-    Path(id): Path<RoleKey>,
+    Path(role_id): Path<RoleKey>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<()> {
     claims.require_role_with_permission(
@@ -24,7 +25,7 @@ pub async fn remove(
         (Resource::Roles, Action::Remove),
     )?;
 
-    roles_repo.remove(&id).await?;
+    roles_repo.remove(&role_id).await?;
 
     Ok(())
 }
@@ -33,6 +34,8 @@ pub async fn remove(
     delete,
     path = "/api/roles/{role_id}/permissions/{permission_id}",
     responses((status = 200, description = "Permission removed")),
+    responses((status = 404, description = "Role not found")),
+    responses((status = 404, description = "Permission not found")),
     params(
         (
             "role_id" = RoleKey,

@@ -2,13 +2,12 @@ use axum::{extract::Path, Json};
 use kernel_entities::entities::auth::*;
 use kernel_repositories::auth::{InsertRole, RolesRepo};
 
+use super::dtos::{AddPermissionDto, AddRoleDto};
 use crate::{
     error::ApiResult,
     extractors::{di::Dep, validated_json::ValidatedJson},
     util::{claims::Claims, response::Created},
 };
-
-use super::dtos::{AddRoleDto, AddPermissionDto};
 
 #[utoipa::path(
     post,
@@ -38,11 +37,8 @@ pub async fn add(
     path = "/api/roles/{role_id}/permissions",
     request_body = AddPermissionDto,
     responses(
-        (
-            status = 201,
-            description = "Permission created",
-            body = PermissionKey,
-        )
+        (status = 201, description = "Permission created", body = PermissionKey),
+        (status = 404, description = "Role not found"),
     ),
     params(
         (
