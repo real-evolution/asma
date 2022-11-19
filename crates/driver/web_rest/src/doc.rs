@@ -1,7 +1,7 @@
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::api::{self, dtos};
+use crate::api;
 
 const SWAGGER_URL: &str = "/swagger/*tail";
 const OPENAPI_URL: &str = "/api-doc/openapi.json";
@@ -30,7 +30,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
     components(
         schemas(
             // setup
-            dtos::setup::RootAccountDetails,
+            api::setup::dtos::RootAccountDetails,
 
             // auth
             api::auth::dtos::UserCredentials,

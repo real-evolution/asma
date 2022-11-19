@@ -3,7 +3,6 @@ use axum_client_ip::ClientIp;
 use chrono::Utc;
 use kernel_services::setup::SetupService;
 
-use super::dtos::setup::RootAccountDetails;
 use crate::{error::ApiResult, extractors::di::Dep};
 
 #[utoipa::path(
@@ -18,7 +17,7 @@ use crate::{error::ApiResult, extractors::di::Dep};
 pub async fn setup(
     setup_svc: Dep<dyn SetupService>,
     ClientIp(ip): ClientIp,
-    Json(form): Json<RootAccountDetails>,
+    Json(form): Json<dtos::RootAccountDetails>,
 ) -> ApiResult<()> {
     info!("a setup request was made from: `{ip}`");
 
@@ -30,4 +29,19 @@ pub async fn setup(
 
 pub fn routes() -> Router {
     Router::new().route("/", post(setup))
+}
+
+pub mod dtos {
+    use serde::Deserialize;
+    use utoipa::ToSchema;
+    use validator::Validate;
+
+    #[derive(Clone, Debug, Deserialize, ToSchema, Validate)]
+    #[serde(rename_all = "camelCase")]
+    pub struct RootAccountDetails {
+        #[validate(length(min = 4))]
+        pub holder_name: Option<String>,
+        #[validate(length(min = 8))]
+        pub password: String,
+    }
 }
