@@ -14,7 +14,7 @@ use super::dtos::{AddRoleDto, AddPermissionDto};
     post,
     path = "/api/roles",
     request_body = AddRoleDto,
-    responses((status = 201, description = "Role created", body = RoleKey)),
+    responses((status = 201, description = "Role created")),
 )]
 pub async fn add(
     claims: Claims,

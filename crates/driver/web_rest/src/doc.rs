@@ -30,6 +30,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         // users
         api::users::view::get_by_id,
         api::users::view::get_all,
+        api::users::add::add,
     ),
     components(
         schemas(
@@ -50,6 +51,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
 
             // users
             api::users::dtos::UserDto,
+            api::users::dtos::AddUserDto,
         ),
     ),
     tags((
