@@ -1,10 +1,14 @@
+use derive_more::{From, Into};
+use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
 
 use super::*;
 use crate::traits::*;
 
-#[repr(i32)]
-#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, sqlx::Type)]
+#[EnumRepr(type = "i32")]
+#[derive(
+    Clone, Copy, Debug, serde::Deserialize, serde::Serialize, sqlx::Type,
+)]
 pub enum AccountState {
     Inactive = 0,
     Active = 1,
@@ -12,7 +16,7 @@ pub enum AccountState {
 }
 
 #[entity]
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
 pub struct Account {
     pub account_name: String,
     pub holder_name: Option<String>,
