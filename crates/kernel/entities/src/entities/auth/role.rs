@@ -5,16 +5,6 @@ use kernel_proc_macros::*;
 use super::AccountKey;
 use crate::traits::*;
 
-const ROOT_ROLE_CODE: &str = "root";
-const ADMIN_ROLE_CODE: &str = "admin";
-const REGULAR_ROLE_CODE: &str = "regular";
-
-#[derive(Clone, Debug)]
-pub enum KnownRoles {
-    Root,
-    Admin,
-    Regular,
-}
 
 #[entity]
 #[derive(Debug, Clone, sqlx::FromRow)]
@@ -32,12 +22,19 @@ pub struct AccountRole {
     pub is_active: bool,
 }
 
+#[derive(Clone, Debug)]
+pub enum KnownRoles {
+    Root,
+    Admin,
+    Regular,
+}
+
 impl Into<&str> for KnownRoles {
     fn into(self) -> &'static str {
         match self {
-            KnownRoles::Root => ROOT_ROLE_CODE,
-            KnownRoles::Admin => ADMIN_ROLE_CODE,
-            KnownRoles::Regular => REGULAR_ROLE_CODE,
+            KnownRoles::Root => "root",
+            KnownRoles::Admin => "admin",
+            KnownRoles::Regular => "regular",
         }
     }
 }
