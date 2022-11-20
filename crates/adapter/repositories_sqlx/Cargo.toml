@@ -6,6 +6,10 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# crate dependencies
+ormx = { git = "https://github.com/clouds56/ormx", features = ["postgres"] }
+seq-macro = "0"
+
 # project dependencies
 common_validation = { path = "../../common/validation" }
 kernel_entities = { path = "../../kernel/entities" }
@@ -15,6 +19,7 @@ kernel_repositories = { path = "../../kernel/repositories" }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 chrono = { workspace = true }
+derive_more = { workspace = true }
 itertools = { workspace = true }
 lazy_static = { workspace = true }
 regex = { workspace = true }
