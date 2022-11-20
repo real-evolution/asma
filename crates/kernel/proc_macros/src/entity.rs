@@ -5,6 +5,16 @@ use quote::quote;
 use syn::DeriveInput;
 use syn::{parse::*, *};
 
+macro_rules! field {
+    ($name:ident, $typ:ty) => {
+        Field::parse_named.parse2(quote!(pub $name: $typ)).unwrap().into()
+    };
+
+    ($name:ident, #$typ:tt) => {
+        Field::parse_named.parse2(quote!(pub $name: #$typ)).unwrap().into()
+    };
+}
+
 #[derive(Debug, Clone, Copy, FromMeta)]
 #[darling(default)]
 pub enum EntityType {
@@ -19,22 +29,6 @@ impl Default for EntityType {
 }
 
 impl EntityType {
-    fn into_fields(&self, id_type: &Ident) -> Vec<Field> {
-        let mut fields = vec![
-            quote!(pub id: #id_type),
-            quote!(pub created_at: chrono::DateTime<chrono::Utc>),
-        ];
-
-        if let EntityType::Mutable = self {
-            fields.push(quote!(pub updated_at: chrono::DateTime<chrono::Utc>));
-        }
-
-        fields
-            .into_iter()
-            .map(|f| Field::parse_named.parse2(f).unwrap().into())
-            .collect()
-    }
-
     fn into_impls(
         &self,
         id_type: &Ident,
@@ -83,23 +77,22 @@ pub fn expand_entity(
 ) -> TokenStream {
     let args = EntityOptions::from_list(&args).unwrap();
 
+    let id_type =
+        Ident::new(&format!("{}Key", &input.ident), Span::call_site());
     let id_inner_type = args
         .id_type
         .unwrap_or(Type::parse.parse2(quote! { uuid::Uuid }).unwrap());
-    let id_type =
-        Ident::new(&format!("{}Key", &input.ident), Span::call_site());
-    let id_struct = quote! {
-        pub struct #id_type(pub #id_inner_type);
-    };
 
-    let fields = args.entity_type.into_fields(&id_type);
-    let impls = args.entity_type.into_impls(&id_type, &input.ident);
+    let fields = &mut extract_named_fields(extract_struct(&mut input)).named;
 
-    for field in fields.into_iter().rev() {
-        extract_named_fields(extract_struct(&mut input))
-            .named
-            .insert(0, field);
+    fields.insert(0, field!(id, #id_type));
+    fields.push(field!(created_at, chrono::DateTime<chrono::Utc>));
+
+    if let EntityType::Mutable = args.entity_type {
+        fields.push(field!(updated_at, chrono::DateTime<chrono::Utc>));
     }
+
+    let impls = args.entity_type.into_impls(&id_type, &input.ident);
 
     quote! {
         #[derive(serde::Deserialize, serde::Serialize)]
@@ -117,8 +110,7 @@ pub fn expand_entity(
                  derive_more::From,
                  derive_more::Display)]
         #[sqlx(transparent)]
-        #[repr(transparent)]
-        #id_struct
+        pub struct #id_type(pub #id_inner_type);
     }
     .into()
 }
