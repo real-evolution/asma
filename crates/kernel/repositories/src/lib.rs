@@ -1,4 +1,5 @@
 mod database_connection;
+pub mod traits;
 
 pub use database_connection::*;
 
