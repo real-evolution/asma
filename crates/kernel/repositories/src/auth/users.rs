@@ -3,11 +3,10 @@ use derive_more::Constructor;
 use kernel_entities::entities::auth::*;
 use shaku::Interface;
 
-use crate::error::RepoResult;
+use crate::{error::RepoResult, traits::repo::Repo};
 
 #[async_trait::async_trait]
-pub trait UsersRepo: Interface {
-    async fn get(&self, id: &UserKey) -> RepoResult<User>;
+pub trait UsersRepo: Repo<User> + Interface {
     async fn get_by_username(&self, username: &str) -> RepoResult<User>;
     async fn get_all(
         &self,

@@ -5,6 +5,7 @@ use kernel_entities::entities::auth::*;
 use kernel_repositories::{
     auth::{InsertUser, UsersRepo},
     error::RepoResult,
+    traits::repo::Repo,
 };
 use shaku::Component;
 
@@ -19,16 +20,6 @@ pub struct SqlxUsersRepo {
 
 #[async_trait::async_trait]
 impl UsersRepo for SqlxUsersRepo {
-    async fn get(&self, id: &UserKey) -> RepoResult<User> {
-        Ok(
-            sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
-                .bind(id)
-                .fetch_one(self.db.get())
-                .await
-                .map_err(map_sqlx_error)?,
-        )
-    }
-
     async fn get_by_username(&self, username: &str) -> RepoResult<User> {
         Ok(
             sqlx::query_as::<_, User>(
@@ -88,5 +79,18 @@ impl UsersRepo for SqlxUsersRepo {
             .map_err(map_sqlx_error)?;
 
         Ok(())
+    }
+}
+
+#[async_trait::async_trait]
+impl Repo<User> for SqlxUsersRepo {
+    async fn get(&self, id: &UserKey) -> RepoResult<User> {
+        Ok(
+            sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
+                .bind(id)
+                .fetch_one(self.db.get())
+                .await
+                .map_err(map_sqlx_error)?,
+        )
     }
 }
