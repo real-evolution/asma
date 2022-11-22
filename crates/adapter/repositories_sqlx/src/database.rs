@@ -3,7 +3,7 @@ use kernel_repositories::{error::RepoResult, Transaction, TransactionManager};
 use shaku::{Component, Interface};
 use sqlx::pool::PoolConnection;
 
-use crate::util::map_sqlx_error;
+use crate::util::error::map_sqlx_error;
 
 pub type DbType = sqlx::postgres::Postgres;
 pub type PoolType = sqlx::Pool<DbType>;

@@ -17,7 +17,7 @@ use crate::{
         permission::PermissionModel,
         role::{AccountRoleModel, RoleModel, UpdateSessionModel},
     },
-    util::map_sqlx_error,
+    util::error::map_sqlx_error,
 };
 
 #[derive(Component)]

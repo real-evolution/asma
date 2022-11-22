@@ -10,7 +10,7 @@ use shaku::Component;
 
 use crate::{
     database::SqlxDatabaseConnection, models::link::channel::ChannelModel,
-    util::map_sqlx_error,
+    util::error::map_sqlx_error,
 };
 
 #[derive(Component)]

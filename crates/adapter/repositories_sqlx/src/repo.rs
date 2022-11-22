@@ -3,7 +3,7 @@ use kernel_entities::traits::{Entity, Key, KeyType};
 use kernel_repositories::{error::RepoResult, traits::repo::Repo};
 use ormx::Table;
 
-use crate::{database::PoolType, util::map_sqlx_error};
+use crate::{database::PoolType, util::error::map_sqlx_error};
 
 pub trait SqlxRepo<M>: Send + Sync {
     fn pool(&self) -> &PoolType;

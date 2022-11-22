@@ -9,7 +9,7 @@ use ormx::{Delete, Patch, Table};
 use shaku::Component;
 
 use crate::models::auth::session::{SessionModel, UpdateSessionModel};
-use crate::{database::SqlxDatabaseConnection, util::map_sqlx_error};
+use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
 
 #[derive(Component)]
 #[shaku(interface = SessionsRepo)]

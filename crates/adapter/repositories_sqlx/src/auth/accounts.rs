@@ -9,10 +9,9 @@ use ormx::Table;
 use shaku::Component;
 use uuid::Uuid;
 
-use crate::{
-    database::SqlxDatabaseConnection, models::auth::account::AccountModel,
-    util::map_sqlx_error,
-};
+use crate::database::SqlxDatabaseConnection;
+use crate::models::auth::account::AccountModel;
+use crate::util::error::map_sqlx_error;
 
 #[derive(Component)]
 #[shaku(interface = AccountsRepo)]
@@ -73,3 +72,5 @@ impl AccountsRepo for SqlxAccountsRepo {
         .into())
     }
 }
+
+mod models {}

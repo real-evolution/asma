@@ -12,7 +12,7 @@ use shaku::Component;
 
 use crate::{
     database::SqlxDatabaseConnection, models::auth::user::UserModel,
-    util::map_sqlx_error,
+    util::error::map_sqlx_error,
 };
 
 #[derive(Component)]
