@@ -11,7 +11,7 @@ use crate::error::RepoResult;
 #[async_trait::async_trait]
 pub trait ChannelsRepo: Interface {
     async fn get_by_id(&self, id: &Key<Channel>) -> RepoResult<Channel>;
-    async fn create(&self, insert: InsertChannel) -> RepoResult<Key<Channel>>;
+    async fn create_for(&self, user_id: &Key<User>, insert: InsertChannel) -> RepoResult<Key<Channel>>;
 }
 
 #[derive(Constructor)]
@@ -21,5 +21,4 @@ pub struct InsertChannel {
     pub api_key: String,
     pub valid_until: Option<DateTime<Utc>>,
     pub is_active: bool,
-    pub user_id: Key<User>,
 }

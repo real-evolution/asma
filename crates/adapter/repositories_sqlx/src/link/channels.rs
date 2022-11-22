@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use kernel_entities::{entities::link::*, traits::Key};
+use kernel_entities::{
+    entities::{auth::User, link::*},
+    traits::Key,
+};
 use kernel_repositories::{
     error::RepoResult,
     link::{ChannelsRepo, InsertChannel},
@@ -26,7 +29,11 @@ impl ChannelsRepo for SqlxChannelsRepo {
             .into())
     }
 
-    async fn create(&self, insert: InsertChannel) -> RepoResult<Key<Channel>> {
+    async fn create_for(
+        &self,
+        user_id: &Key<User>,
+        insert: InsertChannel,
+    ) -> RepoResult<Key<Channel>> {
         Ok(models::ChannelModel::insert(
             self.db.acquire().await?.as_mut(),
             models::InsertChannelModel {
@@ -36,7 +43,7 @@ impl ChannelsRepo for SqlxChannelsRepo {
                 api_key: insert.api_key,
                 is_active: insert.is_active,
                 valid_until: insert.valid_until,
-                user_id: insert.user_id.into(),
+                user_id: user_id.value(),
             },
         )
         .await

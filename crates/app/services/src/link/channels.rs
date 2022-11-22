@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use chrono::Utc;
 use kernel_entities::entities::auth::User;
-use kernel_entities::entities::link::{ChannelPlatform, Channel};
+use kernel_entities::entities::link::{Channel, ChannelPlatform};
 use kernel_entities::traits::Key;
 use kernel_repositories::link::{ChannelsRepo, InsertChannel};
 use kernel_services::error::AppResult;
@@ -16,7 +16,7 @@ pub struct AppChannelsService {
     channels: Arc<dyn ChannelsRepo>,
 }
 
-#[async_trait::async_trait()]
+#[async_trait::async_trait]
 impl ChannelsService for AppChannelsService {
     async fn create_telegram_channel_for(
         &self,
@@ -25,14 +25,16 @@ impl ChannelsService for AppChannelsService {
     ) -> AppResult<Key<Channel>> {
         Ok(self
             .channels
-            .create(InsertChannel::new(
-                info.name,
-                ChannelPlatform::Telegram,
-                info.api_key,
-                Some(Utc::now() + info.valid_for),
-                true,
-                user_id.clone(),
-            ))
+            .create_for(
+                user_id,
+                InsertChannel::new(
+                    info.name,
+                    ChannelPlatform::Telegram,
+                    info.api_key,
+                    Some(Utc::now() + info.valid_for),
+                    true,
+                ),
+            )
             .await?)
     }
 
@@ -43,14 +45,16 @@ impl ChannelsService for AppChannelsService {
     ) -> AppResult<Key<Channel>> {
         Ok(self
             .channels
-            .create(InsertChannel::new(
-                info.name,
-                ChannelPlatform::WhatsApp,
-                info.api_key,
-                Some(Utc::now() + info.valid_for),
-                true,
-                user_id.clone(),
-            ))
+            .create_for(
+                user_id,
+                InsertChannel::new(
+                    info.name,
+                    ChannelPlatform::WhatsApp,
+                    info.api_key,
+                    Some(Utc::now() + info.valid_for),
+                    true,
+                ),
+            )
             .await?)
     }
 
