@@ -1,13 +1,13 @@
 use std::ops::{BitAnd, BitOr, BitXor, Not};
 
-use derive_more::Display;
+use derive_more::{Display, From, Into};
 use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use super::UserKey;
+use super::Role;
 use crate::traits::*;
 
 lazy_static! {
@@ -50,11 +50,11 @@ pub enum Action {
 }
 
 #[entity(entity_type = "immutable")]
-#[derive(Debug, Clone, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
 pub struct Permission {
     pub resource: Resource,
     pub actions: Actions,
-    pub role_id: UserKey,
+    pub role_id: Key<Role>,
 }
 
 #[repr(transparent)]

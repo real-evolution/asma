@@ -22,5 +22,5 @@ pub struct Account {
     pub holder_name: Option<String>,
     pub password_hash: String,
     pub state: AccountState,
-    pub user_id: UserKey,
+    pub user_id: Key<User>,
 }

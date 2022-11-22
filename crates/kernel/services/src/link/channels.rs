@@ -1,4 +1,6 @@
-use kernel_entities::entities::{auth::UserKey, link::ChannelKey};
+use kernel_entities::entities::auth::*;
+use kernel_entities::entities::link::Channel;
+use kernel_entities::traits::Key;
 use shaku::Interface;
 
 use crate::error::AppResult;
@@ -9,19 +11,19 @@ use crate::link::models::ChannelInfo;
 pub trait ChannelsService: Interface {
     async fn create_telegram_channel_for(
         &self,
-        user_id: &UserKey,
+        user_id: &Key<User>,
         info: ChannelInfo,
-    ) -> AppResult<ChannelKey>;
+    ) -> AppResult<Key<Channel>>;
 
     async fn create_whatsapp_channel_for(
         &self,
-        user_id: &UserKey,
+        user_id: &Key<User>,
         info: ChannelInfo,
-    ) -> AppResult<ChannelKey>;
+    ) -> AppResult<Key<Channel>>;
 
     async fn toggle_channel(
         &self,
-        channel_id: &ChannelKey,
+        channel_id: &Key<Channel>,
         is_active: bool,
     ) -> AppResult<()>;
 

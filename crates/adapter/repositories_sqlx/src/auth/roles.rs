@@ -2,15 +2,23 @@ use std::{collections::HashMap, sync::Arc};
 
 use chrono::{DateTime, Utc};
 use itertools::Itertools;
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{
     auth::{InsertRole, RolesRepo, UpdateRole},
     error::{RepoError, RepoResult},
 };
+use ormx::{Delete, Patch, Table};
 use shaku::Component;
 use tracing::warn;
 
-use crate::{database::SqlxDatabaseConnection, util::map_sqlx_error};
+use crate::{
+    database::SqlxDatabaseConnection,
+    models::auth::{
+        permission::PermissionModel,
+        role::{AccountRoleModel, RoleModel, UpdateSessionModel},
+    },
+    util::map_sqlx_error,
+};
 
 #[derive(Component)]
 #[shaku(interface = RolesRepo)]
@@ -21,54 +29,51 @@ pub struct SqlxRolesRepo {
 
 #[async_trait::async_trait]
 impl RolesRepo for SqlxRolesRepo {
-    async fn get(&self, id: &RoleKey) -> RepoResult<Role> {
-        let role =
-            sqlx::query_as::<_, Role>("SELECT * FROM roles WHERE id = $1")
-                .bind(id)
-                .fetch_one(self.db.get())
-                .await
-                .map_err(map_sqlx_error)?;
-
-        Ok(role)
+    async fn get(&self, id: &Key<Role>) -> RepoResult<Role> {
+        Ok(RoleModel::get(self.db.get(), id.value())
+            .await
+            .map_err(map_sqlx_error)?
+            .into())
     }
 
     async fn get_all(
         &self,
         pagination: (DateTime<Utc>, usize),
     ) -> RepoResult<Vec<Role>> {
-        Ok(sqlx::query_as::<_, Role>(
+        Ok(sqlx::query_as!(
+            RoleModel,
             r#"
             SELECT * FROM roles
             WHERE created_at < $1
             ORDER BY created_at DESC
             LIMIT $2
             "#,
+            pagination.0,
+            pagination.1 as i64
         )
-        .bind(pagination.0)
-        .bind(pagination.1 as i64)
         .fetch_all(self.db.get())
         .await
-        .map_err(map_sqlx_error)?)
+        .map_err(map_sqlx_error)?
+        .into_iter()
+        .map(|u| u.into())
+        .collect())
     }
 
     async fn get_permissions_of(
         &self,
-        role_id: &RoleKey,
+        role_id: &Key<Role>,
     ) -> RepoResult<Vec<Permission>> {
-        let permissions = sqlx::query_as::<_, Permission>(
-            "SELECT * FROM permissions WHERE role_id = $1",
-        )
-        .bind(role_id)
-        .fetch_all(self.db.get())
-        .await
-        .map_err(map_sqlx_error)?;
-
-        Ok(permissions)
+        Ok(PermissionModel::by_role(self.db.get(), role_id.value_ref())
+            .await
+            .map_err(map_sqlx_error)?
+            .into_iter()
+            .map(|p| p.into())
+            .collect())
     }
 
     async fn get_roles_with_permissions_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
     ) -> RepoResult<HashMap<String, Vec<(Resource, Actions)>>> {
         let items = sqlx::query!(
             r#"
@@ -79,7 +84,7 @@ impl RolesRepo for SqlxRolesRepo {
             JOIN   permissions
               ON   permissions.role_id = account_roles.role_id
             "#,
-            account_id.0
+            account_id.value_ref()
         )
         .fetch_all(self.db.get())
         .await
@@ -100,67 +105,56 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(items)
     }
 
-    async fn create(&self, insert: InsertRole) -> RepoResult<RoleKey> {
-        let id = sqlx::query_scalar!(
-            r#"
-            INSERT    INTO roles (code, friendly_name)
-            VALUES    ($1, $2)
-            RETURNING id
-            "#,
-            insert.code,
-            insert.friendly_name
+    async fn create(&self, insert: InsertRole) -> RepoResult<Key<Role>> {
+        Ok(RoleModel::insert(
+            self.db.acquire().await?.as_mut(),
+            crate::models::auth::role::InsertRoleModel {
+                code: insert.code,
+                friendly_name: insert.friendly_name,
+                is_active: true,
+            },
         )
-        .fetch_one(self.db.get())
         .await
-        .map_err(map_sqlx_error)?;
-
-        Ok(RoleKey(id))
+        .map_err(map_sqlx_error)?
+        .id
+        .into())
     }
 
     async fn update(
         &self,
-        role_id: &RoleKey,
+        role_id: &Key<Role>,
         update: UpdateRole,
     ) -> RepoResult<()> {
-        sqlx::query!(
-            r#"UPDATE roles SET friendly_name = $1 WHERE id = $2"#,
-            update.friendly_name,
-            role_id.0
-        )
-        .execute(self.db.get())
+        Ok(UpdateSessionModel {
+            friendly_name: update.friendly_name,
+            updated_at: Utc::now(),
+        }
+        .patch_row(self.db.get(), role_id.value())
         .await
-        .map_err(map_sqlx_error)?;
-
-        Ok(())
+        .map_err(map_sqlx_error)?)
     }
 
-    async fn remove(&self, role_id: &RoleKey) -> RepoResult<()> {
-        sqlx::query!(r#"DELETE FROM roles WHERE id = $1"#, role_id.0)
-            .execute(self.db.get())
+    async fn remove(&self, role_id: &Key<Role>) -> RepoResult<()> {
+        Ok(RoleModel::delete_row(self.db.get(), role_id.value())
             .await
-            .map_err(map_sqlx_error)?;
-
-        Ok(())
+            .map_err(map_sqlx_error)?)
     }
 
     async fn add_permission(
         &self,
-        role_id: &RoleKey,
+        role_id: &Key<Role>,
         resource: Resource,
         actions: Actions,
-    ) -> RepoResult<PermissionKey> {
-        let resource = resource as i64;
-        let actions = actions.inner();
-
+    ) -> RepoResult<Key<Permission>> {
         let exists = sqlx::query_scalar!(
             r#"
             SELECT EXISTS (
                 SELECT 1 FROM permissions
                 WHERE resource = $1 AND actions = $2 AND role_id = $3
             )"#,
-            resource,
-            actions,
-            role_id.0
+            resource as i64,
+            actions.inner(),
+            role_id.value_ref()
         )
         .fetch_one(self.db.get())
         .await
@@ -168,36 +162,33 @@ impl RolesRepo for SqlxRolesRepo {
 
         if exists.unwrap_or(false) {
             return Err(RepoError::DuplicateValue(format!(
-                "permission {resource}:{actions:b} was already added to role #{role_id:?}"
+                "permission {resource}:{actions:?} was already added to role #{role_id:?}"
             )));
         }
 
-        let id = sqlx::query_scalar!(
-            r#"
-            INSERT    INTO permissions (resource, actions, role_id)
-            VALUES    ($1, $2, $3)
-            RETURNING id
-            "#,
-            resource,
-            actions,
-            role_id.0,
+        Ok(PermissionModel::insert(
+            self.db.acquire().await?.as_mut(),
+            crate::models::auth::permission::InsertPermissionModel {
+                role_id: role_id.value(),
+                actions,
+                resource,
+            },
         )
-        .fetch_one(self.db.get())
         .await
-        .map_err(map_sqlx_error)?;
-
-        Ok(PermissionKey(id))
+        .map_err(map_sqlx_error)?
+        .id
+        .into())
     }
 
     async fn remove_permission(
         &self,
-        role_id: &RoleKey,
-        permission_id: &PermissionKey,
+        role_id: &Key<Role>,
+        permission_id: &Key<Permission>,
     ) -> RepoResult<()> {
         sqlx::query!(
             r#"DELETE FROM permissions WHERE id = $1 AND role_id = $2"#,
-            permission_id.0,
-            role_id.0,
+            permission_id.value_ref(),
+            role_id.value_ref(),
         )
         .execute(self.db.get())
         .await
@@ -208,18 +199,17 @@ impl RolesRepo for SqlxRolesRepo {
 
     async fn add_to(
         &self,
-        account_id: &AccountKey,
-        role_id: &RoleKey,
+        account_id: &Key<Account>,
+        role_id: &Key<Role>,
     ) -> RepoResult<()> {
-        sqlx::query!(
-            r#"
-            INSERT INTO account_roles (account_id, role_id, is_active)
-            VALUES ($1, $2, true)
-            "#,
-            account_id.0,
-            role_id.0,
+        AccountRoleModel::insert(
+            self.db.acquire().await?.as_mut(),
+            crate::models::auth::role::InsertAccountRoleModel {
+                account_id: account_id.value(),
+                role_id: role_id.value(),
+                is_active: true,
+            },
         )
-        .execute(self.db.get())
         .await
         .map_err(map_sqlx_error)?;
 
@@ -228,16 +218,16 @@ impl RolesRepo for SqlxRolesRepo {
 
     async fn remove_from(
         &self,
-        account_id: &AccountKey,
-        role_id: &RoleKey,
+        account_id: &Key<Account>,
+        role_id: &Key<Role>,
     ) -> RepoResult<()> {
         sqlx::query!(
             r#"
             DELETE FROM account_roles
             WHERE account_id = $1 AND role_id = $2
             "#,
-            account_id.0,
-            role_id.0,
+            account_id.value_ref(),
+            role_id.value_ref(),
         )
         .execute(self.db.get())
         .await

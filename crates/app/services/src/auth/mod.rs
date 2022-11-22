@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use chrono::{Duration, Utc};
 use kernel_entities::entities::auth::*;
+use kernel_entities::traits::Key;
 use kernel_repositories::auth::*;
 use kernel_repositories::error::RepoError;
 use kernel_services::auth::models::AccessRule;
@@ -149,7 +150,7 @@ impl AuthService for AppAuthService {
 
     async fn get_access_rules_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
     ) -> AppResult<Vec<AccessRule>> {
         Ok(self
             .roles

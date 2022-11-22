@@ -1,5 +1,5 @@
 use derive_more::Constructor;
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use shaku::Interface;
 
 use crate::error::RepoResult;
@@ -8,15 +8,15 @@ use crate::error::RepoResult;
 pub trait AccountsRepo: Interface {
     async fn get_of_user_by_name(
         &self,
-        user_id: &UserKey,
+        user_id: &Key<User>,
         account_name: &str,
     ) -> RepoResult<Account>;
 
     async fn create_for(
         &self,
-        user_id: &UserKey,
+        user_id: &Key<User>,
         insert: InsertAccount,
-    ) -> RepoResult<AccountKey>;
+    ) -> RepoResult<Key<Account>>;
 }
 
 #[derive(Constructor, Debug)]

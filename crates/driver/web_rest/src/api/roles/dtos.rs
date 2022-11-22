@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use mapper::Mapper;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -16,7 +16,7 @@ pub struct RoleDto {
 #[serde(rename_all = "camelCase")]
 #[from(Permission)]
 pub struct PermissionDto {
-    pub id: PermissionKey,
+    pub id: Key<Permission>,
     pub resource: Resource,
     pub actions: Actions,
     pub created_at: DateTime<Utc>,

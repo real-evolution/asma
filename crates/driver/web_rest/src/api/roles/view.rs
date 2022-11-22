@@ -1,6 +1,7 @@
 use axum::{extract::Path, Json};
 use itertools::Itertools;
-use kernel_entities::entities::auth::{Action, KnownRoles, Resource, RoleKey};
+use kernel_entities::entities::auth::{Action, KnownRoles, Resource, Role};
+use kernel_entities::traits::Key;
 use kernel_repositories::auth::RolesRepo;
 
 use super::dtos::{PermissionDto, RoleDto, RoleWithPermissionsDto};
@@ -46,12 +47,12 @@ pub async fn get_all(
         (status = 404, description = "No roles with `id` were found"),
     ),
     params(
-        ("role_id" = RoleKey, Path, description = "Id of the role to get"),
+        ("role_id" = Key<Role>, Path, description = "Id of the role to get"),
     )
 )]
 pub async fn get_by_id(
     claims: Claims,
-    Path(role_id): Path<RoleKey>,
+    Path(role_id): Path<Key<Role>>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<Json<RoleWithPermissionsDto>> {
     claims.require_any_role_with_permission(

@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use derive_more::Constructor;
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use shaku::Interface;
 
 use crate::{error::RepoResult, traits::repo::Repo};
@@ -13,8 +13,8 @@ pub trait UsersRepo: Repo<User> + Interface {
         pagination: (DateTime<Utc>, usize),
     ) -> RepoResult<Vec<User>>;
 
-    async fn create(&self, insert: InsertUser) -> RepoResult<UserKey>;
-    async fn remove(&self, user_id: &UserKey) -> RepoResult<()>;
+    async fn create(&self, insert: InsertUser) -> RepoResult<Key<User>>;
+    async fn remove(&self, user_id: &Key<User>) -> RepoResult<()>;
 }
 
 #[derive(Constructor, Debug)]

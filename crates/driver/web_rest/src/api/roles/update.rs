@@ -1,5 +1,6 @@
 use axum::extract::Path;
-use kernel_entities::entities::auth::{Action, KnownRoles, Resource, RoleKey};
+use kernel_entities::entities::auth::{Action, KnownRoles, Resource, Role};
+use kernel_entities::traits::Key;
 use kernel_repositories::auth::{RolesRepo, UpdateRole};
 
 use super::dtos::UpdateRoleDto;
@@ -16,7 +17,7 @@ use crate::{
     responses((status = 200, description = "Role updated")),
     params(
         (
-            "role_id" = RoleKey,
+            "role_id" = Key<Role>,
             Path,
             description = "Id of the role to be updated"
         ),
@@ -24,7 +25,7 @@ use crate::{
 )]
 pub async fn update(
     claims: Claims,
-    Path(role_id): Path<RoleKey>,
+    Path(role_id): Path<Key<Role>>,
     ValidatedJson(form): ValidatedJson<UpdateRoleDto>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<()> {

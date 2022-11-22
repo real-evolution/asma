@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use kernel_entities::traits::Entity;
+use kernel_entities::traits::{Entity, Key, KeyType};
 use kernel_repositories::{error::RepoResult, traits::repo::Repo};
 use ormx::Table;
 
@@ -13,12 +13,10 @@ pub trait SqlxRepo<M>: Send + Sync {
 impl<E, M> Repo<E> for dyn SqlxRepo<M>
 where
     E: Entity + Send + Sync,
-    E::Key: Into<E::KeyInner> + Send + Sync,
-    E::KeyInner: Send + Sync,
-    M: Table<Id = E::KeyInner> + Into<E>,
+    M: Table<Id = KeyType> + Into<E>,
 {
-    async fn get(&self, key: &E::Key) -> RepoResult<E> {
-        let item = M::get(self.pool(), (*key).into())
+    async fn get(&self, key: &Key<E>) -> RepoResult<E> {
+        let item = M::get(self.pool(), key.value())
             .await
             .map_err(map_sqlx_error)?;
 

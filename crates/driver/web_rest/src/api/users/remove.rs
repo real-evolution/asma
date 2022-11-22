@@ -1,5 +1,6 @@
 use axum::extract::Path;
-use kernel_entities::entities::auth::{Action, KnownRoles, Resource, UserKey};
+use kernel_entities::entities::auth::{Action, KnownRoles, Resource, User};
+use kernel_entities::traits::Key;
 use kernel_repositories::auth::UsersRepo;
 
 use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
@@ -10,12 +11,12 @@ use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
     responses((status = 200, description = "User removed")),
     responses((status = 404, description = "User not found")),
     params(
-        ("user_id" = UserKey, Path, description = "Id of the user to remove"),
+        ("user_id" = Key<User>, Path, description = "Id of the user to remove"),
     )
 )]
 pub async fn remove(
     claims: Claims,
-    Path(user_id): Path<UserKey>,
+    Path(user_id): Path<Key<User>>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<()> {
     claims.require_any_role_with_permission(

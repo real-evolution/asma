@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
 use chrono::Utc;
-use kernel_entities::entities::link::ChannelPlatform;
-use kernel_entities::entities::{auth::UserKey, link::ChannelKey};
+use kernel_entities::entities::auth::User;
+use kernel_entities::entities::link::{ChannelPlatform, Channel};
+use kernel_entities::traits::Key;
 use kernel_repositories::link::{ChannelsRepo, InsertChannel};
 use kernel_services::error::AppResult;
 use kernel_services::link::{channels::ChannelsService, models::ChannelInfo};
@@ -19,9 +20,9 @@ pub struct AppChannelsService {
 impl ChannelsService for AppChannelsService {
     async fn create_telegram_channel_for(
         &self,
-        user_id: &UserKey,
+        user_id: &Key<User>,
         info: ChannelInfo,
-    ) -> AppResult<ChannelKey> {
+    ) -> AppResult<Key<Channel>> {
         Ok(self
             .channels
             .create(InsertChannel::new(
@@ -37,9 +38,9 @@ impl ChannelsService for AppChannelsService {
 
     async fn create_whatsapp_channel_for(
         &self,
-        user_id: &UserKey,
+        user_id: &Key<User>,
         info: ChannelInfo,
-    ) -> AppResult<ChannelKey> {
+    ) -> AppResult<Key<Channel>> {
         Ok(self
             .channels
             .create(InsertChannel::new(
@@ -55,7 +56,7 @@ impl ChannelsService for AppChannelsService {
 
     async fn toggle_channel(
         &self,
-        channel_id: &ChannelKey,
+        channel_id: &Key<Channel>,
         is_active: bool,
     ) -> AppResult<()> {
         todo!()

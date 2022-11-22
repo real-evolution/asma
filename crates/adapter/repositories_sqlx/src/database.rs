@@ -1,15 +1,17 @@
 use async_trait::async_trait;
-use kernel_repositories::{TransactionManager, error::RepoResult, Transaction};
+use kernel_repositories::{error::RepoResult, Transaction, TransactionManager};
 use shaku::{Component, Interface};
+use sqlx::pool::PoolConnection;
 
 use crate::util::map_sqlx_error;
-
 
 pub type DbType = sqlx::postgres::Postgres;
 pub type PoolType = sqlx::Pool<DbType>;
 
+#[async_trait]
 pub trait SqlxDatabaseConnection: Interface {
     fn get(&self) -> &PoolType;
+    async fn acquire(&self) -> RepoResult<PoolConnection<DbType>>;
 }
 
 #[derive(Component)]
@@ -24,9 +26,14 @@ pub struct SqlxTransactionManager {
     inner: PoolType,
 }
 
+#[async_trait]
 impl SqlxDatabaseConnection for SqlxPool {
     fn get(&self) -> &PoolType {
         &self.inner
+    }
+
+    async fn acquire(&self) -> RepoResult<PoolConnection<DbType>> {
+        Ok(self.inner.acquire().await.map_err(map_sqlx_error)?)
     }
 }
 

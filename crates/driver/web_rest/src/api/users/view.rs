@@ -1,6 +1,9 @@
 use axum::{extract::Path, Json};
 use itertools::Itertools;
-use kernel_entities::entities::auth::{Action, KnownRoles, Resource, UserKey};
+use kernel_entities::{
+    entities::auth::{Action, KnownRoles, Resource, User},
+    traits::Key,
+};
 use kernel_repositories::auth::UsersRepo;
 
 use super::dtos::UserDto;
@@ -52,7 +55,7 @@ pub async fn get_all(
 )]
 pub async fn get_by_id(
     claims: Claims,
-    Path(user_id): Path<UserKey>,
+    Path(user_id): Path<Key<User>>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<Json<UserDto>> {
     claims

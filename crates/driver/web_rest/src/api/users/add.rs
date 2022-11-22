@@ -1,4 +1,4 @@
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::auth::{InsertUser, UsersRepo};
 
 use super::dtos::AddUserDto;
@@ -18,7 +18,7 @@ pub async fn add(
     claims: Claims,
     ValidatedJson(form): ValidatedJson<AddUserDto>,
     users_repo: Dep<dyn UsersRepo>,
-) -> ApiResult<Created<UserKey>> {
+) -> ApiResult<Created<Key<User>>> {
     claims.require_any_role_with_permission(
         vec![KnownRoles::Root, KnownRoles::Admin],
         (Resource::Users, Action::Add),

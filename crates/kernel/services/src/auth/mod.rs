@@ -1,7 +1,7 @@
 pub mod error;
 pub mod models;
 
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use shaku::Interface;
 
 use self::models::AccessRule;
@@ -31,6 +31,6 @@ pub trait AuthService: Interface {
 
     async fn get_access_rules_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
     ) -> AppResult<Vec<AccessRule>>;
 }

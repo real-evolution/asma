@@ -35,12 +35,12 @@ impl Claims {
         };
 
         Claims {
-            sub: session.id.0,
+            sub: session.id.value(),
             iat,
             exp,
             iss: config.token.issuer.clone(),
             aud: config.token.audience.clone(),
-            account: session.account_id.0,
+            account: session.account_id.value(),
             roles: access_rules
                 .into_iter()
                 .map(|a| (a.role_code, a.permissions))

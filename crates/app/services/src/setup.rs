@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{auth::*, error::RepoError, TransactionManager};
 use kernel_services::{
     crypto::hash::CryptoHashService,
@@ -34,7 +34,7 @@ pub struct AppSetupService {
 }
 
 impl AppSetupService {
-    async fn create_system_user(&self) -> AppResult<UserKey> {
+    async fn create_system_user(&self) -> AppResult<Key<User>> {
         let system_user_id = self
             .users
             .create(InsertUser::new(
@@ -49,10 +49,10 @@ impl AppSetupService {
 
     async fn create_root_account(
         &self,
-        user_id: &UserKey,
+        user_id: &Key<User>,
         root_holder_name: Option<String>,
         root_password: String,
-    ) -> AppResult<AccountKey> {
+    ) -> AppResult<Key<Account>> {
         let root_account_id = self
             .accounts
             .create_for(
@@ -69,7 +69,7 @@ impl AppSetupService {
         Ok(root_account_id)
     }
 
-    async fn setup_roles(&self, root_account_id: &AccountKey) -> AppResult<()> {
+    async fn setup_roles(&self, root_account_id: &Key<Account>) -> AppResult<()> {
         // create root role
         let role_id = self
             .roles

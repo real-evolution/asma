@@ -1,5 +1,5 @@
 use axum::{extract::Path, Json};
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::auth::{InsertRole, RolesRepo};
 
 use super::dtos::{AddPermissionDto, AddRoleDto};
@@ -19,7 +19,7 @@ pub async fn add(
     claims: Claims,
     ValidatedJson(form): ValidatedJson<AddRoleDto>,
     roles_repo: Dep<dyn RolesRepo>,
-) -> ApiResult<Created<RoleKey>> {
+) -> ApiResult<Created<Key<Role>>> {
     claims.require_role_with_permission(
         KnownRoles::Root,
         (Resource::Roles, Action::Add),
@@ -37,12 +37,12 @@ pub async fn add(
     path = "/api/roles/{role_id}/permissions",
     request_body = AddPermissionDto,
     responses(
-        (status = 201, description = "Permission created", body = PermissionKey),
+        (status = 201, description = "Permission created", body = Key<Permission>),
         (status = 404, description = "Role not found"),
     ),
     params(
         (
-            "role_id" = RoleKey,
+            "role_id" = Key<Role>,
             Path,
             description = "Id of the role to add the permission to"
         ),
@@ -50,10 +50,10 @@ pub async fn add(
 )]
 pub async fn add_permission(
     claims: Claims,
-    Path(role_id): Path<RoleKey>,
+    Path(role_id): Path<Key<Role>>,
     Json(form): Json<AddPermissionDto>,
     roles_repo: Dep<dyn RolesRepo>,
-) -> ApiResult<Created<PermissionKey>> {
+) -> ApiResult<Created<Key<Permission>>> {
     claims.require_role_with_permissions(
         KnownRoles::Root,
         vec![

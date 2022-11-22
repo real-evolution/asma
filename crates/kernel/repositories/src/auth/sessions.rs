@@ -1,27 +1,27 @@
 use chrono::{DateTime, Duration, Utc};
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use shaku::Interface;
 
 use crate::error::RepoResult;
 
 #[async_trait::async_trait]
 pub trait SessionsRepo: Interface {
-    async fn get(&self, id: &SessionKey) -> RepoResult<Session>;
+    async fn get(&self, id: &Key<Session>) -> RepoResult<Session>;
 
     async fn get_all_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
     ) -> RepoResult<Vec<Session>>;
 
     async fn get_active_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
         device_identifier: &str,
     ) -> RepoResult<Session>;
 
     async fn get_active_count_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
     ) -> RepoResult<usize>;
 
     async fn get_active_by_token(
@@ -32,19 +32,19 @@ pub trait SessionsRepo: Interface {
 
     async fn create_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
         insert: &InsertSession,
-    ) -> RepoResult<SessionKey>;
+    ) -> RepoResult<Key<Session>>;
 
     async fn update(
         &self,
-        id: &SessionKey,
+        id: &Key<Session>,
         address: &str,
         agent: &str,
         validity: Duration,
     ) -> RepoResult<()>;
 
-    async fn remove(&self, id: &SessionKey) -> RepoResult<()>;
+    async fn remove(&self, id: &Key<Session>) -> RepoResult<()>;
 }
 
 #[derive(Debug)]

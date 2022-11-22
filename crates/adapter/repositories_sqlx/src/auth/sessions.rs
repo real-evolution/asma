@@ -2,10 +2,13 @@ use std::sync::Arc;
 
 use chrono::{Duration, Utc};
 use kernel_entities::entities::auth::*;
+use kernel_entities::traits::Key;
 use kernel_repositories::auth::InsertSession;
 use kernel_repositories::{auth::SessionsRepo, error::RepoResult};
+use ormx::{Delete, Patch, Table};
 use shaku::Component;
 
+use crate::models::auth::session::{SessionModel, UpdateSessionModel};
 use crate::{database::SqlxDatabaseConnection, util::map_sqlx_error};
 
 #[derive(Component)]
@@ -17,61 +20,61 @@ pub struct SqlxSessionsRepo {
 
 #[async_trait::async_trait]
 impl SessionsRepo for SqlxSessionsRepo {
-    async fn get(&self, id: &SessionKey) -> RepoResult<Session> {
-        Ok(
-            sqlx::query_as::<_, Session>(
-                "SELECT * FROM sessions WHERE id = $1",
-            )
-            .bind(id)
-            .fetch_one(self.db.get())
+    async fn get(&self, id: &Key<Session>) -> RepoResult<Session> {
+        Ok(SessionModel::get(self.db.get(), id.value())
             .await
-            .map_err(map_sqlx_error)?,
-        )
+            .map_err(map_sqlx_error)?
+            .into())
     }
 
     async fn get_all_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
     ) -> RepoResult<Vec<Session>> {
-        Ok(sqlx::query_as::<_, Session>(
+        Ok(sqlx::query_as!(
+            SessionModel,
             "SELECT * FROM sessions WHERE account_id = $1",
+            account_id.value_ref()
         )
-        .bind(account_id)
         .fetch_all(self.db.get())
         .await
-        .map_err(map_sqlx_error)?)
+        .map_err(map_sqlx_error)?
+        .into_iter()
+        .map(|s| s.into())
+        .collect())
     }
 
     async fn get_active_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
         device_identifier: &str,
     ) -> RepoResult<Session> {
-        Ok(sqlx::query_as::<_, Session>(
+        Ok(sqlx::query_as!(
+            SessionModel,
             r#"
             SELECT * FROM sessions
             WHERE account_id = $1 AND
                   device_identifier = $2 AND
                   expires_at > $3"#,
+            account_id.value_ref(),
+            device_identifier,
+            Utc::now()
         )
-        .bind(account_id)
-        .bind(device_identifier)
-        .bind(Utc::now())
         .fetch_one(self.db.get())
         .await
-        .map_err(map_sqlx_error)?)
+        .map_err(map_sqlx_error)?
+        .into())
     }
 
     async fn get_active_count_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
     ) -> RepoResult<usize> {
         let count = sqlx::query_scalar!(
             r#"
             SELECT COUNT(id) FROM SESSIONS
-            WHERE account_id = $1 AND expires_at > $2
-                     "#,
-            account_id.0,
+            WHERE account_id = $1 AND expires_at > $2"#,
+            account_id.value_ref(),
             Utc::now(),
         )
         .fetch_one(self.db.get())
@@ -86,43 +89,37 @@ impl SessionsRepo for SqlxSessionsRepo {
         token: &str,
         unique_identifier: &str,
     ) -> RepoResult<Session> {
-        Ok(sqlx::query_as::<_, Session>(
+        Ok(sqlx::query_as!(
+            SessionModel,
             r#"
             SELECT * FROM sessions
             WHERE refresh_token = $1 AND
                   device_identifier = $2 AND
-                  valid_until > $3"#,
+                  expires_at > $3"#,
+            token,
+            unique_identifier,
+            Utc::now()
         )
-        .bind(token)
-        .bind(unique_identifier)
-        .bind(Utc::now())
         .fetch_one(self.db.get())
         .await
-        .map_err(map_sqlx_error)?)
+        .map_err(map_sqlx_error)?
+        .into())
     }
 
     async fn update(
         &self,
-        id: &SessionKey,
+        id: &Key<Session>,
         new_address: &str,
         new_agent: &str,
         validity: Duration,
     ) -> RepoResult<()> {
-        sqlx::query!(
-            r#"
-            UPDATE sessions SET
-                last_address = $1,
-                agent = $2,
-                expires_at = $3,
-                updated_at = $4
-            WHERE id = $5"#,
-            new_address,
-            new_agent,
-            Utc::now() + validity,
-            Utc::now(),
-            id.0,
-        )
-        .execute(self.db.get())
+        UpdateSessionModel {
+            agent: new_agent.into(),
+            last_address: new_address.into(),
+            expires_at: Some(Utc::now() + validity),
+            updated_at: Utc::now(),
+        }
+        .patch_row(self.db.get(), id.value())
         .await
         .map_err(map_sqlx_error)?;
 
@@ -131,41 +128,29 @@ impl SessionsRepo for SqlxSessionsRepo {
 
     async fn create_for(
         &self,
-        account_id: &AccountKey,
+        account_id: &Key<Account>,
         insert: &InsertSession,
-    ) -> RepoResult<SessionKey> {
-        let id = sqlx::query_scalar!(
-            r#"
-            INSERT INTO sessions (
-                device_identifier,
-                agent,
-                last_address,
-                refresh_token,
-                account_id,
-                expires_at)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING id
-            "#,
-            insert.device_identifier,
-            insert.agent,
-            insert.address,
-            insert.refresh_token,
-            account_id.0,
-            insert.expires_at,
+    ) -> RepoResult<Key<Session>> {
+        Ok(SessionModel::insert(
+            self.db.acquire().await?.as_mut(),
+            crate::models::auth::session::InsertSessionModel {
+                device_identifier: insert.device_identifier.clone(),
+                agent: insert.agent.clone(),
+                last_address: insert.address.clone(),
+                refresh_token: insert.refresh_token.clone(),
+                account_id: account_id.value(),
+                expires_at: Some(insert.expires_at),
+            },
         )
-        .fetch_one(self.db.get())
         .await
-        .map_err(map_sqlx_error)?;
-
-        Ok(SessionKey(id))
+        .map_err(map_sqlx_error)?
+        .id
+        .into())
     }
 
-    async fn remove(&self, id: &SessionKey) -> RepoResult<()> {
-        sqlx::query!("DELETE FROM sessions WHERE id = $1", id.0)
-            .execute(self.db.get())
+    async fn remove(&self, id: &Key<Session>) -> RepoResult<()> {
+        Ok(SessionModel::delete_row(self.db.get(), id.value())
             .await
-            .map_err(map_sqlx_error)?;
-
-        Ok(())
+            .map_err(map_sqlx_error)?)
     }
 }

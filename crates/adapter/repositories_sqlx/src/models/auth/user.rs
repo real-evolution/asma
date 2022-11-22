@@ -5,12 +5,12 @@ use uuid::Uuid;
 
 use crate::generate_mapping;
 
-#[derive(Clone, Debug, From, Into, ormx::Table)]
+#[derive(Clone, Debug, From, Into, ormx::Table, sqlx::FromRow)]
 #[ormx(table = "users", id = id, insertable, deletable)]
-pub struct User {
+pub struct UserModel {
     pub id: Uuid,
     pub display_name: String,
-    #[ormx(get_one)]
+    #[ormx(get_one(&str))]
     pub username: String,
     pub is_active: bool,
     #[ormx(default)]
@@ -19,4 +19,4 @@ pub struct User {
     pub updated_at: DateTime<Utc>,
 }
 
-generate_mapping!(entities::auth::User, User, 6);
+generate_mapping!(entities::auth::User, UserModel, 6);
