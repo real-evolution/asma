@@ -4,10 +4,10 @@ pub trait Entity {
     type Key: Copy;
     type KeyInner: Copy;
 
-    fn get_id(&self) -> Self::Key;
-    fn get_created(&self) -> DateTime<Utc>;
+    fn id(&self) -> Self::Key;
+    fn created_at(&self) -> DateTime<Utc>;
 }
 
 pub trait MutableEntity: Entity {
-    fn get_updated(&self) -> DateTime<Utc>;
+    fn updated_at(&self) -> DateTime<Utc>;
 }

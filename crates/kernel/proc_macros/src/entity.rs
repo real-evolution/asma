@@ -40,11 +40,11 @@ impl EntityType {
                 type Key = #id_type;
                 type KeyInner = #id_inner_type;
 
-                fn get_id(&self) -> Self::Key {
+                fn id(&self) -> Self::Key {
                     self.id
                 }
 
-                fn get_created(&self) -> chrono::DateTime<chrono::Utc> {
+                fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
                     self.created_at
                 }
             }
@@ -53,7 +53,7 @@ impl EntityType {
         if let EntityType::Mutable = self {
             impls.push(quote! {
                 impl MutableEntity for #type_ident {
-                    fn get_updated(&self) -> chrono::DateTime<chrono::Utc> {
+                    fn updated_at(&self) -> chrono::DateTime<chrono::Utc> {
                         self.updated_at
                     }
                 }
