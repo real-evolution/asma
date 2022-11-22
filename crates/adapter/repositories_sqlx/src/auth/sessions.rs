@@ -8,7 +8,6 @@ use kernel_repositories::{auth::SessionsRepo, error::RepoResult};
 use ormx::{Delete, Patch, Table};
 use shaku::Component;
 
-use crate::models::auth::session::{SessionModel, UpdateSessionModel};
 use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
 
 #[derive(Component)]
@@ -21,7 +20,7 @@ pub struct SqlxSessionsRepo {
 #[async_trait::async_trait]
 impl SessionsRepo for SqlxSessionsRepo {
     async fn get(&self, id: &Key<Session>) -> RepoResult<Session> {
-        Ok(SessionModel::get(self.db.get(), id.value())
+        Ok(models::SessionModel::get(self.db.get(), id.value())
             .await
             .map_err(map_sqlx_error)?
             .into())
@@ -32,7 +31,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         account_id: &Key<Account>,
     ) -> RepoResult<Vec<Session>> {
         Ok(sqlx::query_as!(
-            SessionModel,
+            models::SessionModel,
             "SELECT * FROM sessions WHERE account_id = $1",
             account_id.value_ref()
         )
@@ -50,7 +49,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         device_identifier: &str,
     ) -> RepoResult<Session> {
         Ok(sqlx::query_as!(
-            SessionModel,
+            models::SessionModel,
             r#"
             SELECT * FROM sessions
             WHERE account_id = $1 AND
@@ -90,7 +89,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         unique_identifier: &str,
     ) -> RepoResult<Session> {
         Ok(sqlx::query_as!(
-            SessionModel,
+            models::SessionModel,
             r#"
             SELECT * FROM sessions
             WHERE refresh_token = $1 AND
@@ -113,7 +112,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         new_agent: &str,
         validity: Duration,
     ) -> RepoResult<()> {
-        UpdateSessionModel {
+        models::UpdateSessionModel {
             agent: new_agent.into(),
             last_address: new_address.into(),
             expires_at: Some(Utc::now() + validity),
@@ -131,9 +130,9 @@ impl SessionsRepo for SqlxSessionsRepo {
         account_id: &Key<Account>,
         insert: &InsertSession,
     ) -> RepoResult<Key<Session>> {
-        Ok(SessionModel::insert(
+        Ok(models::SessionModel::insert(
             self.db.acquire().await?.as_mut(),
-            crate::models::auth::session::InsertSessionModel {
+            models::InsertSessionModel {
                 device_identifier: insert.device_identifier.clone(),
                 agent: insert.agent.clone(),
                 last_address: insert.address.clone(),
@@ -149,8 +148,46 @@ impl SessionsRepo for SqlxSessionsRepo {
     }
 
     async fn remove(&self, id: &Key<Session>) -> RepoResult<()> {
-        Ok(SessionModel::delete_row(self.db.get(), id.value())
+        Ok(models::SessionModel::delete_row(self.db.get(), id.value())
             .await
             .map_err(map_sqlx_error)?)
     }
+}
+
+mod models {
+    use chrono::{DateTime, Utc};
+    use derive_more::{From, Into};
+    use kernel_entities::entities::auth::Session;
+    use uuid::Uuid;
+
+    use crate::generate_mapping;
+
+    #[derive(Clone, Debug, From, Into, ormx::Table)]
+    #[ormx(table = "sessions", id = id, insertable, deletable)]
+    pub struct SessionModel {
+        #[ormx(default)]
+        pub id: Uuid,
+        #[ormx(get_optional)]
+        pub device_identifier: String,
+        pub agent: String,
+        pub refresh_token: String,
+        pub last_address: String,
+        pub account_id: Uuid,
+        pub expires_at: Option<DateTime<Utc>>,
+        #[ormx(default)]
+        pub created_at: DateTime<Utc>,
+        #[ormx(default, set)]
+        pub updated_at: DateTime<Utc>,
+    }
+
+    #[derive(ormx::Patch)]
+    #[ormx(table_name = "sessions", table = SessionModel, id = "id")]
+    pub struct UpdateSessionModel {
+        pub last_address: String,
+        pub agent: String,
+        pub expires_at: Option<DateTime<Utc>>,
+        pub updated_at: DateTime<Utc>,
+    }
+
+    generate_mapping!(Session, SessionModel, 9);
 }
