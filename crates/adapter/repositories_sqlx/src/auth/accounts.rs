@@ -10,7 +10,6 @@ use shaku::Component;
 use uuid::Uuid;
 
 use crate::database::SqlxDatabaseConnection;
-use crate::models::auth::account::AccountModel;
 use crate::util::error::map_sqlx_error;
 
 #[derive(Component)]
@@ -28,7 +27,7 @@ impl AccountsRepo for SqlxAccountsRepo {
         account_name: &str,
     ) -> RepoResult<Account> {
         Ok(sqlx::query_as!(
-            AccountModel,
+            models::AccountModel,
             r#"
             SELECT id,
                    account_name,
@@ -55,9 +54,9 @@ impl AccountsRepo for SqlxAccountsRepo {
         user_id: &Key<User>,
         insert: InsertAccount,
     ) -> RepoResult<Key<Account>> {
-        Ok(AccountModel::insert(
+        Ok(models::AccountModel::insert(
             self.db.acquire().await?.as_mut(),
-            crate::models::auth::account::InsertAccountModel {
+            models::InsertAccountModel {
                 id: Uuid::new_v4(),
                 account_name: insert.account_name,
                 holder_name: insert.holder_name,
@@ -73,4 +72,30 @@ impl AccountsRepo for SqlxAccountsRepo {
     }
 }
 
-mod models {}
+mod models {
+    use chrono::{DateTime, Utc};
+    use derive_more::{From, Into};
+    use kernel_entities::entities::auth::{Account, AccountState};
+    use uuid::Uuid;
+
+    use crate::generate_mapping;
+
+    #[derive(Clone, Debug, From, Into, ormx::Table)]
+    #[ormx(table = "accounts", id = id, insertable, deletable)]
+    pub struct AccountModel {
+        pub id: Uuid,
+        #[ormx(get_one)]
+        pub account_name: String,
+        pub holder_name: Option<String>,
+        pub password_hash: String,
+        #[ormx(custom_type)]
+        pub state: AccountState,
+        pub user_id: Uuid,
+        #[ormx(default)]
+        pub created_at: DateTime<Utc>,
+        #[ormx(default, set)]
+        pub updated_at: DateTime<Utc>,
+    }
+
+    generate_mapping!(Account, AccountModel, 8);
+}
