@@ -10,10 +10,8 @@ use kernel_repositories::{
 use ormx::Table;
 use shaku::Component;
 
-use crate::{
-    database::SqlxDatabaseConnection, models::auth::user::UserModel,
-    util::error::map_sqlx_error,
-};
+use crate::database::SqlxDatabaseConnection;
+use crate::util::error::map_sqlx_error;
 
 #[derive(Component)]
 #[shaku(interface = UsersRepo)]
@@ -25,7 +23,7 @@ pub struct SqlxUsersRepo {
 #[async_trait::async_trait]
 impl UsersRepo for SqlxUsersRepo {
     async fn get_by_username(&self, username: &str) -> RepoResult<User> {
-        Ok(UserModel::by_username(self.db.get(), username)
+        Ok(models::UserModel::by_username(self.db.get(), username)
             .await
             .map_err(map_sqlx_error)?
             .into())
@@ -36,7 +34,7 @@ impl UsersRepo for SqlxUsersRepo {
         pagination: (DateTime<Utc>, usize),
     ) -> RepoResult<Vec<User>> {
         Ok(sqlx::query_as!(
-            UserModel,
+            models::UserModel,
             r#"
             SELECT * FROM users
             WHERE created_at < $1
@@ -88,9 +86,34 @@ impl UsersRepo for SqlxUsersRepo {
 #[async_trait::async_trait]
 impl Repo<User> for SqlxUsersRepo {
     async fn get(&self, id: &Key<User>) -> RepoResult<User> {
-        Ok(UserModel::get(self.db.get(), id.value())
+        Ok(models::UserModel::get(self.db.get(), id.value())
             .await
             .map_err(map_sqlx_error)?
             .into())
     }
+}
+
+mod models {
+    use chrono::{DateTime, Utc};
+    use derive_more::{From, Into};
+    use kernel_entities::entities;
+    use uuid::Uuid;
+
+    use crate::generate_mapping;
+
+    #[derive(Clone, Debug, From, Into, ormx::Table, sqlx::FromRow)]
+    #[ormx(table = "users", id = id, insertable, deletable)]
+    pub struct UserModel {
+        pub id: Uuid,
+        pub display_name: String,
+        #[ormx(get_one(&str))]
+        pub username: String,
+        pub is_active: bool,
+        #[ormx(default)]
+        pub created_at: DateTime<Utc>,
+        #[ormx(default, set)]
+        pub updated_at: DateTime<Utc>,
+    }
+
+    generate_mapping!(entities::auth::User, UserModel, 6);
 }
