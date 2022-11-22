@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 
-pub trait BasicEntity {
+pub trait Entity {
     type Key: Copy;
     type KeyInner: Copy;
 
@@ -8,6 +8,6 @@ pub trait BasicEntity {
     fn get_created(&self) -> DateTime<Utc>;
 }
 
-pub trait MutableEntity: BasicEntity {
+pub trait MutableEntity: Entity {
     fn get_updated(&self) -> DateTime<Utc>;
 }

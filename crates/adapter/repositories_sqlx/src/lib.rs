@@ -5,3 +5,4 @@ pub mod config;
 pub mod database;
 pub mod link;
 pub mod models;
+pub mod repo;

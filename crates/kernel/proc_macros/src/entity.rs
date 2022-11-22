@@ -36,7 +36,7 @@ impl EntityType {
         type_ident: &Ident,
     ) -> Vec<TokenStream> {
         let mut impls = vec![quote! {
-            impl BasicEntity for #type_ident{
+            impl Entity for #type_ident{
                 type Key = #id_type;
                 type KeyInner = #id_inner_type;
 
