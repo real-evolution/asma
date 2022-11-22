@@ -27,30 +27,22 @@ impl ChannelsRepo for SqlxChannelsRepo {
     }
 
     async fn create(&self, insert: InsertChannel) -> RepoResult<Key<Channel>> {
-        let id = sqlx::query_scalar!(
-            r#"
-            INSERT INTO channels (
-                name,
-                platform,
-                api_key,
-                is_active,
-                valid_until,
-                user_id)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING id
-            "#,
-            insert.name,
-            insert.platform as i32,
-            insert.api_key,
-            insert.is_active,
-            insert.valid_until,
-            insert.user_id.value(),
+        Ok(models::ChannelModel::insert(
+            self.db.acquire().await?.as_mut(),
+            models::InsertChannelModel {
+                id: uuid::Uuid::new_v4(),
+                name: insert.name,
+                platform: insert.platform,
+                api_key: insert.api_key,
+                is_active: insert.is_active,
+                valid_until: insert.valid_until,
+                user_id: insert.user_id.into(),
+            },
         )
-        .fetch_one(self.db.get())
         .await
-        .map_err(map_sqlx_error)?;
-
-        Ok(Key::new(id))
+        .map_err(map_sqlx_error)?
+        .id
+        .into())
     }
 }
 
