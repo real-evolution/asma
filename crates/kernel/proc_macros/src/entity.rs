@@ -32,11 +32,13 @@ impl EntityType {
     fn into_impls(
         &self,
         id_type: &Ident,
+        id_inner_type: &Type,
         type_ident: &Ident,
     ) -> Vec<TokenStream> {
         let mut impls = vec![quote! {
             impl BasicEntity for #type_ident{
                 type Key = #id_type;
+                type KeyInner = #id_inner_type;
 
                 fn get_id(&self) -> Self::Key {
                     self.id
@@ -92,7 +94,9 @@ pub fn expand_entity(
         fields.push(field!(updated_at, chrono::DateTime<chrono::Utc>));
     }
 
-    let impls = args.entity_type.into_impls(&id_type, &input.ident);
+    let impls =
+        args.entity_type
+            .into_impls(&id_type, &id_inner_type, &input.ident);
 
     quote! {
         #[derive(serde::Deserialize, serde::Serialize)]

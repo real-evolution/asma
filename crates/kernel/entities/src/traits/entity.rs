@@ -1,7 +1,8 @@
 use chrono::{DateTime, Utc};
 
 pub trait BasicEntity {
-    type Key;
+    type Key: Copy;
+    type KeyInner: Copy;
 
     fn get_id(&self) -> Self::Key;
     fn get_created(&self) -> DateTime<Utc>;
