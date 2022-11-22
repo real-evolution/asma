@@ -11,14 +11,7 @@ use ormx::{Delete, Patch, Table};
 use shaku::Component;
 use tracing::warn;
 
-use crate::{
-    database::SqlxDatabaseConnection,
-    models::auth::{
-        permission::PermissionModel,
-        role::{AccountRoleModel, RoleModel, UpdateSessionModel},
-    },
-    util::error::map_sqlx_error,
-};
+use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
 
 #[derive(Component)]
 #[shaku(interface = RolesRepo)]
@@ -30,7 +23,7 @@ pub struct SqlxRolesRepo {
 #[async_trait::async_trait]
 impl RolesRepo for SqlxRolesRepo {
     async fn get(&self, id: &Key<Role>) -> RepoResult<Role> {
-        Ok(RoleModel::get(self.db.get(), id.value())
+        Ok(models::RoleModel::get(self.db.get(), id.value())
             .await
             .map_err(map_sqlx_error)?
             .into())
@@ -41,7 +34,7 @@ impl RolesRepo for SqlxRolesRepo {
         pagination: (DateTime<Utc>, usize),
     ) -> RepoResult<Vec<Role>> {
         Ok(sqlx::query_as!(
-            RoleModel,
+            models::RoleModel,
             r#"
             SELECT * FROM roles
             WHERE created_at < $1
@@ -63,12 +56,17 @@ impl RolesRepo for SqlxRolesRepo {
         &self,
         role_id: &Key<Role>,
     ) -> RepoResult<Vec<Permission>> {
-        Ok(PermissionModel::by_role(self.db.get(), role_id.value_ref())
+        Ok(
+            models::PermissionModel::by_role(
+                self.db.get(),
+                role_id.value_ref(),
+            )
             .await
             .map_err(map_sqlx_error)?
             .into_iter()
             .map(|p| p.into())
-            .collect())
+            .collect(),
+        )
     }
 
     async fn get_roles_with_permissions_for(
@@ -106,9 +104,10 @@ impl RolesRepo for SqlxRolesRepo {
     }
 
     async fn create(&self, insert: InsertRole) -> RepoResult<Key<Role>> {
-        Ok(RoleModel::insert(
+        Ok(models::RoleModel::insert(
             self.db.acquire().await?.as_mut(),
-            crate::models::auth::role::InsertRoleModel {
+            models::InsertRoleModel {
+                id: uuid::Uuid::new_v4(),
                 code: insert.code,
                 friendly_name: insert.friendly_name,
                 is_active: true,
@@ -125,7 +124,7 @@ impl RolesRepo for SqlxRolesRepo {
         role_id: &Key<Role>,
         update: UpdateRole,
     ) -> RepoResult<()> {
-        Ok(UpdateSessionModel {
+        Ok(models::UpdateRoleModel {
             friendly_name: update.friendly_name,
             updated_at: Utc::now(),
         }
@@ -135,9 +134,11 @@ impl RolesRepo for SqlxRolesRepo {
     }
 
     async fn remove(&self, role_id: &Key<Role>) -> RepoResult<()> {
-        Ok(RoleModel::delete_row(self.db.get(), role_id.value())
-            .await
-            .map_err(map_sqlx_error)?)
+        Ok(
+            models::RoleModel::delete_row(self.db.get(), role_id.value())
+                .await
+                .map_err(map_sqlx_error)?,
+        )
     }
 
     async fn add_permission(
@@ -166,9 +167,10 @@ impl RolesRepo for SqlxRolesRepo {
             )));
         }
 
-        Ok(PermissionModel::insert(
+        Ok(models::PermissionModel::insert(
             self.db.acquire().await?.as_mut(),
-            crate::models::auth::permission::InsertPermissionModel {
+            models::InsertPermissionModel {
+                id: uuid::Uuid::new_v4(),
                 role_id: role_id.value(),
                 actions,
                 resource,
@@ -202,9 +204,10 @@ impl RolesRepo for SqlxRolesRepo {
         account_id: &Key<Account>,
         role_id: &Key<Role>,
     ) -> RepoResult<()> {
-        AccountRoleModel::insert(
+        models::AccountRoleModel::insert(
             self.db.acquire().await?.as_mut(),
-            crate::models::auth::role::InsertAccountRoleModel {
+            models::InsertAccountRoleModel {
+                id: uuid::Uuid::new_v4(),
                 account_id: account_id.value(),
                 role_id: role_id.value(),
                 is_active: true,
@@ -235,4 +238,66 @@ impl RolesRepo for SqlxRolesRepo {
 
         Ok(())
     }
+}
+
+mod models {
+    use chrono::{DateTime, Utc};
+    use derive_more::{From, Into};
+    use kernel_entities::entities::auth::*;
+    use uuid::Uuid;
+
+    use crate::generate_mapping;
+
+    #[derive(Clone, Debug, From, Into, ormx::Table)]
+    #[ormx(table = "roles", id = id, insertable, deletable)]
+    pub struct RoleModel {
+        pub id: Uuid,
+        #[ormx(get_one, get_optional = by_code_optional)]
+        pub code: String,
+        #[ormx(set)]
+        pub friendly_name: Option<String>,
+        pub is_active: bool,
+        #[ormx(default)]
+        pub created_at: DateTime<Utc>,
+        #[ormx(default, set)]
+        pub updated_at: DateTime<Utc>,
+    }
+
+    #[derive(ormx::Patch)]
+    #[ormx(table_name = "roles", table = RoleModel, id = "id")]
+    pub struct UpdateRoleModel {
+        pub friendly_name: Option<String>,
+        pub updated_at: DateTime<Utc>,
+    }
+
+    #[derive(Clone, Debug, From, Into, ormx::Table)]
+    #[ormx(table = "account_roles", id = id, insertable, deletable)]
+    pub struct AccountRoleModel {
+        pub id: Uuid,
+        pub account_id: Uuid,
+        pub role_id: Uuid,
+        pub is_active: bool,
+        #[ormx(default)]
+        pub created_at: DateTime<Utc>,
+        #[ormx(default, set)]
+        pub updated_at: DateTime<Utc>,
+    }
+
+    #[derive(Clone, Debug, From, Into, ormx::Table)]
+    #[ormx(table = "permissions", id = id, insertable, deletable)]
+    pub struct PermissionModel {
+        pub id: Uuid,
+        #[ormx(custom_type)]
+        pub resource: Resource,
+        #[ormx(custom_type)]
+        pub actions: Actions,
+        #[ormx(get_many=by_role)]
+        pub role_id: Uuid,
+        #[ormx(default)]
+        pub created_at: DateTime<Utc>,
+    }
+
+    generate_mapping!(Permission, PermissionModel, 5);
+    generate_mapping!(Role, RoleModel, 6);
+    generate_mapping!(AccountRole, AccountRoleModel, 6);
 }
