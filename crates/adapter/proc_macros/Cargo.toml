@@ -1,0 +1,21 @@
+[package]
+name = "adapter_proc_macros"
+description = "A crate to hold macros used in the infrastructure layer cates"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+common_macros = { path = "../../common/macros" }
+
+# workspace dependencies
+derive_more = { workspace = true }
+
+# crate dependencies
+syn = { version = "1" }
+quote = "1"
+proc-macro2 = "1"
+darling = "0"
