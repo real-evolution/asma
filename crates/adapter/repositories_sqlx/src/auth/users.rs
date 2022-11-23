@@ -91,6 +91,13 @@ impl Repo<User> for SqlxUsersRepo {
             .map_err(map_sqlx_error)?
             .into())
     }
+    async fn get_all(&self) -> RepoResult<Vec<User>> {
+        todo!()
+    }
+
+    async fn get_paginated(&self, params: (i64, i64)) -> RepoResult<Vec<User>> {
+        todo!()
+    }
 }
 
 mod models {

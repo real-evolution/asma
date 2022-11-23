@@ -22,4 +22,12 @@ where
 
         Ok(item.into())
     }
+
+    async fn get_all(&self) -> RepoResult<Vec<E>> {
+        todo!()
+    }
+
+    async fn get_paginated(&self, params: (i64, i64)) -> RepoResult<Vec<E>> {
+        todo!()
+    }
 }
