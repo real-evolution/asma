@@ -244,14 +244,14 @@ mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
     use kernel_entities::entities::auth::*;
-    use uuid::Uuid;
+    use kernel_entities::traits::KeyType;
 
     use crate::generate_mapping;
 
     #[derive(Clone, Debug, From, Into, ormx::Table)]
     #[ormx(table = "roles", id = id, insertable, deletable)]
     pub struct RoleModel {
-        pub id: Uuid,
+        pub id: KeyType,
         #[ormx(get_one, get_optional = by_code_optional)]
         pub code: String,
         #[ormx(set)]
@@ -273,9 +273,9 @@ mod models {
     #[derive(Clone, Debug, From, Into, ormx::Table)]
     #[ormx(table = "account_roles", id = id, insertable, deletable)]
     pub struct AccountRoleModel {
-        pub id: Uuid,
-        pub account_id: Uuid,
-        pub role_id: Uuid,
+        pub id: KeyType,
+        pub account_id: KeyType,
+        pub role_id: KeyType,
         pub is_active: bool,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
@@ -286,13 +286,13 @@ mod models {
     #[derive(Clone, Debug, From, Into, ormx::Table)]
     #[ormx(table = "permissions", id = id, insertable, deletable)]
     pub struct PermissionModel {
-        pub id: Uuid,
+        pub id: KeyType,
         #[ormx(custom_type)]
         pub resource: Resource,
         #[ormx(custom_type)]
         pub actions: Actions,
         #[ormx(get_many=by_role)]
-        pub role_id: Uuid,
+        pub role_id: KeyType,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
     }

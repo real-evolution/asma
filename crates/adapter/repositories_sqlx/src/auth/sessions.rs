@@ -157,8 +157,7 @@ impl SessionsRepo for SqlxSessionsRepo {
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
-    use kernel_entities::entities::auth::Session;
-    use uuid::Uuid;
+    use kernel_entities::{entities::auth::Session, traits::KeyType};
 
     use crate::generate_mapping;
 
@@ -166,13 +165,13 @@ mod models {
     #[ormx(table = "sessions", id = id, insertable, deletable)]
     pub struct SessionModel {
         #[ormx(default)]
-        pub id: Uuid,
+        pub id: KeyType,
         #[ormx(get_optional)]
         pub device_identifier: String,
         pub agent: String,
         pub refresh_token: String,
         pub last_address: String,
-        pub account_id: Uuid,
+        pub account_id: KeyType,
         pub expires_at: Option<DateTime<Utc>>,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,

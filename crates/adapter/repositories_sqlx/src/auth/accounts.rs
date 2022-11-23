@@ -75,22 +75,24 @@ impl AccountsRepo for SqlxAccountsRepo {
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
-    use kernel_entities::entities::auth::{Account, AccountState};
-    use uuid::Uuid;
+    use kernel_entities::{
+        entities::auth::{Account, AccountState},
+        traits::KeyType,
+    };
 
     use crate::generate_mapping;
 
     #[derive(Clone, Debug, From, Into, ormx::Table)]
     #[ormx(table = "accounts", id = id, insertable, deletable)]
     pub struct AccountModel {
-        pub id: Uuid,
+        pub id: KeyType,
         #[ormx(get_one)]
         pub account_name: String,
         pub holder_name: Option<String>,
         pub password_hash: String,
         #[ormx(custom_type)]
         pub state: AccountState,
-        pub user_id: Uuid,
+        pub user_id: KeyType,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
         #[ormx(default, set)]

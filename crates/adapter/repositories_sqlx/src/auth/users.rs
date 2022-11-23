@@ -91,6 +91,7 @@ impl Repo<User> for SqlxUsersRepo {
             .map_err(map_sqlx_error)?
             .into())
     }
+
     async fn get_all(&self) -> RepoResult<Vec<User>> {
         todo!()
     }
@@ -103,15 +104,14 @@ impl Repo<User> for SqlxUsersRepo {
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
-    use kernel_entities::entities;
-    use uuid::Uuid;
+    use kernel_entities::{entities, traits::KeyType};
 
     use crate::generate_mapping;
 
     #[derive(Clone, Debug, From, Into, ormx::Table, sqlx::FromRow)]
     #[ormx(table = "users", id = id, insertable, deletable)]
     pub struct UserModel {
-        pub id: Uuid,
+        pub id: KeyType,
         pub display_name: String,
         #[ormx(get_one(&str))]
         pub username: String,
