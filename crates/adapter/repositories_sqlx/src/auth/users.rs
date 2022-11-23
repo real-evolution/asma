@@ -92,12 +92,15 @@ impl Repo<User> for SqlxUsersRepo {
             .into())
     }
 
-    async fn get_all(&self) -> RepoResult<Vec<User>> {
-        todo!()
-    }
-
     async fn get_paginated(&self, params: (i64, i64)) -> RepoResult<Vec<User>> {
-        todo!()
+        Ok(
+            models::UserModel::all_paginated(self.db.get(), params.0, params.1)
+                .await
+                .map_err(map_sqlx_error)?
+                .into_iter()
+                .map(|u| u.into())
+                .collect(),
+        )
     }
 }
 
