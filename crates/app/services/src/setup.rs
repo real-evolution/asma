@@ -53,7 +53,7 @@ impl AppSetupService {
         root_holder_name: Option<String>,
         root_password: String,
     ) -> AppResult<Account> {
-        let root_account_id = self
+        let root_account = self
             .accounts
             .create(InsertAccount::new(
                 user_id,
@@ -64,7 +64,7 @@ impl AppSetupService {
             ))
             .await?;
 
-        Ok(root_account_id)
+        Ok(root_account)
     }
 
     async fn setup_roles(
