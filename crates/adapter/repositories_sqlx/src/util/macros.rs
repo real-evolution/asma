@@ -21,3 +21,21 @@ macro_rules! generate_mapping {
         });
     };
 }
+
+#[macro_export]
+macro_rules! sqlx_ok {
+    ($e:expr) => {
+        Ok($e.map_err(map_sqlx_error)?.into())
+    };
+}
+
+#[macro_export]
+macro_rules! sqlx_vec_ok {
+    ($e:expr) => {
+        Ok($e
+            .map_err(map_sqlx_error)?
+            .into_iter()
+            .map(|i| i.into())
+            .collect())
+    };
+}
