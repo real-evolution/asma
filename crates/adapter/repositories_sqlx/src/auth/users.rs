@@ -6,7 +6,7 @@ use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{
     auth::{InsertUser, UsersRepo},
     error::RepoResult,
-    traits::repo::Repo,
+    traits::repo::*,
 };
 use ormx::{Delete, Table};
 use shaku::Component;
@@ -15,7 +15,11 @@ use crate::database::SqlxDatabaseConnection;
 use crate::util::error::map_sqlx_error;
 
 #[derive(Component, Repo)]
-#[repo(table = "users", read(entity = "User", model = "models::UserModel"))]
+#[repo(
+    table = "users",
+    read(entity = "User", model = "models::UserModel"),
+    insert(entity = "InsertUser", model = "models::InsertUserModel")
+)]
 #[shaku(interface = UsersRepo)]
 pub struct SqlxUsersRepo {
     #[shaku(inject)]
@@ -53,33 +57,13 @@ impl UsersRepo for SqlxUsersRepo {
         .map(|u| u.into())
         .collect())
     }
-
-    async fn create(&self, insert: InsertUser) -> RepoResult<Key<User>> {
-        let id = sqlx::query_scalar!(
-            r#"
-            INSERT INTO users (
-                username,
-                display_name,
-                is_active)
-            VALUES ($1, $2, $3)
-            RETURNING id
-            "#,
-            insert.username,
-            insert.display_name,
-            insert.is_active,
-        )
-        .fetch_one(self.db.get())
-        .await
-        .map_err(map_sqlx_error)?;
-
-        Ok(Key::new(id))
-    }
 }
 
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
     use kernel_entities::{entities, traits::KeyType};
+    use kernel_repositories::auth::InsertUser;
 
     use crate::generate_mapping;
 
@@ -95,6 +79,17 @@ mod models {
         pub created_at: DateTime<Utc>,
         #[ormx(default, set)]
         pub updated_at: DateTime<Utc>,
+    }
+
+    impl Into<InsertUserModel> for InsertUser {
+        fn into(self) -> InsertUserModel {
+            InsertUserModel {
+                id: uuid::Uuid::new_v4(),
+                username: self.username,
+                display_name: self.display_name,
+                is_active: self.is_active,
+            }
+        }
     }
 
     generate_mapping!(entities::auth::User, UserModel, 6);
