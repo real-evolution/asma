@@ -15,10 +15,18 @@ pub struct RepoDeriveInput {
     data: darling::ast::Data<(), PoolFieldReceiver>,
     table: String,
     read: RepoReadTypes,
+    #[darling(default)]
+    insert: Option<RepoInsertTypes>,
 }
 
 #[derive(Clone, FromMeta)]
 struct RepoReadTypes {
+    entity: syn::Type,
+    model: syn::Type,
+}
+
+#[derive(Clone, FromMeta)]
+struct RepoInsertTypes {
     entity: syn::Type,
     model: syn::Type,
 }
@@ -37,6 +45,7 @@ impl ToTokens for RepoDeriveInput {
             ref data,
             ref table,
             ref read,
+            ref insert,
         } = *self;
 
         let pool = data
@@ -98,6 +107,29 @@ impl ToTokens for RepoDeriveInput {
                 }
             }
         });
+
+        if let Some(insert) = insert {
+            let (insert_entity, insert_model) = (&insert.entity, &insert.model);
+
+            tokens.extend(quote! {
+                #[async_trait::async_trait]
+                impl InsertRepo<#read_entity, #insert_entity> for #ident {
+                    async fn create(&self, insert: #insert_entity) -> RepoResult<#read_entity> {
+                        let insert: #insert_model = insert.into();
+
+                        Ok(
+                            #read_model::insert(
+                                self.db.acquire().await?.as_mut(),
+                                insert,
+                            )
+                            .await
+                            .map_err(map_sqlx_error)?
+                            .into(),
+                        )
+                    }
+                }
+            });
+        }
     }
 }
 
