@@ -25,11 +25,11 @@ pub async fn add(
         (Resource::Roles, Action::Add),
     )?;
 
-    let id = roles_repo
+    let role = roles_repo
         .create(InsertRole::new(form.code, form.friendly_name))
         .await?;
 
-    Ok(Created("/api/roles", id).into())
+    Ok(Created("/api/roles", role.id).into())
 }
 
 #[utoipa::path(
@@ -62,9 +62,9 @@ pub async fn add_permission(
         ],
     )?;
 
-    let permission_id = roles_repo
+    let permission = roles_repo
         .add_permission(&role_id, form.resource, form.actions)
         .await?;
 
-    Ok(Created(format!("/api/roles/{role_id}"), permission_id))
+    Ok(Created(format!("/api/roles/{role_id}"), permission.id))
 }

@@ -72,7 +72,7 @@ impl AppSetupService {
         root_account_id: &Key<Account>,
     ) -> AppResult<()> {
         // create root role
-        let role_id = self
+        let role = self
             .roles
             .create(InsertRole::new(
                 KnownRoles::Root.to_string(),
@@ -83,12 +83,12 @@ impl AppSetupService {
         // set root role permissions
         for res in Resource::all() {
             self.roles
-                .add_permission(&role_id, res, Actions::all())
+                .add_permission(&role.id, res, Actions::all())
                 .await?;
         }
 
         // add account to root role
-        self.roles.add_to(root_account_id, &role_id).await?;
+        self.roles.add_to(root_account_id, &role.id).await?;
 
         Ok(())
     }
