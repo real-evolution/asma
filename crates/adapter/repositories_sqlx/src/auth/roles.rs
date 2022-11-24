@@ -11,7 +11,10 @@ use ormx::{Delete, Patch, Table};
 use shaku::Component;
 use tracing::warn;
 
-use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
+use crate::{
+    database::SqlxDatabaseConnection, sqlx_ok, sqlx_vec_ok,
+    util::error::map_sqlx_error,
+};
 
 #[derive(Component)]
 #[shaku(interface = RolesRepo)]
@@ -33,39 +36,33 @@ impl RolesRepo for SqlxRolesRepo {
         &self,
         pagination: (DateTime<Utc>, usize),
     ) -> RepoResult<Vec<Role>> {
-        Ok(sqlx::query_as!(
-            models::RoleModel,
-            r#"
-            SELECT * FROM roles
-            WHERE created_at < $1
-            ORDER BY created_at DESC
-            LIMIT $2
-            "#,
-            pagination.0,
-            pagination.1 as i64
+        sqlx_vec_ok!(
+            sqlx::query_as!(
+                models::RoleModel,
+                r#"
+                SELECT * FROM roles
+                WHERE created_at < $1
+                ORDER BY created_at DESC
+                LIMIT $2
+                "#,
+                pagination.0,
+                pagination.1 as i64
+            )
+            .fetch_all(self.db.get())
+            .await
         )
-        .fetch_all(self.db.get())
-        .await
-        .map_err(map_sqlx_error)?
-        .into_iter()
-        .map(|u| u.into())
-        .collect())
     }
 
     async fn get_permissions_of(
         &self,
         role_id: &Key<Role>,
     ) -> RepoResult<Vec<Permission>> {
-        Ok(
+        sqlx_vec_ok!(
             models::PermissionModel::by_role(
                 self.db.get(),
                 role_id.value_ref(),
             )
             .await
-            .map_err(map_sqlx_error)?
-            .into_iter()
-            .map(|p| p.into())
-            .collect(),
         )
     }
 
@@ -167,19 +164,18 @@ impl RolesRepo for SqlxRolesRepo {
             )));
         }
 
-        Ok(models::PermissionModel::insert(
-            self.db.acquire().await?.as_mut(),
-            models::InsertPermissionModel {
-                id: uuid::Uuid::new_v4(),
-                role_id: role_id.value(),
-                actions,
-                resource,
-            },
+        sqlx_ok!(
+            models::PermissionModel::insert(
+                self.db.acquire().await?.as_mut(),
+                models::InsertPermissionModel {
+                    id: uuid::Uuid::new_v4(),
+                    role_id: role_id.value(),
+                    actions,
+                    resource,
+                },
+            )
+            .await
         )
-        .await
-        .map_err(map_sqlx_error)?
-        .id
-        .into())
     }
 
     async fn remove_permission(

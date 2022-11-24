@@ -9,6 +9,7 @@ use ormx::{Delete, Table};
 use shaku::Component;
 
 use crate::database::SqlxDatabaseConnection;
+use crate::sqlx_ok;
 use crate::util::error::map_sqlx_error;
 
 #[derive(Component, Repo)]
@@ -30,19 +31,19 @@ impl AccountsRepo for SqlxAccountsRepo {
         user_id: &Key<User>,
         account_name: &str,
     ) -> RepoResult<Account> {
-        Ok(sqlx::query_as!(
-            models::AccountModel,
-            r#"
-            SELECT * FROM accounts
-            WHERE user_id = $1 AND account_name = $2
-            "#,
-            user_id.value_ref(),
-            account_name,
+        sqlx_ok!(
+            sqlx::query_as!(
+                models::AccountModel,
+                r#"
+                SELECT * FROM accounts
+                WHERE user_id = $1 AND account_name = $2
+                "#,
+                user_id.value_ref(),
+                account_name,
+            )
+            .fetch_one(self.db.get())
+            .await
         )
-        .fetch_one(self.db.get())
-        .await
-        .map_err(map_sqlx_error)?
-        .into())
     }
 }
 
