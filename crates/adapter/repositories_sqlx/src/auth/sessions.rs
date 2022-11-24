@@ -1,16 +1,23 @@
 use std::sync::Arc;
 
+use adapter_proc_macros::Repo;
 use chrono::{Duration, Utc};
 use kernel_entities::entities::auth::*;
-use kernel_entities::traits::Key;
-use kernel_repositories::auth::InsertSession;
-use kernel_repositories::{auth::SessionsRepo, error::RepoResult};
+use kernel_entities::traits::*;
+use kernel_repositories::auth::*;
+use kernel_repositories::error::RepoResult;
+use kernel_repositories::traits::repo::*;
 use ormx::{Delete, Patch, Table};
 use shaku::Component;
 
 use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
 
-#[derive(Component)]
+#[derive(Component, Repo)]
+#[repo(
+    table = "sessions",
+    read(entity = "Session", model = "models::SessionModel"),
+    insert(entity = "InsertSession", model = "models::InsertSessionModel")
+)]
 #[shaku(interface = SessionsRepo)]
 pub struct SqlxSessionsRepo {
     #[shaku(inject)]
@@ -19,13 +26,6 @@ pub struct SqlxSessionsRepo {
 
 #[async_trait::async_trait]
 impl SessionsRepo for SqlxSessionsRepo {
-    async fn get(&self, id: &Key<Session>) -> RepoResult<Session> {
-        Ok(models::SessionModel::get(self.db.get(), id.value())
-            .await
-            .map_err(map_sqlx_error)?
-            .into())
-    }
-
     async fn get_all_for(
         &self,
         account_id: &Key<Account>,
@@ -124,40 +124,13 @@ impl SessionsRepo for SqlxSessionsRepo {
 
         Ok(())
     }
-
-    async fn create_for(
-        &self,
-        account_id: &Key<Account>,
-        insert: &InsertSession,
-    ) -> RepoResult<Key<Session>> {
-        Ok(models::SessionModel::insert(
-            self.db.acquire().await?.as_mut(),
-            models::InsertSessionModel {
-                device_identifier: insert.device_identifier.clone(),
-                agent: insert.agent.clone(),
-                last_address: insert.address.clone(),
-                refresh_token: insert.refresh_token.clone(),
-                account_id: account_id.value(),
-                expires_at: Some(insert.expires_at),
-            },
-        )
-        .await
-        .map_err(map_sqlx_error)?
-        .id
-        .into())
-    }
-
-    async fn remove(&self, id: &Key<Session>) -> RepoResult<()> {
-        Ok(models::SessionModel::delete_row(self.db.get(), id.value())
-            .await
-            .map_err(map_sqlx_error)?)
-    }
 }
 
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
     use kernel_entities::{entities::auth::Session, traits::KeyType};
+    use kernel_repositories::auth::InsertSession;
 
     use crate::generate_mapping;
 
@@ -186,6 +159,19 @@ mod models {
         pub agent: String,
         pub expires_at: Option<DateTime<Utc>>,
         pub updated_at: DateTime<Utc>,
+    }
+
+    impl Into<InsertSessionModel> for InsertSession {
+        fn into(self) -> InsertSessionModel {
+            InsertSessionModel {
+                account_id: self.account_id.into(),
+                device_identifier: self.device_identifier,
+                agent: self.agent,
+                refresh_token: self.refresh_token,
+                last_address: self.address,
+                expires_at: self.expires_at,
+            }
+        }
     }
 
     generate_mapping!(Session, SessionModel, 9);
