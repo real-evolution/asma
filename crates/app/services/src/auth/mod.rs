@@ -47,14 +47,28 @@ impl AuthService for AppAuthService {
         password: &str,
         device_info: DeviceInfo,
     ) -> AppResult<Session> {
-        // TODO:
-        // validate user & account validity
-
         let user = self.users.get_by_username(username).await?;
+
+        if !user.is_active {
+            return Err(AuthError::InactiveUser {
+                username: username.into(),
+                account_name: account_name.into(),
+            }
+            .into());
+        }
+
         let account = self
             .accounts
             .get_of_user_by_name(&user.id, account_name)
             .await?;
+
+        let AccountState::Active = account.state else {
+            return Err(AuthError::InactiveAccount {
+                username: username.into(),
+                account_name: account_name.into(),
+            }
+            .into());
+        };
 
         if let Err(err) = self.hash_svc.verify(password, &account.password_hash)
         {
@@ -98,21 +112,24 @@ impl AuthService for AppAuthService {
             .into());
         }
 
-        let session = InsertSession {
-            account_id: account.id,
-            device_identifier: device_info.device_identifier,
-            agent: device_info.agent,
-            address: device_info.last_address,
-            expires_at: Some(
-                Utc::now()
-                    + Duration::seconds(self.config.signin_validity_seconds),
-            ),
-            refresh_token: self
-                .entropy_svc
-                .next_string(self.config.refresh_token_length)?,
-        };
-
-        Ok(self.sessions.create(session).await?)
+        Ok(self
+            .sessions
+            .create(InsertSession {
+                account_id: account.id,
+                device_identifier: device_info.device_identifier,
+                agent: device_info.agent,
+                address: device_info.last_address,
+                expires_at: Some(
+                    Utc::now()
+                        + Duration::seconds(
+                            self.config.signin_validity_seconds,
+                        ),
+                ),
+                refresh_token: self
+                    .entropy_svc
+                    .next_string(self.config.refresh_token_length)?,
+            })
+            .await?)
     }
 
     async fn refresh_session(
@@ -174,9 +191,7 @@ impl AppAuthService {
             .await
         {
             Ok(session) => Ok(session),
-            Err(RepoError::NotFound) => {
-                return Err(AuthError::NotAuthenticated.into())
-            }
+            Err(RepoError::NotFound) => Err(AuthError::NotAuthenticated.into()),
             Err(err) => return Err(err.into()),
         }
     }

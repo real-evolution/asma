@@ -16,4 +16,20 @@ pub enum AuthError {
 
     #[error("invalid role: {0}")]
     InvalidRole(String),
+
+    #[error(
+        "account `{account_name}` tried to signin with an inactvie user `{username}`"
+    )]
+    InactiveUser {
+        username: String,
+        account_name: String,
+    },
+
+    #[error(
+        "inactive or suspended account `{account_name}` of user `{username}` tried to signi "
+    )]
+    InactiveAccount {
+        username: String,
+        account_name: String,
+    },
 }
