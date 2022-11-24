@@ -6,7 +6,7 @@ use kernel_entities::entities::auth::*;
 use kernel_entities::traits::*;
 use kernel_repositories::auth::*;
 use kernel_repositories::error::RepoResult;
-use kernel_repositories::traits::repo::*;
+use kernel_repositories::traits::*;
 use ormx::{Delete, Patch, Table};
 use shaku::Component;
 

@@ -2,11 +2,7 @@ use std::sync::Arc;
 
 use adapter_proc_macros::Repo;
 use kernel_entities::{entities::link::*, traits::Key};
-use kernel_repositories::{
-    error::RepoResult,
-    link::{ChannelsRepo, InsertChannel},
-    traits::repo::*,
-};
+use kernel_repositories::{error::RepoResult, link::*, traits::*};
 use ormx::{Delete, Table};
 use shaku::Component;
 

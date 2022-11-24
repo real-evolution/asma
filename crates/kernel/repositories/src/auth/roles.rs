@@ -4,10 +4,7 @@ use derive_more::Constructor;
 use kernel_entities::{entities::auth::*, traits::Key};
 use shaku::Interface;
 
-use crate::{
-    error::RepoResult,
-    traits::repo::{InsertRepo, Repo},
-};
+use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait RolesRepo:

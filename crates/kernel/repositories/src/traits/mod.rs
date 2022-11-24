@@ -1,1 +1,3 @@
-pub mod repo;
+mod repo;
+
+pub use repo::*;

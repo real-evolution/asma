@@ -4,13 +4,9 @@ use adapter_proc_macros::Repo;
 use chrono::Utc;
 use itertools::Itertools;
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::auth::InsertRole;
-use kernel_repositories::error::RepoResult;
-use kernel_repositories::{
-    auth::{RolesRepo, UpdateRole},
-    error::RepoError,
-    traits::repo::*,
-};
+use kernel_repositories::auth::*;
+use kernel_repositories::error::*;
+use kernel_repositories::traits::*;
 use ormx::{Delete, Patch, Table};
 use shaku::Component;
 use tracing::warn;

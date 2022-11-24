@@ -6,7 +6,7 @@ use kernel_entities::{
 };
 use shaku::Interface;
 
-use crate::traits::repo::*;
+use crate::traits::*;
 
 #[async_trait::async_trait]
 pub trait ChannelsRepo:
