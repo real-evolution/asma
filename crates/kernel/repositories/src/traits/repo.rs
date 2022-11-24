@@ -14,3 +14,8 @@ pub trait Repo<E: Entity> {
 
     async fn remove(&self, key: &Key<E>) -> RepoResult<()>;
 }
+
+#[async_trait::async_trait]
+pub trait InsertRepo<E: Entity, I> {
+    async fn create(&self, model: I) -> RepoResult<E>;
+}
