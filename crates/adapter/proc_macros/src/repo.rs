@@ -88,6 +88,14 @@ impl ToTokens for RepoDeriveInput {
                     .map(|u| u.into())
                     .collect())
                 }
+
+                async fn remove(&self, key: &Key<#read_entity>) -> RepoResult<()> {
+                    #read_model::delete_row(self.db.get(), key.value())
+                        .await
+                        .map_err(map_sqlx_error)?;
+
+                    Ok(())
+                }
             }
         });
     }
