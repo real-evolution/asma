@@ -99,20 +99,20 @@ impl AuthService for AppAuthService {
         }
 
         let session = InsertSession {
+            account_id: account.id,
             device_identifier: device_info.device_identifier,
             agent: device_info.agent,
             address: device_info.last_address,
-            expires_at: Utc::now()
-                + Duration::seconds(self.config.signin_validity_seconds),
+            expires_at: Some(
+                Utc::now()
+                    + Duration::seconds(self.config.signin_validity_seconds),
+            ),
             refresh_token: self
                 .entropy_svc
                 .next_string(self.config.refresh_token_length)?,
         };
 
-        let session_id =
-            self.sessions.create_for(&account.id, &session).await?;
-
-        Ok(self.sessions.get(&session_id).await?)
+        Ok(self.sessions.create(session).await?)
     }
 
     async fn refresh_session(
