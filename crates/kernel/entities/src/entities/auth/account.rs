@@ -24,3 +24,15 @@ pub struct Account {
     pub state: AccountState,
     pub user_id: Key<User>,
 }
+
+impl From<i32> for AccountState {
+    fn from(value: i32) -> Self {
+        Self::from_repr(value).unwrap_or(AccountState::Inactive)
+    }
+}
+
+impl Into<i32> for AccountState {
+    fn into(self) -> i32 {
+        self.repr()
+    }
+}
