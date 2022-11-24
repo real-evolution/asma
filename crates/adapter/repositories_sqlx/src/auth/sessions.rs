@@ -30,12 +30,10 @@ impl SessionsRepo for SqlxSessionsRepo {
         &self,
         account_id: &Key<Account>,
     ) -> RepoResult<Vec<Session>> {
-        Ok(sqlx::query_as!(
-            models::SessionModel,
-            "SELECT * FROM sessions WHERE account_id = $1",
-            account_id.value_ref()
+        Ok(models::SessionModel::by_account_id(
+            self.db.get(),
+            account_id.value_ref(),
         )
-        .fetch_all(self.db.get())
         .await
         .map_err(map_sqlx_error)?
         .into_iter()
@@ -144,6 +142,7 @@ mod models {
         pub agent: String,
         pub refresh_token: String,
         pub last_address: String,
+        #[ormx(get_many)]
         pub account_id: KeyType,
         pub expires_at: Option<DateTime<Utc>>,
         #[ormx(default)]
