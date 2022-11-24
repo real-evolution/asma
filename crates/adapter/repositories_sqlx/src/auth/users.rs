@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use adapter_proc_macros::Repo;
-use chrono::{DateTime, Utc};
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{
     auth::{InsertUser, UsersRepo},
@@ -11,8 +10,8 @@ use kernel_repositories::{
 use ormx::{Delete, Table};
 use shaku::Component;
 
+use crate::util::error::map_sqlx_error;
 use crate::{database::SqlxDatabaseConnection, sqlx_ok};
-use crate::{sqlx_vec_ok, util::error::map_sqlx_error};
 
 #[derive(Component, Repo)]
 #[repo(
@@ -30,27 +29,6 @@ pub struct SqlxUsersRepo {
 impl UsersRepo for SqlxUsersRepo {
     async fn get_by_username(&self, username: &str) -> RepoResult<User> {
         sqlx_ok!(models::UserModel::by_username(self.db.get(), username).await)
-    }
-
-    async fn get_all(
-        &self,
-        pagination: (DateTime<Utc>, usize),
-    ) -> RepoResult<Vec<User>> {
-        sqlx_vec_ok!(
-            sqlx::query_as!(
-                models::UserModel,
-                r#"
-                SELECT * FROM users
-                WHERE created_at < $1
-                ORDER BY created_at DESC
-                LIMIT $2
-                "#,
-                pagination.0,
-                pagination.1 as i64
-            )
-            .fetch_all(self.db.get())
-            .await
-        )
     }
 }
 
