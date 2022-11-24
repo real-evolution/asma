@@ -11,4 +11,6 @@ pub trait Repo<E: Entity> {
         before: &DateTime<Utc>,
         limit: usize,
     ) -> RepoResult<Vec<E>>;
+
+    async fn remove(&self, key: &Key<E>) -> RepoResult<()>;
 }
