@@ -4,19 +4,19 @@ use adapter_proc_macros::Repo;
 use chrono::Utc;
 use itertools::Itertools;
 use kernel_entities::{entities::auth::*, traits::Key};
+use kernel_repositories::auth::InsertRole;
+use kernel_repositories::error::RepoResult;
 use kernel_repositories::{
-    auth::{InsertRole, RolesRepo, UpdateRole},
-    error::{RepoError, RepoResult},
+    auth::{RolesRepo, UpdateRole},
+    error::RepoError,
     traits::repo::*,
 };
 use ormx::{Delete, Patch, Table};
 use shaku::Component;
 use tracing::warn;
 
-use crate::{
-    database::SqlxDatabaseConnection, sqlx_ok, sqlx_vec_ok,
-    util::error::map_sqlx_error,
-};
+use crate::database::SqlxDatabaseConnection;
+use crate::{sqlx_ok, sqlx_vec_ok, util::error::map_sqlx_error};
 
 #[derive(Component, Repo)]
 #[repo(
@@ -91,14 +91,6 @@ impl RolesRepo for SqlxRolesRepo {
             }
             .patch_row(self.db.get(), role_id.value())
             .await
-        )
-    }
-
-    async fn remove(&self, role_id: &Key<Role>) -> RepoResult<()> {
-        Ok(
-            models::RoleModel::delete_row(self.db.get(), role_id.value())
-                .await
-                .map_err(map_sqlx_error)?,
         )
     }
 

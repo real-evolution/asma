@@ -4,10 +4,15 @@ use derive_more::Constructor;
 use kernel_entities::{entities::auth::*, traits::Key};
 use shaku::Interface;
 
-use crate::error::RepoResult;
+use crate::{
+    error::RepoResult,
+    traits::repo::{InsertRepo, Repo},
+};
 
 #[async_trait::async_trait]
-pub trait RolesRepo: Interface {
+pub trait RolesRepo:
+    Repo<Role> + InsertRepo<Role, InsertRole> + Interface
+{
     async fn get_permissions_of(
         &self,
         role_id: &Key<Role>,
@@ -23,8 +28,6 @@ pub trait RolesRepo: Interface {
         role_id: &Key<Role>,
         update: UpdateRole,
     ) -> RepoResult<()>;
-
-    async fn remove(&self, role_id: &Key<Role>) -> RepoResult<()>;
 
     async fn add_to(
         &self,
