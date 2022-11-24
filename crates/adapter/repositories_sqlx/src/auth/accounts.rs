@@ -5,7 +5,7 @@ use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::auth::{AccountsRepo, InsertAccount};
 use kernel_repositories::error::RepoResult;
 use kernel_repositories::traits::repo::Repo;
-use ormx::Table;
+use ormx::{Delete, Table};
 use shaku::Component;
 use uuid::Uuid;
 
