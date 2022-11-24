@@ -4,10 +4,9 @@ use adapter_proc_macros::Repo;
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::auth::{AccountsRepo, InsertAccount};
 use kernel_repositories::error::RepoResult;
-use kernel_repositories::traits::repo::Repo;
+use kernel_repositories::traits::repo::*;
 use ormx::{Delete, Table};
 use shaku::Component;
-use uuid::Uuid;
 
 use crate::database::SqlxDatabaseConnection;
 use crate::util::error::map_sqlx_error;
@@ -15,7 +14,8 @@ use crate::util::error::map_sqlx_error;
 #[derive(Component, Repo)]
 #[repo(
     table = "accounts",
-    read(entity = "Account", model = "models::AccountModel")
+    read(entity = "Account", model = "models::AccountModel"),
+    insert(entity = "InsertAccount", model = "models::InsertAccountModel")
 )]
 #[shaku(interface = AccountsRepo)]
 pub struct SqlxAccountsRepo {
@@ -44,34 +44,13 @@ impl AccountsRepo for SqlxAccountsRepo {
         .map_err(map_sqlx_error)?
         .into())
     }
-
-    async fn create_for(
-        &self,
-        user_id: &Key<User>,
-        insert: InsertAccount,
-    ) -> RepoResult<Key<Account>> {
-        Ok(models::AccountModel::insert(
-            self.db.acquire().await?.as_mut(),
-            models::InsertAccountModel {
-                id: Uuid::new_v4(),
-                account_name: insert.account_name,
-                holder_name: insert.holder_name,
-                password_hash: insert.password_hash,
-                state: insert.state.repr(),
-                user_id: user_id.value(),
-            },
-        )
-        .await
-        .map_err(map_sqlx_error)?
-        .id
-        .into())
-    }
 }
 
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
     use kernel_entities::{entities::auth::Account, traits::KeyType};
+    use kernel_repositories::auth::InsertAccount;
 
     use crate::generate_mapping;
 
@@ -89,6 +68,19 @@ mod models {
         pub created_at: DateTime<Utc>,
         #[ormx(default, set)]
         pub updated_at: DateTime<Utc>,
+    }
+
+    impl Into<InsertAccountModel> for InsertAccount {
+        fn into(self) -> InsertAccountModel {
+            InsertAccountModel {
+                id: uuid::Uuid::new_v4(),
+                user_id: self.user_id.into(),
+                account_name: self.account_name,
+                holder_name: self.holder_name,
+                password_hash: self.password_hash,
+                state: self.state.into(),
+            }
+        }
     }
 
     generate_mapping!(Account, AccountModel, 8);
