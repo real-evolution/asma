@@ -14,7 +14,6 @@ pub trait UsersRepo: Repo<User> + Interface {
     ) -> RepoResult<Vec<User>>;
 
     async fn create(&self, insert: InsertUser) -> RepoResult<Key<User>>;
-    async fn remove(&self, user_id: &Key<User>) -> RepoResult<()>;
 }
 
 #[derive(Constructor, Debug)]

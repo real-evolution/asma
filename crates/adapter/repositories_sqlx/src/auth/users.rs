@@ -8,7 +8,7 @@ use kernel_repositories::{
     error::RepoResult,
     traits::repo::Repo,
 };
-use ormx::Table;
+use ormx::{Delete, Table};
 use shaku::Component;
 
 use crate::database::SqlxDatabaseConnection;
@@ -73,15 +73,6 @@ impl UsersRepo for SqlxUsersRepo {
         .map_err(map_sqlx_error)?;
 
         Ok(Key::new(id))
-    }
-
-    async fn remove(&self, user_id: &Key<User>) -> RepoResult<()> {
-        sqlx::query!(r#"DELETE FROM users WHERE id = $1"#, user_id.value_ref())
-            .execute(self.db.get())
-            .await
-            .map_err(map_sqlx_error)?;
-
-        Ok(())
     }
 }
 
