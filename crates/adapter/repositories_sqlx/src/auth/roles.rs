@@ -146,7 +146,7 @@ impl RolesRepo for SqlxRolesRepo {
         role_id: &Key<Role>,
         resource: Resource,
         actions: Actions,
-    ) -> RepoResult<Key<Permission>> {
+    ) -> RepoResult<Permission> {
         let exists = sqlx::query_scalar!(
             r#"
             SELECT EXISTS (
