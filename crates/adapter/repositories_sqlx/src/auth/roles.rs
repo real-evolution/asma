@@ -1,11 +1,13 @@
 use std::{collections::HashMap, sync::Arc};
 
-use chrono::{DateTime, Utc};
+use adapter_proc_macros::Repo;
+use chrono::Utc;
 use itertools::Itertools;
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{
     auth::{InsertRole, RolesRepo, UpdateRole},
     error::{RepoError, RepoResult},
+    traits::repo::*,
 };
 use ormx::{Delete, Patch, Table};
 use shaku::Component;
@@ -16,7 +18,12 @@ use crate::{
     util::error::map_sqlx_error,
 };
 
-#[derive(Component)]
+#[derive(Component, Repo)]
+#[repo(
+    table = "roles",
+    read(entity = "Role", model = "models::RoleModel"),
+    insert(entity = "InsertRole", model = "models::InsertRoleModel")
+)]
 #[shaku(interface = RolesRepo)]
 pub struct SqlxRolesRepo {
     #[shaku(inject)]
@@ -25,34 +32,6 @@ pub struct SqlxRolesRepo {
 
 #[async_trait::async_trait]
 impl RolesRepo for SqlxRolesRepo {
-    async fn get(&self, id: &Key<Role>) -> RepoResult<Role> {
-        Ok(models::RoleModel::get(self.db.get(), id.value())
-            .await
-            .map_err(map_sqlx_error)?
-            .into())
-    }
-
-    async fn get_all(
-        &self,
-        pagination: (DateTime<Utc>, usize),
-    ) -> RepoResult<Vec<Role>> {
-        sqlx_vec_ok!(
-            sqlx::query_as!(
-                models::RoleModel,
-                r#"
-                SELECT * FROM roles
-                WHERE created_at < $1
-                ORDER BY created_at DESC
-                LIMIT $2
-                "#,
-                pagination.0,
-                pagination.1 as i64
-            )
-            .fetch_all(self.db.get())
-            .await
-        )
-    }
-
     async fn get_permissions_of(
         &self,
         role_id: &Key<Role>,
@@ -100,34 +79,19 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(items)
     }
 
-    async fn create(&self, insert: InsertRole) -> RepoResult<Key<Role>> {
-        Ok(models::RoleModel::insert(
-            self.db.acquire().await?.as_mut(),
-            models::InsertRoleModel {
-                id: uuid::Uuid::new_v4(),
-                code: insert.code,
-                friendly_name: insert.friendly_name,
-                is_active: true,
-            },
-        )
-        .await
-        .map_err(map_sqlx_error)?
-        .id
-        .into())
-    }
-
     async fn update(
         &self,
         role_id: &Key<Role>,
         update: UpdateRole,
     ) -> RepoResult<()> {
-        Ok(models::UpdateRoleModel {
-            friendly_name: update.friendly_name,
-            updated_at: Utc::now(),
-        }
-        .patch_row(self.db.get(), role_id.value())
-        .await
-        .map_err(map_sqlx_error)?)
+        sqlx_ok!(
+            models::UpdateRoleModel {
+                friendly_name: update.friendly_name,
+                updated_at: Utc::now(),
+            }
+            .patch_row(self.db.get(), role_id.value())
+            .await
+        )
     }
 
     async fn remove(&self, role_id: &Key<Role>) -> RepoResult<()> {
@@ -241,6 +205,7 @@ mod models {
     use derive_more::{From, Into};
     use kernel_entities::entities::auth::*;
     use kernel_entities::traits::KeyType;
+    use kernel_repositories::auth::InsertRole;
 
     use crate::generate_mapping;
 
@@ -291,6 +256,17 @@ mod models {
         pub role_id: KeyType,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
+    }
+
+    impl Into<InsertRoleModel> for InsertRole {
+        fn into(self) -> InsertRoleModel {
+            InsertRoleModel {
+                id: uuid::Uuid::new_v4(),
+                code: self.code,
+                friendly_name: self.friendly_name,
+                is_active: true,
+            }
+        }
     }
 
     generate_mapping!(Permission, PermissionModel, 5);
