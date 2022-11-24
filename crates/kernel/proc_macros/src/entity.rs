@@ -2,7 +2,6 @@ use common_macros::proc::parse::{extract_named_fields, extract_struct};
 use darling::FromMeta;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::DeriveInput;
 use syn::{parse::*, *};
 
 macro_rules! field {
@@ -11,45 +10,11 @@ macro_rules! field {
     };
 }
 
-#[derive(Debug, Clone, Copy, FromMeta)]
-#[darling(default)]
+#[derive(Clone, Copy, Debug, Default, FromMeta)]
 pub enum EntityType {
-    Immutable,
+    #[default]
     Mutable,
-}
-
-impl Default for EntityType {
-    fn default() -> Self {
-        Self::Mutable
-    }
-}
-
-impl EntityType {
-    fn into_impls(&self, type_ident: Ident) -> Vec<TokenStream> {
-        let mut impls = vec![quote! {
-            impl Entity for #type_ident{
-                fn id(&self) -> &Key<#type_ident> {
-                    &self.id
-                }
-
-                fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
-                    self.created_at
-                }
-            }
-        }];
-
-        if let EntityType::Mutable = self {
-            impls.push(quote! {
-                impl MutableEntity for #type_ident {
-                    fn updated_at(&self) -> chrono::DateTime<chrono::Utc> {
-                        self.updated_at
-                    }
-                }
-            });
-        }
-
-        impls
-    }
+    Immutable,
 }
 
 #[derive(Debug, Default, FromMeta)]
@@ -70,17 +35,36 @@ pub fn expand_entity(
     fields.insert(0, field!(id: Key<#type_ident>));
     fields.push(field!(created_at: chrono::DateTime<chrono::Utc>));
 
+    let mut impls: TokenStream = quote! {
+        impl Entity for #type_ident{
+            fn id(&self) -> &Key<#type_ident> {
+                &self.id
+            }
+
+            fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
+                self.created_at
+            }
+        }
+    }
+    .into();
+
     if let EntityType::Mutable = args.entity_type {
         fields.push(field!(updated_at: chrono::DateTime<chrono::Utc>));
-    }
 
-    let impls = args.entity_type.into_impls(type_ident);
+        impls.extend(quote! {
+            impl MutableEntity for #type_ident {
+                fn updated_at(&self) -> chrono::DateTime<chrono::Utc> {
+                    self.updated_at
+                }
+            }
+        });
+    }
 
     quote! {
         #[derive(serde::Serialize, serde::Deserialize)]
         #input
 
-        #(#impls)*
+        #impls
     }
     .into()
 }
