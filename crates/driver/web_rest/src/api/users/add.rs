@@ -24,7 +24,7 @@ pub async fn add(
         (Resource::Users, Action::Add),
     )?;
 
-    let id = users_repo
+    let user = users_repo
         .create(InsertUser::new(
             form.username,
             form.display_name,
@@ -32,5 +32,5 @@ pub async fn add(
         ))
         .await?;
 
-    Ok(Created("/api/users", id).into())
+    Ok(Created("/api/users", user.id).into())
 }

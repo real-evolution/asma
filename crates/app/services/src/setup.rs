@@ -34,8 +34,8 @@ pub struct AppSetupService {
 }
 
 impl AppSetupService {
-    async fn create_system_user(&self) -> AppResult<Key<User>> {
-        let system_user_id = self
+    async fn create_system_user(&self) -> AppResult<User> {
+        let system_user = self
             .users
             .create(InsertUser::new(
                 SYSTEM_USER_USERNAME.to_owned(),
@@ -44,32 +44,33 @@ impl AppSetupService {
             ))
             .await?;
 
-        Ok(system_user_id)
+        Ok(system_user)
     }
 
     async fn create_root_account(
         &self,
-        user_id: &Key<User>,
+        user_id: Key<User>,
         root_holder_name: Option<String>,
         root_password: String,
-    ) -> AppResult<Key<Account>> {
+    ) -> AppResult<Account> {
         let root_account_id = self
             .accounts
-            .create_for(
+            .create(InsertAccount::new(
                 user_id,
-                InsertAccount::new(
-                    ROOT_ACCOUNT_NAME.to_owned(),
-                    root_holder_name,
-                    self.hash_svc.hash(&root_password)?,
-                    AccountState::Active,
-                ),
-            )
+                ROOT_ACCOUNT_NAME.to_owned(),
+                root_holder_name,
+                self.hash_svc.hash(&root_password)?,
+                AccountState::Active,
+            ))
             .await?;
 
         Ok(root_account_id)
     }
 
-    async fn setup_roles(&self, root_account_id: &Key<Account>) -> AppResult<()> {
+    async fn setup_roles(
+        &self,
+        root_account_id: &Key<Account>,
+    ) -> AppResult<()> {
         // create root role
         let role_id = self
             .roles
@@ -115,15 +116,15 @@ impl SetupService for AppSetupService {
         let tx = self.tx_mgr.begin().await?;
 
         {
-            let system_user_id = self.create_system_user().await?;
-            let root_account_id = self
+            let system_user = self.create_system_user().await?;
+            let root_account = self
                 .create_root_account(
-                    &system_user_id,
+                    system_user.id,
                     root_holder_name,
                     root_password,
                 )
                 .await?;
-            self.setup_roles(&root_account_id).await?;
+            self.setup_roles(&root_account.id).await?;
         }
 
         tx.commit().await?;
