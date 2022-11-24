@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
+use adapter_proc_macros::Repo;
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::{
-    auth::{AccountsRepo, InsertAccount},
-    error::RepoResult,
-};
+use kernel_repositories::auth::{AccountsRepo, InsertAccount};
+use kernel_repositories::error::RepoResult;
+use kernel_repositories::traits::repo::Repo;
 use ormx::Table;
 use shaku::Component;
 use uuid::Uuid;
@@ -12,7 +12,11 @@ use uuid::Uuid;
 use crate::database::SqlxDatabaseConnection;
 use crate::util::error::map_sqlx_error;
 
-#[derive(Component)]
+#[derive(Component, Repo)]
+#[repo(
+    table = "accounts",
+    read(entity = "Account", model = "models::AccountModel")
+)]
 #[shaku(interface = AccountsRepo)]
 pub struct SqlxAccountsRepo {
     #[shaku(inject)]
@@ -29,15 +33,7 @@ impl AccountsRepo for SqlxAccountsRepo {
         Ok(sqlx::query_as!(
             models::AccountModel,
             r#"
-            SELECT id,
-                   account_name,
-                   holder_name,
-                   password_hash,
-                   user_id,
-                   created_at,
-                   updated_at,
-                   state as "state: _"
-            FROM accounts
+            SELECT * FROM accounts
             WHERE user_id = $1 AND account_name = $2
             "#,
             user_id.value_ref(),
@@ -61,7 +57,7 @@ impl AccountsRepo for SqlxAccountsRepo {
                 account_name: insert.account_name,
                 holder_name: insert.holder_name,
                 password_hash: insert.password_hash,
-                state: insert.state,
+                state: insert.state.repr(),
                 user_id: user_id.value(),
             },
         )
@@ -75,10 +71,7 @@ impl AccountsRepo for SqlxAccountsRepo {
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
-    use kernel_entities::{
-        entities::auth::{Account, AccountState},
-        traits::KeyType,
-    };
+    use kernel_entities::{entities::auth::Account, traits::KeyType};
 
     use crate::generate_mapping;
 
@@ -90,8 +83,7 @@ mod models {
         pub account_name: String,
         pub holder_name: Option<String>,
         pub password_hash: String,
-        #[ormx(custom_type)]
-        pub state: AccountState,
+        pub state: i32,
         pub user_id: KeyType,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
