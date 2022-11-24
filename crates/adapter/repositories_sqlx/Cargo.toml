@@ -14,6 +14,7 @@ seq-macro = "0"
 common_validation = { path = "../../common/validation" }
 kernel_entities = { path = "../../kernel/entities" }
 kernel_repositories = { path = "../../kernel/repositories" }
+adapter_proc_macros = { path = "../proc_macros" }
 
 # workspace dependencies
 anyhow = { workspace = true }

@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use adapter_proc_macros::Repo;
 use chrono::{DateTime, Utc};
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{
@@ -13,7 +14,8 @@ use shaku::Component;
 use crate::database::SqlxDatabaseConnection;
 use crate::util::error::map_sqlx_error;
 
-#[derive(Component)]
+#[derive(Component, Repo)]
+#[repo(table = "users", read(entity = "User", model = "models::UserModel"))]
 #[shaku(interface = UsersRepo)]
 pub struct SqlxUsersRepo {
     #[shaku(inject)]
@@ -80,27 +82,6 @@ impl UsersRepo for SqlxUsersRepo {
             .map_err(map_sqlx_error)?;
 
         Ok(())
-    }
-}
-
-#[async_trait::async_trait]
-impl Repo<User> for SqlxUsersRepo {
-    async fn get(&self, id: &Key<User>) -> RepoResult<User> {
-        Ok(models::UserModel::get(self.db.get(), id.value())
-            .await
-            .map_err(map_sqlx_error)?
-            .into())
-    }
-
-    async fn get_paginated(&self, params: (i64, i64)) -> RepoResult<Vec<User>> {
-        Ok(
-            models::UserModel::all_paginated(self.db.get(), params.0, params.1)
-                .await
-                .map_err(map_sqlx_error)?
-                .into_iter()
-                .map(|u| u.into())
-                .collect(),
-        )
     }
 }
 
