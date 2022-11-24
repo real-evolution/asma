@@ -22,19 +22,17 @@ impl ChannelsService for AppChannelsService {
         &self,
         user_id: &Key<User>,
         info: ChannelInfo,
-    ) -> AppResult<Key<Channel>> {
+    ) -> AppResult<Channel> {
         Ok(self
             .channels
-            .create_for(
-                user_id,
-                InsertChannel::new(
-                    info.name,
-                    ChannelPlatform::Telegram,
-                    info.api_key,
-                    Some(Utc::now() + info.valid_for),
-                    true,
-                ),
-            )
+            .create(InsertChannel::new(
+                user_id.clone(),
+                info.name,
+                ChannelPlatform::Telegram,
+                info.api_key,
+                Some(Utc::now() + info.valid_for),
+                true,
+            ))
             .await?)
     }
 
@@ -42,19 +40,17 @@ impl ChannelsService for AppChannelsService {
         &self,
         user_id: &Key<User>,
         info: ChannelInfo,
-    ) -> AppResult<Key<Channel>> {
+    ) -> AppResult<Channel> {
         Ok(self
             .channels
-            .create_for(
-                user_id,
-                InsertChannel::new(
-                    info.name,
-                    ChannelPlatform::WhatsApp,
-                    info.api_key,
-                    Some(Utc::now() + info.valid_for),
-                    true,
-                ),
-            )
+            .create(InsertChannel::new(
+                user_id.clone(),
+                info.name,
+                ChannelPlatform::WhatsApp,
+                info.api_key,
+                Some(Utc::now() + info.valid_for),
+                true,
+            ))
             .await?)
     }
 

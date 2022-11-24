@@ -13,13 +13,13 @@ pub trait ChannelsService: Interface {
         &self,
         user_id: &Key<User>,
         info: ChannelInfo,
-    ) -> AppResult<Key<Channel>>;
+    ) -> AppResult<Channel>;
 
     async fn create_whatsapp_channel_for(
         &self,
         user_id: &Key<User>,
         info: ChannelInfo,
-    ) -> AppResult<Key<Channel>>;
+    ) -> AppResult<Channel>;
 
     async fn toggle_channel(
         &self,

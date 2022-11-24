@@ -1,19 +1,23 @@
 use std::sync::Arc;
 
-use kernel_entities::{
-    entities::{auth::User, link::*},
-    traits::Key,
-};
+use adapter_proc_macros::Repo;
+use kernel_entities::{entities::link::*, traits::Key};
 use kernel_repositories::{
     error::RepoResult,
     link::{ChannelsRepo, InsertChannel},
+    traits::repo::*,
 };
-use ormx::Table;
+use ormx::{Delete, Table};
 use shaku::Component;
 
 use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
 
-#[derive(Component)]
+#[derive(Component, Repo)]
+#[repo(
+    table = "channels",
+    read(entity = "Channel", model = "models::ChannelModel"),
+    insert(entity = "InsertChannel", model = "models::InsertChannelModel")
+)]
 #[shaku(interface = ChannelsRepo)]
 pub struct SqlxChannelsRepo {
     #[shaku(inject)]
@@ -21,63 +25,45 @@ pub struct SqlxChannelsRepo {
 }
 
 #[async_trait::async_trait]
-impl ChannelsRepo for SqlxChannelsRepo {
-    async fn get_by_id(&self, id: &Key<Channel>) -> RepoResult<Channel> {
-        Ok(models::ChannelModel::get(self.db.get(), id.value())
-            .await
-            .map_err(map_sqlx_error)?
-            .into())
-    }
-
-    async fn create_for(
-        &self,
-        user_id: &Key<User>,
-        insert: InsertChannel,
-    ) -> RepoResult<Key<Channel>> {
-        Ok(models::ChannelModel::insert(
-            self.db.acquire().await?.as_mut(),
-            models::InsertChannelModel {
-                id: uuid::Uuid::new_v4(),
-                name: insert.name,
-                platform: insert.platform,
-                api_key: insert.api_key,
-                is_active: insert.is_active,
-                valid_until: insert.valid_until,
-                user_id: user_id.value(),
-            },
-        )
-        .await
-        .map_err(map_sqlx_error)?
-        .id
-        .into())
-    }
-}
+impl ChannelsRepo for SqlxChannelsRepo {}
 
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
-    use kernel_entities::entities::link::{Channel, ChannelPlatform};
+    use kernel_entities::{entities::link::Channel, traits::KeyType};
+    use kernel_repositories::link::InsertChannel;
     use ormx::Table;
-    use uuid::Uuid;
 
     use crate::generate_mapping;
 
     #[derive(Clone, Debug, From, Into, Table)]
     #[ormx(table = "channels", id = id, insertable, deletable)]
     pub struct ChannelModel {
-        pub id: Uuid,
+        pub id: KeyType,
         pub name: String,
-        #[ormx(custom_type)]
-        pub platform: ChannelPlatform,
+        pub platform: i32,
         pub api_key: String,
         pub valid_until: Option<DateTime<Utc>>,
         pub is_active: bool,
-        #[ormx(custom_type)]
-        pub user_id: Uuid,
+        pub user_id: KeyType,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
         #[ormx(default, set)]
         pub updated_at: DateTime<Utc>,
+    }
+
+    impl Into<InsertChannelModel> for InsertChannel {
+        fn into(self) -> InsertChannelModel {
+            InsertChannelModel {
+                id: uuid::Uuid::new_v4(),
+                user_id: self.user_id.into(),
+                name: self.name,
+                platform: self.platform.into(),
+                api_key: self.api_key,
+                valid_until: self.valid_until,
+                is_active: self.is_active,
+            }
+        }
     }
 
     generate_mapping!(Channel, ChannelModel, 9);

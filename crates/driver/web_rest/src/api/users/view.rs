@@ -33,7 +33,7 @@ pub async fn get_all(
     )?;
 
     let users = users_repo
-        .get_all(pagination.into())
+        .get_paginated(&pagination.before, pagination.page_size)
         .await?
         .into_iter()
         .map(|r| UserDto::new(r))

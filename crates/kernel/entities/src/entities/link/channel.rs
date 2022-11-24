@@ -6,7 +6,9 @@ use kernel_proc_macros::*;
 use crate::{entities::auth::User, traits::*};
 
 #[EnumRepr(type = "i32")]
-#[derive(Clone, Copy, Debug, serde::Deserialize, serde::Serialize, sqlx::Type)]
+#[derive(
+    Clone, Copy, Debug, serde::Deserialize, serde::Serialize, sqlx::Type,
+)]
 pub enum ChannelPlatform {
     Telegram = 0,
     WhatsApp = 1,
@@ -21,4 +23,17 @@ pub struct Channel {
     pub valid_until: Option<DateTime<Utc>>,
     pub is_active: bool,
     pub user_id: Key<User>,
+}
+
+impl From<i32> for ChannelPlatform {
+    fn from(value: i32) -> Self {
+        Self::from_repr(value)
+            .expect(&format!("invalid channel platform: {value}"))
+    }
+}
+
+impl Into<i32> for ChannelPlatform {
+    fn into(self) -> i32 {
+        self.repr()
+    }
 }

@@ -6,16 +6,17 @@ use kernel_entities::{
 };
 use shaku::Interface;
 
-use crate::error::RepoResult;
+use crate::traits::repo::*;
 
 #[async_trait::async_trait]
-pub trait ChannelsRepo: Interface {
-    async fn get_by_id(&self, id: &Key<Channel>) -> RepoResult<Channel>;
-    async fn create_for(&self, user_id: &Key<User>, insert: InsertChannel) -> RepoResult<Key<Channel>>;
+pub trait ChannelsRepo:
+    Repo<Channel> + InsertRepo<Channel, InsertChannel> + Interface
+{
 }
 
 #[derive(Constructor)]
 pub struct InsertChannel {
+    pub user_id: Key<User>,
     pub name: String,
     pub platform: ChannelPlatform,
     pub api_key: String,
