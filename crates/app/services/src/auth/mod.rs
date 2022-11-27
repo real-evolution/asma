@@ -46,7 +46,7 @@ impl AuthService for AppAuthService {
         username: &str,
         password: &str,
         device_info: DeviceInfo,
-    ) -> AppResult<Session> {
+    ) -> AppResult<(User, Account, Session)> {
         let user = self.users.get_by_username(username).await?;
 
         if !user.is_active {
@@ -95,7 +95,7 @@ impl AuthService for AppAuthService {
                 account_name, username, session.id
             );
 
-            return Ok(session);
+            return Ok((user, account, session));
         }
 
         if self.sessions.get_active_count_for(&account.id).await?
@@ -112,10 +112,10 @@ impl AuthService for AppAuthService {
             .into());
         }
 
-        Ok(self
+        let session = self
             .sessions
             .create(InsertSession {
-                account_id: account.id,
+                account_id: account.id.clone(),
                 device_identifier: device_info.device_identifier,
                 agent: device_info.agent,
                 address: device_info.last_address,
@@ -129,7 +129,9 @@ impl AuthService for AppAuthService {
                     .entropy_svc
                     .next_string(self.config.refresh_token_length)?,
             })
-            .await?)
+            .await?;
+
+        Ok((user, account, session))
     }
 
     async fn refresh_session(

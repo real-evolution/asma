@@ -15,7 +15,7 @@ pub trait AuthService: Interface {
         usrename: &str,
         password: &str,
         device_info: models::DeviceInfo,
-    ) -> AppResult<Session>;
+    ) -> AppResult<(User, Account, Session)>;
 
     async fn refresh_session(
         &self,
