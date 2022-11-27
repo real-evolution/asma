@@ -29,7 +29,7 @@ pub async fn get_all(
 ) -> ApiResult<Json<Vec<UserDto>>> {
     claims.require_any_role_with_permission(
         vec![KnownRoles::Root, KnownRoles::Admin],
-        (Resource::Roles, Action::View | Action::Global),
+        (Resource::Roles, Action::View),
     )?;
 
     let users = users_repo
@@ -58,8 +58,7 @@ pub async fn get_by_id(
     Path(user_id): Path<Key<User>>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<Json<UserDto>> {
-    claims
-        .require_permission(Resource::Users, Action::View | Action::Global)?;
+    claims.require_permission(Resource::Users, Action::View)?;
 
     Ok(Json(UserDto::new(users_repo.get(&user_id).await?)))
 }
