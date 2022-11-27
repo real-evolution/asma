@@ -31,7 +31,7 @@ pub async fn signin(
         last_address: ip.to_string(),
     };
 
-    let session = auth_svc
+    let (user, account, session) = auth_svc
         .signin(
             &form.account_name,
             &form.username,
@@ -40,13 +40,16 @@ pub async fn signin(
         )
         .await?;
 
+    let refresh_token = session.refresh_token.clone();
     let access_rules =
         auth_svc.get_access_rules_for(&session.account_id).await?;
-    let jwt = Claims::new(&session, access_rules, &config)
-        .encode(&config.token.signing_key.as_bytes())?;
+
+    let access_token =
+        Claims::new(user, account, session, access_rules, &config)
+            .encode(&config.token.signing_key.as_bytes())?;
 
     Ok(Json(TokenPair {
-        access_token: jwt,
-        refresh_token: session.refresh_token,
+        access_token,
+        refresh_token,
     }))
 }
