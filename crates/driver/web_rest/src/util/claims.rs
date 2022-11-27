@@ -2,28 +2,37 @@ use std::{cmp::min, collections::HashMap};
 
 use chrono::Utc;
 use jsonwebtoken::{EncodingKey, Header};
-use kernel_entities::entities::auth::{Actions, Resource, Session};
+use kernel_entities::entities::auth::{
+    Account, Actions, Resource, Session, User,
+};
+use kernel_entities::traits::Key;
 use kernel_services::auth::models::AccessRule;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::config::ApiConfig;
 use crate::error::{ApiError, ApiResult};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Claims {
-    pub sub: Uuid,
+    pub sub: Key<Session>,
     pub exp: i64,
     pub iat: i64,
     pub iss: String,
     pub aud: String,
-    pub account: Uuid,
+    pub user_id: Key<User>,
+    pub username: String,
+    pub display_name: String,
+    pub account_id: Key<Account>,
+    pub account_name: String,
+    pub holder_name: Option<String>,
     pub roles: HashMap<String, Vec<(Resource, Actions)>>,
 }
 
 impl Claims {
     pub fn new(
-        session: &Session,
+        user: User,
+        account: Account,
+        session: Session,
         access_rules: Vec<AccessRule>,
         config: &ApiConfig,
     ) -> Claims {
@@ -35,12 +44,17 @@ impl Claims {
         };
 
         Claims {
-            sub: session.id.value(),
+            sub: session.id,
             iat,
             exp,
             iss: config.token.issuer.clone(),
             aud: config.token.audience.clone(),
-            account: session.account_id.value(),
+            user_id: user.id,
+            username: user.username,
+            display_name: user.display_name,
+            account_id: account.id,
+            account_name: account.account_name,
+            holder_name: account.holder_name,
             roles: access_rules
                 .into_iter()
                 .map(|a| (a.role_code, a.permissions))
@@ -153,6 +167,7 @@ impl Claims {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn require_any_role_with_permissions<
         'a,
         R: Into<&'a str>,
