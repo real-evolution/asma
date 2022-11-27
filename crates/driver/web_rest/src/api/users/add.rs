@@ -1,11 +1,14 @@
-use kernel_entities::{entities::auth::*, traits::Key};
+use kernel_entities::entities::auth::*;
 use kernel_repositories::auth::{InsertUser, UsersRepo};
 
 use super::dtos::AddUserDto;
 use crate::{
     error::ApiResult,
     extractors::{di::Dep, validated_json::ValidatedJson},
-    util::{claims::Claims, response::Created},
+    util::{
+        claims::Claims,
+        response::{Created, EntityCreated},
+    },
 };
 
 #[utoipa::path(
@@ -18,7 +21,7 @@ pub async fn add(
     claims: Claims,
     ValidatedJson(form): ValidatedJson<AddUserDto>,
     users_repo: Dep<dyn UsersRepo>,
-) -> ApiResult<Created<Key<User>>> {
+) -> ApiResult<EntityCreated<User>> {
     claims.require_any_role_with_permission(
         vec![KnownRoles::Root, KnownRoles::Admin],
         (Resource::Users, Action::Add),
@@ -32,5 +35,5 @@ pub async fn add(
         ))
         .await?;
 
-    Ok(Created("/api/users", user.id).into())
+    Ok(Created::new("/api/users", user).into())
 }

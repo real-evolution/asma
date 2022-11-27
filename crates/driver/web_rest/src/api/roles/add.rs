@@ -6,7 +6,10 @@ use super::dtos::{AddPermissionDto, AddRoleDto};
 use crate::{
     error::ApiResult,
     extractors::{di::Dep, validated_json::ValidatedJson},
-    util::{claims::Claims, response::Created},
+    util::{
+        claims::Claims,
+        response::{Created, EntityCreated},
+    },
 };
 
 #[utoipa::path(
@@ -19,7 +22,7 @@ pub async fn add(
     claims: Claims,
     ValidatedJson(form): ValidatedJson<AddRoleDto>,
     roles_repo: Dep<dyn RolesRepo>,
-) -> ApiResult<Created<Key<Role>>> {
+) -> ApiResult<EntityCreated<Role>> {
     claims.require_role_with_permission(
         KnownRoles::Root,
         (Resource::Roles, Action::Add),
@@ -29,7 +32,7 @@ pub async fn add(
         .create(InsertRole::new(form.code, form.friendly_name))
         .await?;
 
-    Ok(Created("/api/roles", role.id).into())
+    Ok(Created::new("/api/roles", role).into())
 }
 
 #[utoipa::path(
@@ -53,7 +56,7 @@ pub async fn add_permission(
     Path(role_id): Path<Key<Role>>,
     Json(form): Json<AddPermissionDto>,
     roles_repo: Dep<dyn RolesRepo>,
-) -> ApiResult<Created<Key<Permission>>> {
+) -> ApiResult<EntityCreated<Permission>> {
     claims.require_role_with_permissions(
         KnownRoles::Root,
         vec![
@@ -66,5 +69,5 @@ pub async fn add_permission(
         .add_permission(&role_id, form.resource, form.actions)
         .await?;
 
-    Ok(Created(format!("/api/roles/{role_id}"), permission.id))
+    Ok(Created::new(format!("/api/roles/{role_id}"), permission))
 }
