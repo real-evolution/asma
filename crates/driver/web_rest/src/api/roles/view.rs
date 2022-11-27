@@ -26,7 +26,7 @@ pub async fn get_all(
 ) -> ApiResult<Json<Vec<RoleDto>>> {
     claims.require_any_role_with_permission(
         vec![KnownRoles::Root, KnownRoles::Admin],
-        (Resource::Roles, Action::View | Action::Global),
+        (Resource::Roles, Action::View),
     )?;
 
     let roles = roles_repo
@@ -57,7 +57,7 @@ pub async fn get_by_id(
 ) -> ApiResult<Json<RoleWithPermissionsDto>> {
     claims.require_any_role_with_permission(
         vec![KnownRoles::Root, KnownRoles::Admin],
-        (Resource::Roles, Action::View | Action::Global),
+        (Resource::Roles, Action::View),
     )?;
 
     let role = roles_repo.get(&role_id).await?;
