@@ -31,11 +31,11 @@ impl UsersRepo for SqlxUsersRepo {
     async fn set_display_name(
         &self,
         id: &Key<User>,
-        value: &str,
+        value: String,
     ) -> RepoResult<()> {
         sqlx_ok!(
             models::UpdateUserDisplayNameModel {
-                display_name: value.into(),
+                display_name: value,
                 updated_at: Utc::now()
             }
             .patch_row(self.db.get(), id.value())

@@ -13,7 +13,7 @@ pub trait UsersRepo:
     async fn set_display_name(
         &self,
         id: &Key<User>,
-        value: &str,
+        value: String,
     ) -> RepoResult<()>;
 }
 
