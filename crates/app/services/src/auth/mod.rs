@@ -179,6 +179,24 @@ impl AuthService for AppAuthService {
             .map(|i| AccessRule::new(i.0, i.1))
             .collect())
     }
+
+    async fn update_password(
+        &self,
+        account_id: &Key<Account>,
+        old_password: &str,
+        new_password: &str,
+    ) -> AppResult<()> {
+        let account = self.accounts.get(account_id).await?;
+
+        if self.hash_svc.hash(old_password)? != account.password_hash {
+            return Err(AuthError::OldPasswordWrong.into());
+        }
+
+        Ok(self
+            .accounts
+            .set_password_hash(account_id, self.hash_svc.hash(new_password)?)
+            .await?)
+    }
 }
 
 impl AppAuthService {
