@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use derive_more::Constructor;
 use kernel_entities::{entities::auth::*, traits::Key};
 use shaku::Interface;
@@ -8,6 +9,13 @@ use crate::{error::RepoResult, traits::*};
 pub trait AccountsRepo:
     Repo<Account> + InsertRepo<Account, InsertAccount> + Interface
 {
+    async fn get_paginated_for(
+        &self,
+        user_id: &Key<User>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Account>>;
+
     async fn get_of_user_by_name(
         &self,
         user_id: &Key<User>,

@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use adapter_proc_macros::Repo;
+use chrono::{DateTime, Utc};
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::auth::{AccountsRepo, InsertAccount};
 use kernel_repositories::error::RepoResult;
@@ -9,8 +10,8 @@ use ormx::{Delete, Table};
 use shaku::Component;
 
 use crate::database::SqlxDatabaseConnection;
-use crate::sqlx_ok;
 use crate::util::error::map_sqlx_error;
+use crate::{sqlx_ok, sqlx_vec_ok};
 
 #[derive(Component, Repo)]
 #[repo(
@@ -26,6 +27,30 @@ pub struct SqlxAccountsRepo {
 
 #[async_trait::async_trait]
 impl AccountsRepo for SqlxAccountsRepo {
+    async fn get_paginated_for(
+        &self,
+        user_id: &Key<User>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Account>> {
+        sqlx_vec_ok!(
+            sqlx::query_as!(
+                models::AccountModel,
+                r#"
+                SELECT * FROM accounts
+                WHERE user_id = $1 AND created_at <= $2
+                ORDER BY created_at
+                LIMIT $3
+                "#,
+                user_id.value_ref(),
+                before,
+                limit as i64
+            )
+            .fetch_all(self.db.get())
+            .await
+        )
+    }
+
     async fn get_of_user_by_name(
         &self,
         user_id: &Key<User>,
@@ -64,6 +89,7 @@ mod models {
         pub holder_name: Option<String>,
         pub password_hash: String,
         pub state: i32,
+        #[ormx(get_many)]
         pub user_id: KeyType,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
