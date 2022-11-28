@@ -1,13 +1,13 @@
 use chrono::{DateTime, Utc};
 use common_macros::into_fn;
 use serde::Deserialize;
-use utoipa::IntoParams;
+use utoipa::{IntoParams, ToSchema};
 use validator::Validate;
 
 into_fn!(default_before_timestamp: DateTime<Utc> =>  Utc::now());
 into_fn!(default_page_size: usize =>  32usize);
 
-#[derive(Deserialize, IntoParams, Validate)]
+#[derive(Deserialize, IntoParams, ToSchema, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct Pagination {
     #[serde(default = "default_before_timestamp")]
