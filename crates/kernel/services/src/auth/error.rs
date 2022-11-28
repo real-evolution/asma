@@ -8,6 +8,9 @@ pub enum AuthError {
     #[error("invalid credentials")]
     InvalidCredentials,
 
+    #[error("used old password is wrong")]
+    OldPasswordWrong,
+
     #[error("maximum number of seassons ({0}) has been reached")]
     MaxSessionsCountReached(usize),
 
