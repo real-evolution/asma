@@ -1,7 +1,7 @@
 use axum::extract::Path;
 use kernel_entities::entities::auth::{Action, KnownRoles, Resource, Role};
 use kernel_entities::traits::Key;
-use kernel_repositories::auth::{RolesRepo, UpdateRole};
+use kernel_repositories::auth::RolesRepo;
 
 use super::dtos::UpdateRoleDto;
 use crate::{
@@ -35,7 +35,7 @@ pub async fn update(
     )?;
 
     roles_repo
-        .update(&role_id, UpdateRole::new(form.friendly_name))
+        .set_friendly_name(&role_id, form.friendly_name)
         .await?;
 
     Ok(())

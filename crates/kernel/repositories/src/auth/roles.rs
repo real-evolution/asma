@@ -20,10 +20,10 @@ pub trait RolesRepo:
         account_id: &Key<Account>,
     ) -> RepoResult<HashMap<String, Vec<(Resource, Actions)>>>;
 
-    async fn update(
+    async fn set_friendly_name(
         &self,
         role_id: &Key<Role>,
-        update: UpdateRole,
+        value: Option<String>,
     ) -> RepoResult<()>;
 
     async fn add_to(
@@ -55,10 +55,5 @@ pub trait RolesRepo:
 #[derive(Constructor)]
 pub struct InsertRole {
     pub code: String,
-    pub friendly_name: Option<String>,
-}
-
-#[derive(Constructor)]
-pub struct UpdateRole {
     pub friendly_name: Option<String>,
 }

@@ -75,14 +75,14 @@ impl RolesRepo for SqlxRolesRepo {
         Ok(items)
     }
 
-    async fn update(
+    async fn set_friendly_name(
         &self,
         role_id: &Key<Role>,
-        update: UpdateRole,
+        value: Option<String>,
     ) -> RepoResult<()> {
         sqlx_ok!(
             models::UpdateRoleModel {
-                friendly_name: update.friendly_name,
+                friendly_name: value,
                 updated_at: Utc::now(),
             }
             .patch_row(self.db.get(), role_id.value())
