@@ -167,7 +167,6 @@ impl Claims {
         Ok(())
     }
 
-    #[allow(dead_code)]
     pub fn require_any_role_with_permissions<
         'a,
         R: Into<&'a str>,
