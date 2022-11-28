@@ -21,6 +21,12 @@ pub trait AccountsRepo:
         user_id: &Key<User>,
         account_name: &str,
     ) -> RepoResult<Account>;
+
+    async fn set_password_hash(
+        &self,
+        id: &Key<Account>,
+        value: String,
+    ) -> RepoResult<()>;
 }
 
 #[derive(Constructor, Debug)]

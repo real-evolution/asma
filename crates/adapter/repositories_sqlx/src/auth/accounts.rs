@@ -70,6 +70,20 @@ impl AccountsRepo for SqlxAccountsRepo {
             .await
         )
     }
+
+    async fn set_password_hash(
+        &self,
+        id: &Key<Account>,
+        value: String,
+    ) -> RepoResult<()> {
+        sqlx_ok!(
+            models::AccountModel::get(self.db.get(), id.value())
+                .await
+                .map_err(map_sqlx_error)?
+                .set_password_hash(self.db.acquire().await?.as_mut(), value)
+                .await
+        )
+    }
 }
 
 mod models {
@@ -86,8 +100,11 @@ mod models {
         pub id: KeyType,
         #[ormx(get_one)]
         pub account_name: String,
+        #[ormx(set)]
         pub holder_name: Option<String>,
+        #[ormx(set)]
         pub password_hash: String,
+        #[ormx(set)]
         pub state: i32,
         #[ormx(get_many)]
         pub user_id: KeyType,
