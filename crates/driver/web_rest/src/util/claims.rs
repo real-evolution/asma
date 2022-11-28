@@ -182,6 +182,20 @@ impl Claims {
         Ok(())
     }
 
+    pub fn require_account_with_permission<'a, A: Into<Actions>>(
+        &self,
+        account_id: Key<Account>,
+        permission: (Resource, A),
+    ) -> ApiResult<()> {
+        if self.account_id.value() != account_id.value() {
+            return Self::insufficient_permissions();
+        }
+
+        self.require_permission(permission.0, permission.1)?;
+
+        Ok(())
+    }
+
     fn insufficient_permissions() -> ApiResult<()> {
         Err(ApiError::Authorization("insufficient permissions".into()))
     }
