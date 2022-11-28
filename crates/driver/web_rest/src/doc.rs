@@ -41,6 +41,10 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::accounts::add::add,
         api::accounts::update::update_password,
         api::accounts::remove::remove,
+
+        // channels
+        api::link::channels::view::get_all,
+        api::link::channels::view::get_by_id,
     ),
     components(
         schemas(
@@ -70,6 +74,9 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
             // accounts
             api::accounts::dtos::AccountDto,
             api::accounts::dtos::AddAccountDto,
+
+            // channels
+            api::link::channels::dtos::ChannelDto,
         ),
     ),
     tags((

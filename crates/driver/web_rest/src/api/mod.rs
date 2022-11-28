@@ -1,10 +1,11 @@
+pub mod accounts;
 pub mod auth;
 pub mod diag;
 pub mod dtos;
+pub mod link;
 pub mod roles;
 pub mod setup;
 pub mod users;
-pub mod accounts;
 
 use axum::Router;
 use kernel_services::error::AppResult;
@@ -18,5 +19,6 @@ pub fn api_routes() -> AppResult<Router> {
         .nest("/auth", auth::routes())
         .nest("/roles", roles::routes())
         .nest("/users", users::routes())
-        .nest("/accounts", accounts::routes()))
+        .nest("/accounts", accounts::routes())
+        .nest("/link", link::routes()))
 }
