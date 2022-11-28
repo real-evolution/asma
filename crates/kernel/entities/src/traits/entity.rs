@@ -13,7 +13,17 @@ pub trait MutableEntity: Entity {
     fn updated_at(&self) -> DateTime<Utc>;
 }
 
-#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    serde::Serialize,
+    serde::Deserialize,
+)]
 #[repr(transparent)]
 pub struct Key<E, T = KeyType>(T, #[serde(skip)] PhantomData<E>);
 
