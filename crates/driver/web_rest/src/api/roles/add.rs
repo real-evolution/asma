@@ -53,7 +53,7 @@ pub async fn add(
 )]
 pub async fn add_permission(
     claims: Claims,
-    Path(role_id): Path<Key<Role>>,
+    role_id: Path<Key<Role>>,
     Json(form): Json<AddPermissionDto>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<EntityCreated<Permission>> {
@@ -69,5 +69,5 @@ pub async fn add_permission(
         .add_permission(&role_id, form.resource, form.actions)
         .await?;
 
-    Ok(Created::new(format!("/api/roles/{role_id}"), permission))
+    Ok(Created::new(format!("/api/roles/{}", role_id.0), permission))
 }

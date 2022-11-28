@@ -16,7 +16,7 @@ use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
 )]
 pub async fn remove(
     claims: Claims,
-    Path(user_id): Path<Key<User>>,
+    user_id: Path<Key<User>>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<()> {
     claims.require_any_role_with_permission(

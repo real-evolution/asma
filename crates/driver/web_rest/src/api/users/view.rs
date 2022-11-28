@@ -50,12 +50,12 @@ pub async fn get_all(
         (status = 404, description = "No users with `id` were found"),
     ),
     params(
-        ("user_id" = Userkey, Path, description = "Id of the user to get"),
+        ("user_id" = Key<User>, Path, description = "Id of the user to get"),
     )
 )]
 pub async fn get_by_id(
     claims: Claims,
-    Path(user_id): Path<Key<User>>,
+    user_id: Path<Key<User>>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<Json<UserDto>> {
     claims.require_permission(Resource::Users, Action::View)?;

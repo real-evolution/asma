@@ -52,7 +52,7 @@ pub async fn get_all(
 )]
 pub async fn get_by_id(
     claims: Claims,
-    Path(role_id): Path<Key<Role>>,
+    role_id: Path<Key<Role>>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<Json<RoleWithPermissionsDto>> {
     claims.require_any_role_with_permission(

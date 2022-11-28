@@ -25,7 +25,7 @@ use crate::{
 )]
 pub async fn update(
     claims: Claims,
-    Path(role_id): Path<Key<Role>>,
+    role_id: Path<Key<Role>>,
     ValidatedJson(form): ValidatedJson<UpdateRoleDto>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<()> {
