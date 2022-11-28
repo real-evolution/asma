@@ -31,6 +31,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::users::view::get_by_id,
         api::users::view::get_all,
         api::users::add::add,
+        api::users::update::update,
         api::users::remove::remove,
     ),
     components(
@@ -53,6 +54,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
             // users
             api::users::dtos::UserDto,
             api::users::dtos::AddUserDto,
+            api::users::dtos::UpdateUserDto,
         ),
     ),
     tags((

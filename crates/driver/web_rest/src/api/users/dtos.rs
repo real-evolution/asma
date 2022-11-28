@@ -21,3 +21,10 @@ pub struct AddUserDto {
     pub display_name: String,
     pub is_active: bool,
 }
+
+#[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateUserDto {
+    #[validate(length(min = 4, max = 32))]
+    pub display_name: String,
+}
