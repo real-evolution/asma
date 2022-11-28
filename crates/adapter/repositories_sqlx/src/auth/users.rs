@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
 use adapter_proc_macros::Repo;
+use chrono::Utc;
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{auth::*, error::*, traits::*};
-use ormx::{Delete, Table};
+use ormx::{Delete, Patch, Table};
 use shaku::Component;
 
 use crate::util::error::map_sqlx_error;
@@ -26,6 +27,21 @@ impl UsersRepo for SqlxUsersRepo {
     async fn get_by_username(&self, username: &str) -> RepoResult<User> {
         sqlx_ok!(models::UserModel::by_username(self.db.get(), username).await)
     }
+
+    async fn set_display_name(
+        &self,
+        id: &Key<User>,
+        value: &str,
+    ) -> RepoResult<()> {
+        sqlx_ok!(
+            models::UpdateUserDisplayNameModel {
+                display_name: value.into(),
+                updated_at: Utc::now()
+            }
+            .patch_row(self.db.get(), id.value())
+            .await
+        )
+    }
 }
 
 mod models {
@@ -40,6 +56,7 @@ mod models {
     #[ormx(table = "users", id = id, insertable, deletable)]
     pub struct UserModel {
         pub id: KeyType,
+        #[ormx(set)]
         pub display_name: String,
         #[ormx(get_one(&str))]
         pub username: String,
@@ -47,6 +64,13 @@ mod models {
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
         #[ormx(default, set)]
+        pub updated_at: DateTime<Utc>,
+    }
+
+    #[derive(ormx::Patch)]
+    #[ormx(table_name = "users", table = UserModel, id = "id")]
+    pub struct UpdateUserDisplayNameModel {
+        pub display_name: String,
         pub updated_at: DateTime<Utc>,
     }
 

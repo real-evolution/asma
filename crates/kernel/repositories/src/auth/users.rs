@@ -1,5 +1,5 @@
 use derive_more::Constructor;
-use kernel_entities::entities::auth::*;
+use kernel_entities::{entities::auth::*, traits::Key};
 use shaku::Interface;
 
 use crate::{error::RepoResult, traits::*};
@@ -9,6 +9,12 @@ pub trait UsersRepo:
     Repo<User> + InsertRepo<User, InsertUser> + Interface
 {
     async fn get_by_username(&self, username: &str) -> RepoResult<User>;
+
+    async fn set_display_name(
+        &self,
+        id: &Key<User>,
+        value: &str,
+    ) -> RepoResult<()>;
 }
 
 #[derive(Constructor, Debug)]
