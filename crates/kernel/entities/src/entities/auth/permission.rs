@@ -37,6 +37,7 @@ pub enum Resource {
     Accounts = 1,
     Roles = 2,
     Permissions = 3,
+    Channels = 4,
 }
 
 #[repr(i32)]
