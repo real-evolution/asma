@@ -35,3 +35,11 @@ pub struct AddAccountDto {
     pub password: String,
     pub is_active: bool,
 }
+
+#[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateAccountPasswordDto {
+    pub old_password: String,
+    #[validate(length(min = 8, max = 64))]
+    pub new_password: String,
+}
