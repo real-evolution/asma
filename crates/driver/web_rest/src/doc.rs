@@ -33,6 +33,7 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::users::add::add,
         api::users::update::update,
         api::users::remove::remove,
+        api::users::accounts::view::get_accounts_of,
 
         // accounts
         api::accounts::view::get_all,
