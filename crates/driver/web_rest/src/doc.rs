@@ -40,6 +40,9 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
     ),
     components(
         schemas(
+            // shared
+            api::dtos::pagination::Pagination,
+
             // setup
             api::setup::dtos::RootAccountDetails,
 
