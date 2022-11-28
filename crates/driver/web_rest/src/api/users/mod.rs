@@ -1,3 +1,4 @@
+pub mod accounts;
 pub mod add;
 pub mod dtos;
 pub mod remove;
@@ -15,4 +16,5 @@ pub fn routes() -> Router {
                 .delete(remove::remove)
                 .patch(update::update),
         )
+        .nest("/:user_id/accounts", accounts::routes())
 }
