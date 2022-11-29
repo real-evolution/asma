@@ -76,14 +76,16 @@ impl AccountsRepo for SqlxAccountsRepo {
         id: &Key<Account>,
         value: String,
     ) -> RepoResult<()> {
-        return sqlx_ok!(
+        sqlx_ok!(
             models::UpdateAccountPasswordModel {
                 password_hash: value,
                 updated_at: Utc::now()
             }
             .patch_row(self.db.get(), id.value())
             .await
-        );
+        )
+    }
+
     async fn set_holder_name(
         &self,
         id: &Key<Account>,
