@@ -152,6 +152,20 @@ mod models {
         pub updated_at: DateTime<Utc>,
     }
 
+    #[derive(ormx::Patch)]
+    #[ormx(table_name = "accounts", table = AccountModel, id = "id")]
+    pub struct UpdateAccountHolderNameModel {
+        pub holder_name: Option<String>,
+        pub updated_at: DateTime<Utc>,
+    }
+
+    #[derive(ormx::Patch)]
+    #[ormx(table_name = "accounts", table = AccountModel, id = "id")]
+    pub struct UpdateAccountStateModel {
+        pub state: i32,
+        pub updated_at: DateTime<Utc>,
+    }
+
     impl Into<InsertAccountModel> for InsertAccount {
         fn into(self) -> InsertAccountModel {
             InsertAccountModel {
