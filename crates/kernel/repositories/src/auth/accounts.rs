@@ -33,6 +33,12 @@ pub trait AccountsRepo:
         id: &Key<Account>,
         value: Option<String>,
     ) -> RepoResult<()>;
+
+    async fn set_state(
+        &self,
+        id: &Key<Account>,
+        value: AccountState,
+    ) -> RepoResult<()>;
 }
 
 #[derive(Constructor, Debug)]

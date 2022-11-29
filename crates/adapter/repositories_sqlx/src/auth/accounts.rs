@@ -99,6 +99,20 @@ impl AccountsRepo for SqlxAccountsRepo {
         )
     }
 
+    async fn set_state(
+        &self,
+        id: &Key<Account>,
+        value: AccountState,
+    ) -> RepoResult<()> {
+        sqlx_ok!(
+            models::UpdateAccountStateModel {
+                state: value.into(),
+                updated_at: Utc::now()
+            }
+            .patch_row(self.db.get(), id.value())
+            .await
+        )
+    }
 }
 
 mod models {
