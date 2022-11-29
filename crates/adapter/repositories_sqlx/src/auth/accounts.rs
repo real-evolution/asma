@@ -6,7 +6,7 @@ use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::auth::{AccountsRepo, InsertAccount};
 use kernel_repositories::error::RepoResult;
 use kernel_repositories::traits::*;
-use ormx::{Delete, Table};
+use ormx::{Delete, Patch, Table};
 use shaku::Component;
 
 use crate::database::SqlxDatabaseConnection;
@@ -76,13 +76,14 @@ impl AccountsRepo for SqlxAccountsRepo {
         id: &Key<Account>,
         value: String,
     ) -> RepoResult<()> {
-        sqlx_ok!(
-            models::AccountModel::get(self.db.get(), id.value())
-                .await
-                .map_err(map_sqlx_error)?
-                .set_password_hash(self.db.acquire().await?.as_mut(), value)
-                .await
-        )
+        return sqlx_ok!(
+            models::UpdateAccountPasswordModel {
+                password_hash: value,
+                updated_at: Utc::now()
+            }
+            .patch_row(self.db.get(), id.value())
+            .await
+        );
     }
 }
 
@@ -111,6 +112,13 @@ mod models {
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
         #[ormx(default, set)]
+        pub updated_at: DateTime<Utc>,
+    }
+
+    #[derive(ormx::Patch)]
+    #[ormx(table_name = "accounts", table = AccountModel, id = "id")]
+    pub struct UpdateAccountPasswordModel {
+        pub password_hash: String,
         pub updated_at: DateTime<Utc>,
     }
 
