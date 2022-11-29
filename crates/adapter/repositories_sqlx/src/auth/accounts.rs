@@ -84,7 +84,21 @@ impl AccountsRepo for SqlxAccountsRepo {
             .patch_row(self.db.get(), id.value())
             .await
         );
+    async fn set_holder_name(
+        &self,
+        id: &Key<Account>,
+        value: Option<String>,
+    ) -> RepoResult<()> {
+        sqlx_ok!(
+            models::UpdateAccountHolderNameModel {
+                holder_name: value,
+                updated_at: Utc::now()
+            }
+            .patch_row(self.db.get(), id.value())
+            .await
+        )
     }
+
 }
 
 mod models {

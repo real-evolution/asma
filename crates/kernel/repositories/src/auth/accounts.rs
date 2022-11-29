@@ -27,6 +27,12 @@ pub trait AccountsRepo:
         id: &Key<Account>,
         value: String,
     ) -> RepoResult<()>;
+
+    async fn set_holder_name(
+        &self,
+        id: &Key<Account>,
+        value: Option<String>,
+    ) -> RepoResult<()>;
 }
 
 #[derive(Constructor, Debug)]
