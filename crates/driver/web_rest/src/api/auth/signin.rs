@@ -44,12 +44,9 @@ pub async fn signin(
     let access_rules =
         auth_svc.get_access_rules_for(&session.account_id).await?;
 
-    let access_token =
-        Claims::new(user, account, session, access_rules, &config)
-            .encode(&config.token.signing_key.as_bytes())?;
-
     Ok(Json(TokenPair {
-        access_token,
         refresh_token,
+        access_token: Claims::new(user, account, session, access_rules, config)
+            .encode()?,
     }))
 }
