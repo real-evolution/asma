@@ -19,10 +19,10 @@ pub async fn remove(
     user_id: Path<Key<User>>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<()> {
-    claims.require_any_role_with_permission(
-        vec![KnownRoles::Root, KnownRoles::Admin],
-        (Resource::Users, Action::Remove),
-    )?;
+    claims
+        .check()
+        .can(Resource::Users, Action::Remove)?
+        .in_role(&KnownRoles::Admin)?;
 
     users_repo.remove(&user_id).await?;
 

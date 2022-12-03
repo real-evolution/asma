@@ -23,10 +23,10 @@ pub async fn add(
     ValidatedJson(form): ValidatedJson<AddRoleDto>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<EntityCreated<Role>> {
-    claims.require_role_with_permission(
-        KnownRoles::Root,
-        (Resource::Roles, Action::Add),
-    )?;
+    claims
+        .check()
+        .in_role(&KnownRoles::Admin)?
+        .can(Resource::Roles, Action::Add)?;
 
     let role = roles_repo
         .create(InsertRole::new(form.code, form.friendly_name))
@@ -57,9 +57,9 @@ pub async fn add_permission(
     Json(form): Json<AddPermissionDto>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<EntityCreated<Permission>> {
-    claims.require_role_with_permissions(
-        KnownRoles::Root,
-        vec![
+    claims.check().in_role_with(
+        &KnownRoles::Root,
+        &[
             (Resource::Roles, Action::Modify),
             (Resource::Permissions, Action::Add),
         ],
@@ -69,5 +69,8 @@ pub async fn add_permission(
         .add_permission(&role_id, form.resource, form.actions)
         .await?;
 
-    Ok(Created::new(format!("/api/roles/{}", role_id.0), permission))
+    Ok(Created::new(
+        format!("/api/roles/{}", role_id.0),
+        permission,
+    ))
 }

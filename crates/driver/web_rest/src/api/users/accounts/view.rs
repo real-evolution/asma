@@ -38,13 +38,12 @@ pub async fn get_accounts_of(
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
     accounts_repo: Dep<dyn AccountsRepo>,
 ) -> ApiResult<Json<Vec<AccountDto>>> {
-    claims.require_any_role_with_permissions(
-        vec![KnownRoles::Root, KnownRoles::Admin],
-        vec![
-            (Resource::Users, Action::View),
-            (Resource::Accounts, Action::View),
-        ],
-    )?;
+    claims
+        .check()
+        .can(Resource::Users, Action::View)?
+        .can(Resource::Accounts, Action::View)?
+        .of(&user_id)
+        .or(claims.check().in_role(&KnownRoles::Admin))?;
 
     let accounts = accounts_repo
         .get_paginated_for(&user_id, &pagination.before, pagination.page_size)

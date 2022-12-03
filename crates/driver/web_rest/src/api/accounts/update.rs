@@ -29,10 +29,10 @@ pub async fn update_password(
     ValidatedJson(form): ValidatedJson<UpdateAccountPasswordDto>,
     auth_svc: Dep<dyn AuthService>,
 ) -> ApiResult<()> {
-    claims.require_account_with_permission(
-        account_id.clone(),
-        (Resource::Accounts, Action::Modify),
-    )?;
+    claims
+        .check()
+        .is(&account_id)?
+        .can(Resource::Accounts, Action::Modify)?;
 
     Ok(auth_svc
         .update_password(&account_id, &form.old_password, &form.new_password)

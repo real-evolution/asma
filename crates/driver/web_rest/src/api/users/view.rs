@@ -27,10 +27,10 @@ pub async fn get_all(
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<Json<Vec<UserDto>>> {
-    claims.require_any_role_with_permission(
-        vec![KnownRoles::Root, KnownRoles::Admin],
-        (Resource::Roles, Action::View),
-    )?;
+    claims
+        .check()
+        .can(Resource::Users, Action::View)?
+        .in_role(&KnownRoles::Admin)?;
 
     let users = users_repo
         .get_paginated(&pagination.before, pagination.page_size)
@@ -58,7 +58,7 @@ pub async fn get_by_id(
     user_id: Path<Key<User>>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<Json<UserDto>> {
-    claims.require_permission(Resource::Users, Action::View)?;
+    claims.check().can(Resource::Users, Action::View)?;
 
     Ok(Json(UserDto::new(users_repo.get(&user_id).await?)))
 }

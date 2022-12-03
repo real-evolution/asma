@@ -29,10 +29,10 @@ pub async fn update(
     ValidatedJson(form): ValidatedJson<UpdateUserDto>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<()> {
-    claims.require_role_with_permission(
-        KnownRoles::Root,
-        (Resource::Users, Action::Modify),
-    )?;
+    claims
+        .check()
+        .can(Resource::Users, Action::Modify)?
+        .in_role(&KnownRoles::Admin)?;
 
     Ok(users_repo
         .set_display_name(&user_id, form.display_name)

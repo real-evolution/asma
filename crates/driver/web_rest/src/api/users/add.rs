@@ -22,10 +22,10 @@ pub async fn add(
     ValidatedJson(form): ValidatedJson<AddUserDto>,
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<EntityCreated<User>> {
-    claims.require_any_role_with_permission(
-        vec![KnownRoles::Root, KnownRoles::Admin],
-        (Resource::Users, Action::Add),
-    )?;
+    claims
+        .check()
+        .can(Resource::Users, Action::Add)?
+        .in_role(&KnownRoles::Admin)?;
 
     let user = users_repo
         .create(InsertUser::new(
