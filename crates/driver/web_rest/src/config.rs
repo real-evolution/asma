@@ -17,6 +17,7 @@ fn default_signing_key() -> String {
 pub struct ApiConfig {
     #[serde(default)]
     pub token: ApiTokenConfig,
+    pub disable_root: bool,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Validate)]
