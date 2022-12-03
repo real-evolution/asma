@@ -13,8 +13,6 @@ use crate::error::ApiResult;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Claims {
-    #[serde(skip)]
-    pub config: ApiConfig,
     pub sub: Key<Session>,
     pub exp: i64,
     pub iat: i64,
@@ -27,6 +25,9 @@ pub struct Claims {
     pub account_name: String,
     pub holder_name: Option<String>,
     pub roles: HashMap<String, Vec<(Resource, Actions)>>,
+
+    #[serde(skip)]
+    pub config: ApiConfig,
 }
 
 impl Claims {
@@ -45,7 +46,6 @@ impl Claims {
         };
 
         Claims {
-            config,
             sub: session.id,
             iat,
             exp,
@@ -61,6 +61,7 @@ impl Claims {
                 .into_iter()
                 .map(|a| (a.role_code, a.permissions))
                 .collect(),
+            config,
         }
     }
 
@@ -76,7 +77,7 @@ impl Claims {
 }
 
 impl Claims {
-    pub fn check<'a>(&self) -> ClaimsRequirement<'a> {
+    pub fn check<'a>(&'a self) -> ClaimsRequirement<'a> {
         ClaimsRequirement::new(self)
     }
 }
