@@ -80,13 +80,6 @@ impl AppSetupService {
             ))
             .await?;
 
-        // set root role permissions
-        for res in Resource::all() {
-            self.roles
-                .add_permission(&role.id, res, Actions::all())
-                .await?;
-        }
-
         // add account to root role
         self.roles.add_to(root_account_id, &role.id).await?;
 
