@@ -3,22 +3,11 @@ use std::ops::{BitAnd, BitOr, BitXor, Not};
 use derive_more::{Display, From, Into};
 use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
-use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use super::Role;
 use crate::traits::*;
-
-lazy_static! {
-    static ref ALL_ACTIONS: Vec<Action> = vec![
-        Action::Global,
-        Action::View,
-        Action::Add,
-        Action::Modify,
-        Action::Remove,
-    ];
-}
 
 #[EnumRepr(type = "i64")]
 #[derive(
@@ -59,21 +48,8 @@ pub struct Permission {
 }
 
 #[repr(transparent)]
-#[derive(
-    Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, sqlx::Type,
-)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize, sqlx::Type)]
 pub struct Actions(i32);
-
-impl Resource {
-    pub fn all() -> Vec<Self> {
-        vec![
-            Resource::Users,
-            Resource::Accounts,
-            Resource::Roles,
-            Resource::Permissions,
-        ]
-    }
-}
 
 impl From<Action> for Actions {
     fn from(value: Action) -> Self {
@@ -84,14 +60,6 @@ impl From<Action> for Actions {
 impl Actions {
     pub fn from_bits(inner: i32) -> Self {
         Self(inner)
-    }
-
-    pub fn all() -> Self {
-        Self::all_iter().fold(Self(0), |a, b| a | b)
-    }
-
-    pub fn all_iter() -> impl Iterator<Item = Action> {
-        ALL_ACTIONS.clone().into_iter()
     }
 
     pub fn inner(self) -> i32 {
