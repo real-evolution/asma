@@ -28,7 +28,7 @@ pub async fn add(
         .check()
         .can(Resource::Accounts, Action::Add)?
         .in_any(&[KnownRoles::Admin])?
-        .is_of(&form.user_id)?;
+        .of(&form.user_id)?;
 
     let password_hash = hash_svc.hash(&form.password)?;
     let state = if form.is_active {
