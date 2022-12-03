@@ -2,18 +2,19 @@ use std::{cmp::min, collections::HashMap};
 
 use chrono::Utc;
 use jsonwebtoken::{EncodingKey, Header};
-use kernel_entities::entities::auth::{
-    Account, Actions, Resource, Session, User,
-};
+use kernel_entities::entities::auth::*;
 use kernel_entities::traits::Key;
 use kernel_services::auth::models::AccessRule;
 use serde::{Deserialize, Serialize};
 
+use super::claims_macros::ClaimsRequirement;
 use crate::config::ApiConfig;
-use crate::error::{ApiError, ApiResult};
+use crate::error::ApiResult;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Claims {
+    #[serde(skip)]
+    pub config: ApiConfig,
     pub sub: Key<Session>,
     pub exp: i64,
     pub iat: i64,
@@ -21,7 +22,7 @@ pub struct Claims {
     pub aud: String,
     pub user_id: Key<User>,
     pub username: String,
-    pub display_name: String,
+    pub user_display_name: String,
     pub account_id: Key<Account>,
     pub account_name: String,
     pub holder_name: Option<String>,
@@ -34,7 +35,7 @@ impl Claims {
         account: Account,
         session: Session,
         access_rules: Vec<AccessRule>,
-        config: &ApiConfig,
+        config: ApiConfig,
     ) -> Claims {
         let iat = Utc::now().timestamp();
         let conf_exp = iat + config.token.timout_seconds;
@@ -44,6 +45,7 @@ impl Claims {
         };
 
         Claims {
+            config,
             sub: session.id,
             iat,
             exp,
@@ -51,7 +53,7 @@ impl Claims {
             aud: config.token.audience.clone(),
             user_id: user.id,
             username: user.username,
-            display_name: user.display_name,
+            user_display_name: user.display_name,
             account_id: account.id,
             account_name: account.account_name,
             holder_name: account.holder_name,
@@ -62,11 +64,11 @@ impl Claims {
         }
     }
 
-    pub fn encode(&self, key: &[u8]) -> ApiResult<String> {
+    pub fn encode(&self) -> ApiResult<String> {
         let jwt = jsonwebtoken::encode(
             &Header::default(),
             &self,
-            &EncodingKey::from_secret(key),
+            &EncodingKey::from_secret(self.config.token.signing_key.as_bytes()),
         )?;
 
         Ok(jwt)
@@ -74,129 +76,7 @@ impl Claims {
 }
 
 impl Claims {
-    pub fn require_role<'a, R: Into<&'a str>>(&self, role: R) -> ApiResult<()> {
-        if self.roles.contains_key(role.into()) {
-            return Ok(());
-        }
-
-        Self::insufficient_permissions()
-    }
-
-    pub fn require_any_role<'a, R: Into<&'a str>>(
-        &self,
-        roles: Vec<R>,
-    ) -> ApiResult<()> {
-        if roles.into_iter().any(|r| self.require_role(r).is_ok()) {
-            return Ok(());
-        }
-
-        Self::insufficient_permissions()
-    }
-
-    pub fn require_permission<A: Into<Actions>>(
-        &self,
-        resource: Resource,
-        actions: A,
-    ) -> ApiResult<()> {
-        let actions: Actions = actions.into();
-
-        if self
-            .roles
-            .iter()
-            .any(|r| r.1.iter().any(|a| a.0 == resource && a.1.has(actions)))
-        {
-            return Ok(());
-        }
-
-        Self::insufficient_permissions()
-    }
-
-    pub fn require_permissions<A: Into<Actions>>(
-        &self,
-        permissions: Vec<(Resource, A)>,
-    ) -> ApiResult<()> {
-        for (resource, actions) in permissions {
-            self.require_permission(resource, actions)?;
-        }
-
-        Ok(())
-    }
-
-    pub fn require_role_with_permission<
-        'a,
-        R: Into<&'a str>,
-        A: Into<Actions>,
-    >(
-        &self,
-        role: R,
-        permission: (Resource, A),
-    ) -> ApiResult<()> {
-        self.require_role(role)?;
-        self.require_permission(permission.0, permission.1.into())?;
-
-        Ok(())
-    }
-
-    pub fn require_role_with_permissions<
-        'a,
-        R: Into<&'a str>,
-        A: Into<Actions>,
-    >(
-        &self,
-        role: R,
-        permissions: Vec<(Resource, A)>,
-    ) -> ApiResult<()> {
-        self.require_role(role)?;
-        self.require_permissions(permissions)?;
-
-        Ok(())
-    }
-
-    pub fn require_any_role_with_permission<
-        'a,
-        R: Into<&'a str>,
-        A: Into<Actions>,
-    >(
-        &self,
-        roles: Vec<R>,
-        permission: (Resource, A),
-    ) -> ApiResult<()> {
-        self.require_any_role(roles)?;
-        self.require_permission(permission.0, permission.1)?;
-
-        Ok(())
-    }
-
-    pub fn require_any_role_with_permissions<
-        'a,
-        R: Into<&'a str>,
-        A: Into<Actions>,
-    >(
-        &self,
-        roles: Vec<R>,
-        permissions: Vec<(Resource, A)>,
-    ) -> ApiResult<()> {
-        self.require_any_role(roles)?;
-        self.require_permissions(permissions)?;
-
-        Ok(())
-    }
-
-    pub fn require_account_with_permission<'a, A: Into<Actions>>(
-        &self,
-        account_id: Key<Account>,
-        permission: (Resource, A),
-    ) -> ApiResult<()> {
-        if self.account_id.value() != account_id.value() {
-            return Self::insufficient_permissions();
-        }
-
-        self.require_permission(permission.0, permission.1)?;
-
-        Ok(())
-    }
-
-    fn insufficient_permissions() -> ApiResult<()> {
-        Err(ApiError::Authorization("insufficient permissions".into()))
+    pub fn check<'a>(&self) -> ClaimsRequirement<'a> {
+        ClaimsRequirement::new(self)
     }
 }
