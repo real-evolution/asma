@@ -55,3 +55,33 @@ pub async fn get_accounts_of(
 
     Ok(Json(accounts))
 }
+
+#[utoipa::path(
+    get,
+    path = "/api/users/{user_id}/accounts/{account_id}",
+    responses(
+        (status = 200, description = "Account with `id", body = AccountDto),
+        (status = 404, description = "No accounts with `id` were found"),
+    ),
+    params(
+        ("account_id" = Key<Account>, Path, description = "Id of the user to get"),
+    )
+)]
+pub async fn get_account_of_by_id(
+    claims: Claims,
+    user_id: Path<Key<Account>>,
+    account_id: Path<Key<Account>>,
+    accounts_repo: Dep<dyn AccountsRepo>,
+) -> ApiResult<Json<AccountDto>> {
+    claims
+        .can(&[
+            (Resource::Users, Action::View),
+            (Resource::Accounts, Action::View),
+        ])?
+        .of(&user_id)
+        .or(claims.in_role(&KnownRoles::Admin))?;
+
+    let account = accounts_repo.get_for(&account_id, &user_id)?;
+
+    Ok(Json(AccountDto::from(account)))
+}
