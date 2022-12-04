@@ -34,8 +34,9 @@ pub trait AuthService: Interface {
         account_id: &Key<Account>,
     ) -> AppResult<Vec<AccessRule>>;
 
-    async fn update_password(
+    async fn update_password_for(
         &self,
+        user_id: &Key<User>,
         account_id: &Key<Account>,
         old_password: &str,
         new_password: &str,

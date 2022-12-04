@@ -180,13 +180,14 @@ impl AuthService for AppAuthService {
             .collect())
     }
 
-    async fn update_password(
+    async fn update_password_for(
         &self,
+        user_id: &Key<User>,
         account_id: &Key<Account>,
         old_password: &str,
         new_password: &str,
     ) -> AppResult<()> {
-        let account = self.accounts.get(account_id).await?;
+        let account = self.accounts.get_of(user_id, account_id).await?;
 
         if self.hash_svc.hash(old_password)? != account.password_hash {
             return Err(AuthError::OldPasswordWrong.into());
