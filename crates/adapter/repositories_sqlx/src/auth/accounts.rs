@@ -27,30 +27,6 @@ pub struct SqlxAccountsRepo {
 
 #[async_trait::async_trait]
 impl AccountsRepo for SqlxAccountsRepo {
-    async fn get_paginated_for(
-        &self,
-        user_id: &Key<User>,
-        before: &DateTime<Utc>,
-        limit: usize,
-    ) -> RepoResult<Vec<Account>> {
-        sqlx_vec_ok!(
-            sqlx::query_as!(
-                models::AccountModel,
-                r#"
-                SELECT * FROM accounts
-                WHERE user_id = $1 AND created_at <= $2
-                ORDER BY created_at
-                LIMIT $3
-                "#,
-                user_id.value_ref(),
-                before,
-                limit as i64
-            )
-            .fetch_all(self.db.get())
-            .await
-        )
-    }
-
     async fn get_of_user_by_name(
         &self,
         user_id: &Key<User>,
@@ -112,6 +88,66 @@ impl AccountsRepo for SqlxAccountsRepo {
                 updated_at: Utc::now()
             }
             .patch_row(self.db.get(), id.value())
+            .await
+        )
+    }
+}
+
+impl ChildRepo<Account, User> for SqlxAccountsRepo {
+    async fn get_paginated_for(
+        &self,
+        user_id: &Key<User>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Account>> {
+        sqlx_vec_ok!(
+            sqlx::query_as!(
+                models::AccountModel,
+                r#"
+                SELECT * FROM accounts
+                WHERE user_id = $1 AND created_at <= $2
+                ORDER BY created_at
+                LIMIT $3
+                "#,
+                user_id.value_ref(),
+                before,
+                limit as i64
+            )
+            .fetch_all(self.db.get())
+            .await
+        )
+    }
+
+    async fn get_for(
+        &self,
+        key: &Key<Account>,
+        parent_key: &Key<User>,
+    ) -> RepoResult<Account> {
+        sqlx_ok!(
+            sqlx::query_as!(
+                models::AccountModel,
+                r#"SELECT * FROM accounts WHERE id = $1 AND user_id = $2"#,
+                key.value_ref(),
+                parent_key.value_ref()
+            )
+            .fetch_one(self.db.get())
+            .await
+        )
+    }
+
+    async fn remove_for(
+        &self,
+        key: &Key<Account>,
+        parent_key: &Key<User>,
+    ) -> RepoResult<()> {
+        sqlx_ok!(
+            sqlx::query_as!(
+                models::AccountModel,
+                r#"DELETE FROM accounts WHERE id = $1 AND user_id = $2"#,
+                key.value_ref(),
+                parent_key.value_ref()
+            )
+            .fetch_one(self.db.get())
             .await
         )
     }
