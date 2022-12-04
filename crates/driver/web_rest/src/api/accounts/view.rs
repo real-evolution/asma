@@ -46,26 +46,3 @@ pub async fn get_all(
 
     Ok(Json(users))
 }
-
-#[utoipa::path(
-    get,
-    path = "/api/accounts/{account_id}",
-    responses(
-        (status = 200, description = "Account with `id", body = AccountDto),
-        (status = 404, description = "No accounts with `id` were found"),
-    ),
-    params(
-        ("account_id" = Key<Account>, Path, description = "Id of the user to get"),
-    )
-)]
-pub async fn get_by_id(
-    claims: Claims,
-    account_id: Path<Key<Account>>,
-    accounts_repo: Dep<dyn AccountsRepo>,
-) -> ApiResult<Json<AccountDto>> {
-    claims.check().can(Resource::Users, Action::View)?;
-
-    Ok(Json(AccountDto::from(
-        accounts_repo.get(&account_id).await?,
-    )))
-}
