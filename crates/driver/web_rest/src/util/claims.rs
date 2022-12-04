@@ -81,3 +81,103 @@ impl Claims {
         ClaimsRequirement::new(self)
     }
 }
+
+impl Claims {
+    #[inline]
+    pub fn is_root(&self) -> ApiResult<&Self> {
+        if !self.config.disable_root
+            && self.roles.contains_key(KnownRoles::Root.into())
+        {
+            return Ok(self);
+        }
+
+        Self::insufficient_permissions()
+    }
+
+    #[inline]
+    pub fn in_role<'a, R: Into<&'a str>>(&self, role: R) -> ApiResult<&Self> {
+        self.is_root()
+            .or(self.require(|| self.roles.contains_key(role.into())))
+    }
+
+    #[inline]
+    pub fn in_role_with<'a, R: Into<&'a str>, A: Into<Actions>>(
+        &self,
+        role: R,
+        perms: &[(Resource, A)],
+    ) -> ApiResult<&Self> {
+        let Some(role_perms) = self.roles.get(role.into()) else {
+            return Self::insufficient_permissions();
+        };
+
+        self.require(|| {
+            perms.iter().all(|p| {
+                let actions: Actions = p.1.into();
+
+                role_perms
+                    .iter()
+                    .any(|rp| p.0 == rp.0 && rp.1.has(&actions))
+            })
+        })
+    }
+
+    #[inline]
+    pub fn can<A: Into<Actions>>(
+        &self,
+        perms: &[(Resource, A)],
+    ) -> ApiResult<&Self> {
+        self.is_root().or(self.require(|| {
+            perms.iter().all(|p| {
+                let actions = p.1.into();
+
+                self.roles.iter().any(|r| {
+                    r.1.iter().any(|rp| rp.0 == p.0 && rp.1.has(&actions))
+                })
+            })
+        }))
+    }
+
+    #[inline]
+    pub fn is(&self, account_id: &Key<Account>) -> ApiResult<&Self> {
+        self.require(|| self.account_id.value_ref() == account_id.value_ref())
+    }
+
+    #[inline]
+    pub fn is_with(
+        &self,
+        account_id: &Key<Account>,
+        perms: &[(Resource, A)],
+    ) -> ApiResult<&Self> {
+        self.is(account_id)?;
+        self.can(perms)
+    }
+
+    #[inline]
+    pub fn of(&self, user_id: &Key<User>) -> ApiResult<&Self> {
+        self.require(|| self.user_id.value_ref() == user_id.value_ref())
+    }
+
+    #[inline]
+    pub fn of_with(
+        &self,
+        user_id: &Key<User>,
+        perms: &[(Resource, A)],
+    ) -> ApiResult<&Self> {
+        self.of(user_id)?;
+        self.can(perms)
+    }
+
+    #[inline]
+    pub fn require<F: FnOnce() -> bool>(&self, req: F) -> ApiResult<&Self> {
+        if req() {
+            Ok(self)
+        } else {
+            Self::insufficient_permissions()
+        }
+    }
+
+    #[inline]
+    fn insufficient_permissions() -> ApiResult<&'static Self> {
+        Err(ApiError::Authorization("insufficient permissions".into()))
+    }
+}
