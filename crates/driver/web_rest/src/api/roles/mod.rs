@@ -16,6 +16,10 @@ pub fn routes() -> Router {
                 .patch(update::update),
         )
         .route(
+            "/accounts",
+            post(add::add_to).delete(remove::remove_from),
+        )
+        .route(
             "/permissions/:permission_id",
             post(add::add_permission).delete(remove::remove_permission),
         )
