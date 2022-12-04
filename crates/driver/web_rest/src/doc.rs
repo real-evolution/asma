@@ -35,9 +35,9 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::users::remove::remove,
 
         // accounts
-        api::users::accounts::view::get_all_of,
-        api::users::accounts::view::get_of_by_id,
-        //api::users::accounts::add::add,
+        api::users::accounts::view::get_all,
+        api::users::accounts::view::get_by_id,
+        api::users::accounts::add::add,
         api::users::accounts::update::update_password,
         api::users::accounts::remove::remove,
 
@@ -71,8 +71,9 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
             api::users::dtos::UpdateUserDto,
 
             // accounts
-            api::accounts::dtos::AccountDto,
-            api::accounts::dtos::AddAccountDto,
+            api::users::accounts::dtos::AccountDto,
+            api::users::accounts::dtos::AddAccountDto,
+            api::users::accounts::dtos::UpdateAccountPasswordDto,
 
             // channels
             api::link::channels::dtos::ChannelDto,
