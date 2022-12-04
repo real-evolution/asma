@@ -1,8 +1,8 @@
 use axum::{extract::Path, Json};
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::auth::{InsertRole, RolesRepo};
+use kernel_repositories::auth::{AccountsRepo, InsertRole, RolesRepo};
 
-use super::dtos::{AddPermissionDto, AddRoleDto};
+use super::dtos::{AddAccountToRoleDto, AddPermissionDto, AddRoleDto};
 use crate::{
     error::ApiResult,
     extractors::{di::Dep, validated_json::ValidatedJson},
@@ -71,4 +71,43 @@ pub async fn add_permission(
         format!("/api/roles/{}", role_id.0),
         permission,
     ))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/roles/{role_id}/accounts",
+    request_body = AddAccountToRoleDto,
+    responses(
+        (status = 200, description = "Account added"),
+        (status = 404, description = "Role or account or user does not exist"),
+    ),
+    params(
+        (
+            "role_id" = Key<Role>,
+            Path,
+            description = "Id of the role to add the account to"
+        ),
+    )
+)]
+pub async fn add_to(
+    claims: Claims,
+    role_id: Path<Key<Role>>,
+    Json(form): Json<AddAccountToRoleDto>,
+    roles_repo: Dep<dyn RolesRepo>,
+    accounts_repo: Dep<dyn AccountsRepo>,
+) -> ApiResult<()> {
+    claims.in_role_with(
+        KnownRoles::UserOwner,
+        &[(Resource::Roles, Action::Modify)],
+    )?;
+
+    let role = roles_repo.get(&role_id).await?;
+    claims.in_role(role.code.as_str())?;
+
+    let account = accounts_repo.get(&form.account_id).await?;
+    claims.of(&account.user_id)?;
+
+    roles_repo.add_to(&account.id, &role.id).await?;
+
+    Ok(())
 }
