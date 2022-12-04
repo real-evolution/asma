@@ -68,3 +68,41 @@ pub async fn get_by_id(
         permissions,
     }))
 }
+
+#[utoipa::path(
+    get,
+    path = "/api/roles/{role_id}/accounts",
+    responses(
+        (status = 200, description = "Role with `id", body = RoleWithPermissionsDto),
+        (status = 404, description = "No roles with `id` were found"),
+    ),
+    params(
+        ("role_id" = Key<Role>, Path, description = "Id of the role to get"),
+    )
+)]
+pub async fn get_accounts(
+    claims: Claims,
+    role_id: Path<Key<Role>>,
+    roles_repo: Dep<dyn RolesRepo>,
+) -> ApiResult<Json<RoleWithPermissionsDto>> {
+    claims.in_role_with(
+        KnownRoles::Admin,
+        &[
+            (Resource::Roles, Action::View),
+            (Resource::Accounts, Action::View),
+        ],
+    )?;
+
+    let role = roles_repo.get(&role_id).await?;
+    let permissions: Vec<PermissionDto> = roles_repo
+        .get_permissions_of(&role.id)
+        .await?
+        .into_iter()
+        .map(|p| p.into())
+        .collect_vec();
+
+    Ok(Json(RoleWithPermissionsDto {
+        role: RoleDto { role },
+        permissions,
+    }))
+}
