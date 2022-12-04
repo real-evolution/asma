@@ -1,4 +1,3 @@
-pub mod accounts;
 pub mod auth;
 pub mod diag;
 pub mod dtos;
@@ -19,6 +18,5 @@ pub fn api_routes() -> AppResult<Router> {
         .nest("/auth", auth::routes())
         .nest("/roles", roles::routes())
         .nest("/users", users::routes())
-        .nest("/accounts", accounts::routes())
         .nest("/link", link::routes()))
 }
