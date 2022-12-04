@@ -23,9 +23,7 @@ pub async fn add(
     users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<EntityCreated<User>> {
     claims
-        .check()
-        .can(Resource::Users, Action::Add)?
-        .in_role(&KnownRoles::Admin)?;
+        .in_role_with(KnownRoles::Admin, &[(Resource::Users, Action::Add)])?;
 
     let user = users_repo
         .create(InsertUser::new(
