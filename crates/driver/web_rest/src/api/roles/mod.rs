@@ -1,8 +1,8 @@
 pub mod add;
+pub mod dtos;
 pub mod remove;
 pub mod update;
 pub mod view;
-pub mod dtos;
 
 use axum::{routing::*, Router};
 

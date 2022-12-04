@@ -4,6 +4,7 @@ use mapper::Mapper;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
+use common_validation::identifier;
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -32,9 +33,9 @@ pub struct RoleWithPermissionsDto {
 #[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct AddRoleDto {
-    #[validate(length(min = 4))]
+    #[validate(custom = "identifier")]
     pub code: String,
-    #[validate(length(min = 1))]
+    #[validate(length(min = 4, max = 64))]
     pub friendly_name: Option<String>,
 }
 
@@ -48,6 +49,6 @@ pub struct AddPermissionDto {
 #[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateRoleDto {
-    #[validate(length(min = 1))]
+    #[validate(length(min = 4, max = 64))]
     pub friendly_name: Option<String>,
 }
