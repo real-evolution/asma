@@ -1,5 +1,5 @@
 use axum::extract::Path;
-use kernel_entities::entities::auth::{Account, Action, KnownRoles, Resource};
+use kernel_entities::entities::auth::*;
 use kernel_entities::traits::Key;
 use kernel_repositories::auth::AccountsRepo;
 
@@ -23,5 +23,5 @@ pub async fn remove(
 ) -> ApiResult<()> {
     claims.of_with(&user_id, &[(Resource::Accounts, Action::Remove)])?;
 
-    Ok(accounts_repo.remove_of(&account_id, &user_id).await?)
+    Ok(accounts_repo.remove_of(&user_id, &account_id).await?)
 }

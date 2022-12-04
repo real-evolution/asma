@@ -1,9 +1,6 @@
 use axum::{extract::Path, Json};
 use itertools::Itertools;
-use kernel_entities::{
-    entities::auth::{Action, KnownRoles, Resource, User},
-    traits::Key,
-};
+use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::auth::AccountsRepo;
 
 use crate::{
@@ -44,7 +41,7 @@ pub async fn get_all_of(
             (Resource::Accounts, Action::View),
         ])?
         .of(&user_id)
-        .or(claims.in_role(&KnownRoles::Admin))?;
+        .or(claims.in_role(KnownRoles::Admin))?;
 
     let accounts = accounts_repo
         .get_paginated_of(&user_id, &pagination.before, pagination.page_size)
@@ -70,7 +67,7 @@ pub async fn get_all_of(
 )]
 pub async fn get_of_by_id(
     claims: Claims,
-    user_id: Path<Key<Account>>,
+    user_id: Path<Key<User>>,
     account_id: Path<Key<Account>>,
     accounts_repo: Dep<dyn AccountsRepo>,
 ) -> ApiResult<Json<AccountDto>> {
@@ -80,9 +77,9 @@ pub async fn get_of_by_id(
             (Resource::Accounts, Action::View),
         ])?
         .of(&user_id)
-        .or(claims.in_role(&KnownRoles::Admin))?;
+        .or(claims.in_role(KnownRoles::Admin))?;
 
-    let account = accounts_repo.get_of(&account_id, &user_id)?;
+    let account = accounts_repo.get_of(&user_id, &account_id).await?;
 
     Ok(Json(AccountDto::from(account)))
 }
