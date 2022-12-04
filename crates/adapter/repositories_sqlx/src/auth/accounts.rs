@@ -91,6 +91,58 @@ impl AccountsRepo for SqlxAccountsRepo {
             .await
         )
     }
+
+    async fn get_in_role(
+        &self,
+        role_id: &Key<Role>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Account>> {
+        sqlx_vec_ok!(
+            sqlx::query_as!(
+                models::AccountModel,
+                r#"
+                SELECT accounts.*
+                FROM accounts
+                INNER JOIN account_roles ON role_id = $1
+                WHERE account_roles.created_at <= $2
+                ORDER BY account_roles.created_at
+                LIMIT $3"#,
+                role_id.value_ref(),
+                before,
+                limit as i64,
+            )
+            .fetch_all(self.db.get())
+            .await
+        )
+    }
+
+    async fn get_in_role_for(
+        &self,
+        user_id: &Key<User>,
+        role_id: &Key<Role>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Account>> {
+        sqlx_vec_ok!(
+            sqlx::query_as!(
+                models::AccountModel,
+                r#"
+                SELECT accounts.*
+                FROM accounts
+                INNER JOIN account_roles ON role_id = $1
+                WHERE accounts.user_id = $2 AND account_roles.created_at <= $3
+                ORDER BY account_roles.created_at
+                LIMIT $4"#,
+                role_id.value_ref(),
+                user_id.value_ref(),
+                before,
+                limit as i64,
+            )
+            .fetch_all(self.db.get())
+            .await
+        )
+    }
 }
 
 #[async_trait::async_trait]

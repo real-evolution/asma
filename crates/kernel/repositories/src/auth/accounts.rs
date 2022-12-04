@@ -35,6 +35,21 @@ pub trait AccountsRepo:
         id: &Key<Account>,
         value: AccountState,
     ) -> RepoResult<()>;
+
+    async fn get_in_role(
+        &self,
+        role_id: &Key<Role>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Account>>;
+
+    async fn get_in_role_for(
+        &self,
+        user_id: &Key<User>,
+        role_id: &Key<Role>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Account>>;
 }
 
 #[derive(Constructor, Debug)]
