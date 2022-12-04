@@ -29,12 +29,11 @@ pub trait ChildRepo<E: Entity, P: Entity> {
         limit: usize,
     ) -> RepoResult<Vec<E>>;
 
-    async fn get_of(&self, key: &Key<E>, parent_key: &Key<P>)
-        -> RepoResult<E>;
+    async fn get_of(&self, parent_key: &Key<P>, key: &Key<E>) -> RepoResult<E>;
 
     async fn remove_of(
         &self,
-        key: &Key<E>,
         parent_key: &Key<P>,
+        key: &Key<E>,
     ) -> RepoResult<()>;
 }

@@ -93,6 +93,7 @@ impl AccountsRepo for SqlxAccountsRepo {
     }
 }
 
+#[async_trait::async_trait]
 impl ChildRepo<Account, User> for SqlxAccountsRepo {
     async fn get_paginated_of(
         &self,
@@ -120,15 +121,15 @@ impl ChildRepo<Account, User> for SqlxAccountsRepo {
 
     async fn get_of(
         &self,
-        key: &Key<Account>,
-        parent_key: &Key<User>,
+        user_id: &Key<User>,
+        id: &Key<Account>,
     ) -> RepoResult<Account> {
         sqlx_ok!(
             sqlx::query_as!(
                 models::AccountModel,
                 r#"SELECT * FROM accounts WHERE id = $1 AND user_id = $2"#,
-                key.value_ref(),
-                parent_key.value_ref()
+                id.value_ref(),
+                user_id.value_ref()
             )
             .fetch_one(self.db.get())
             .await
@@ -137,19 +138,20 @@ impl ChildRepo<Account, User> for SqlxAccountsRepo {
 
     async fn remove_of(
         &self,
-        key: &Key<Account>,
-        parent_key: &Key<User>,
+        user_id: &Key<User>,
+        id: &Key<Account>,
     ) -> RepoResult<()> {
-        sqlx_ok!(
-            sqlx::query_as!(
-                models::AccountModel,
-                r#"DELETE FROM accounts WHERE id = $1 AND user_id = $2"#,
-                key.value_ref(),
-                parent_key.value_ref()
-            )
-            .fetch_one(self.db.get())
-            .await
+        sqlx::query_as!(
+            models::AccountModel,
+            r#"DELETE FROM accounts WHERE id = $1 AND user_id = $2"#,
+            id.value_ref(),
+            user_id.value_ref()
         )
+        .fetch_one(self.db.get())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(())
     }
 }
 
