@@ -1,5 +1,6 @@
-pub mod view;
+pub mod dtos;
 pub mod remove;
+pub mod view;
 
 use axum::{routing::get, Router};
 
