@@ -1,5 +1,5 @@
 use derive_more::Constructor;
-use kernel_entities::entities::auth::{Actions, Resource};
+use kernel_entities::{entities::auth::*, traits::Key};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
