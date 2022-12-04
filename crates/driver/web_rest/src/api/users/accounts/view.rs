@@ -32,7 +32,7 @@ use crate::{
         ("pagination" = Pagination, Query, description = "Pagination parameters")
     )
 )]
-pub async fn get_accounts_of(
+pub async fn get_all_of(
     claims: Claims,
     user_id: Path<Key<User>>,
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
@@ -64,10 +64,11 @@ pub async fn get_accounts_of(
         (status = 404, description = "No accounts with `id` were found"),
     ),
     params(
-        ("account_id" = Key<Account>, Path, description = "Id of the user to get"),
+        ("user_id" = Key<User>, Path, description = "Id of the user to get"),
+        ("account_id" = Key<Account>, Path, description = "Id of the account to get"),
     )
 )]
-pub async fn get_account_of_by_id(
+pub async fn get_of_by_id(
     claims: Claims,
     user_id: Path<Key<Account>>,
     account_id: Path<Key<Account>>,
