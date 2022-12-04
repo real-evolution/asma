@@ -66,7 +66,7 @@ impl Actions {
         self.0 as i32
     }
 
-    pub fn has(&self, rhs: Self) -> bool {
+    pub fn has(&self, rhs: &Self) -> bool {
         (self.0 & rhs.0) == rhs.0
     }
 }
