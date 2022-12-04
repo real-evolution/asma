@@ -25,9 +25,7 @@ pub async fn get_all(
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<Json<Vec<RoleDto>>> {
     claims
-        .check()
-        .in_role(&KnownRoles::Admin)?
-        .can(Resource::Roles, Action::View)?;
+        .in_role_with(&KnownRoles::Admin, &[(Resource::Roles, Action::View)])?;
 
     let roles = roles_repo
         .get_paginated(&pagination.before, pagination.page_size)
@@ -55,10 +53,7 @@ pub async fn get_by_id(
     role_id: Path<Key<Role>>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<Json<RoleWithPermissionsDto>> {
-    claims
-        .check()
-        .in_role(&KnownRoles::Admin)?
-        .can(Resource::Roles, Action::View)?;
+    claims.can(&[(Resource::Roles, Action::View)])?;
 
     let role = roles_repo.get(&role_id).await?;
     let permissions: Vec<PermissionDto> = roles_repo

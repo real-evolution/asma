@@ -39,11 +39,12 @@ pub async fn get_accounts_of(
     accounts_repo: Dep<dyn AccountsRepo>,
 ) -> ApiResult<Json<Vec<AccountDto>>> {
     claims
-        .check()
-        .can(Resource::Users, Action::View)?
-        .can(Resource::Accounts, Action::View)?
+        .can(&[
+            (Resource::Users, Action::View),
+            (Resource::Accounts, Action::View),
+        ])?
         .of(&user_id)
-        .or(claims.check().in_role(&KnownRoles::Admin))?;
+        .or(claims.in_role(&KnownRoles::Admin))?;
 
     let accounts = accounts_repo
         .get_paginated_for(&user_id, &pagination.before, pagination.page_size)
