@@ -1,3 +1,4 @@
+pub mod add;
 pub mod dtos;
 pub mod remove;
 pub mod update;
@@ -10,7 +11,7 @@ use axum::{
 
 pub fn routes() -> Router {
     Router::new()
-        .route("/", get(view::get_all_of))
-        .route("/:account_id", get(view::get_of_by_id))
+        .route("/", get(view::get_all).post(add::add))
+        .route("/:account_id", get(view::get_by_id).delete(remove::remove))
         .route("/password", put(update::update_password))
 }

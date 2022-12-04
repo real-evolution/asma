@@ -4,11 +4,13 @@ use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::auth::AccountsRepo;
 
 use crate::{
-    api::{accounts::dtos::AccountDto, dtos::pagination::Pagination},
+    api::dtos::pagination::Pagination,
     error::ApiResult,
     extractors::{di::Dep, validated_query::ValidatedQuery},
     util::claims::Claims,
 };
+
+use super::dtos::AccountDto;
 
 #[utoipa::path(
     get,
@@ -29,7 +31,7 @@ use crate::{
         ("pagination" = Pagination, Query, description = "Pagination parameters")
     )
 )]
-pub async fn get_all_of(
+pub async fn get_all(
     claims: Claims,
     user_id: Path<Key<User>>,
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
@@ -65,7 +67,7 @@ pub async fn get_all_of(
         ("account_id" = Key<Account>, Path, description = "Id of the account to get"),
     )
 )]
-pub async fn get_of_by_id(
+pub async fn get_by_id(
     claims: Claims,
     user_id: Path<Key<User>>,
     account_id: Path<Key<Account>>,

@@ -21,7 +21,13 @@ pub async fn remove(
     account_id: Path<Key<Account>>,
     accounts_repo: Dep<dyn AccountsRepo>,
 ) -> ApiResult<()> {
-    claims.of_with(&user_id, &[(Resource::Accounts, Action::Remove)])?;
+    claims.of_with(
+        &user_id,
+        &[
+            (Resource::Users, Action::Modify),
+            (Resource::Accounts, Action::Remove),
+        ],
+    )?;
 
     Ok(accounts_repo.remove_of(&user_id, &account_id).await?)
 }
