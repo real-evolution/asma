@@ -27,6 +27,7 @@ pub enum KnownRoles {
     Root,
     Admin,
     Regular,
+    UserOwner,
 }
 
 impl Into<&str> for KnownRoles {
@@ -35,6 +36,7 @@ impl Into<&str> for KnownRoles {
             KnownRoles::Root => "root",
             KnownRoles::Admin => "admin",
             KnownRoles::Regular => "regular",
+            KnownRoles::UserOwner => "user_owner",
         }
     }
 }
