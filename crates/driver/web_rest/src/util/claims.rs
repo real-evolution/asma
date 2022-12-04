@@ -7,9 +7,8 @@ use kernel_entities::traits::Key;
 use kernel_services::auth::models::AccessRule;
 use serde::{Deserialize, Serialize};
 
-use super::claims_macros::ClaimsRequirement;
 use crate::config::ApiConfig;
-use crate::error::ApiResult;
+use crate::error::{ApiError, ApiResult};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Claims {
@@ -77,12 +76,6 @@ impl Claims {
 }
 
 impl Claims {
-    pub fn check<'a>(&'a self) -> ClaimsRequirement<'a> {
-        ClaimsRequirement::new(self)
-    }
-}
-
-impl Claims {
     #[inline]
     pub fn is_root(&self) -> ApiResult<&Self> {
         if !self.config.disable_root
@@ -101,7 +94,7 @@ impl Claims {
     }
 
     #[inline]
-    pub fn in_role_with<'a, R: Into<&'a str>, A: Into<Actions>>(
+    pub fn in_role_with<'a, R: Into<&'a str>, A: Into<Actions> + Copy>(
         &self,
         role: R,
         perms: &[(Resource, A)],
@@ -112,27 +105,21 @@ impl Claims {
 
         self.require(|| {
             perms.iter().all(|p| {
-                let actions: Actions = p.1.into();
-
-                role_perms
-                    .iter()
-                    .any(|rp| p.0 == rp.0 && rp.1.has(&actions))
+                role_perms.iter().any(|rp| p.0 == rp.0 && rp.1.has(&p.1))
             })
         })
     }
 
     #[inline]
-    pub fn can<A: Into<Actions>>(
+    pub fn can<A: Into<Actions> + Copy>(
         &self,
         perms: &[(Resource, A)],
     ) -> ApiResult<&Self> {
         self.is_root().or(self.require(|| {
             perms.iter().all(|p| {
-                let actions = p.1.into();
-
-                self.roles.iter().any(|r| {
-                    r.1.iter().any(|rp| rp.0 == p.0 && rp.1.has(&actions))
-                })
+                self.roles
+                    .iter()
+                    .any(|r| r.1.iter().any(|rp| rp.0 == p.0 && rp.1.has(&p.1)))
             })
         }))
     }
@@ -143,7 +130,7 @@ impl Claims {
     }
 
     #[inline]
-    pub fn is_with(
+    pub fn is_with<A: Into<Actions> + Copy>(
         &self,
         account_id: &Key<Account>,
         perms: &[(Resource, A)],
@@ -158,7 +145,8 @@ impl Claims {
     }
 
     #[inline]
-    pub fn of_with(
+    #[allow(dead_code)]
+    pub fn of_with<A: Into<Actions> + Copy>(
         &self,
         user_id: &Key<User>,
         perms: &[(Resource, A)],

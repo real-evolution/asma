@@ -24,7 +24,7 @@ pub async fn add(
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<EntityCreated<Role>> {
     claims
-        .in_role_with(&KnownRoles::Admin, &[(Resource::Roles, Action::Add)])?;
+        .in_role_with(KnownRoles::Admin, &[(Resource::Roles, Action::Add)])?;
 
     let role = roles_repo
         .create(InsertRole::new(form.code, form.friendly_name))
@@ -56,7 +56,7 @@ pub async fn add_permission(
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<EntityCreated<Permission>> {
     claims.in_role_with(
-        &KnownRoles::Root,
+        KnownRoles::Root,
         &[
             (Resource::Roles, Action::Modify),
             (Resource::Permissions, Action::Add),

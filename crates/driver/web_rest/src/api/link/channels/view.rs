@@ -25,10 +25,10 @@ pub async fn get_all(
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
     channels_repo: Dep<dyn ChannelsRepo>,
 ) -> ApiResult<Json<Vec<ChannelDto>>> {
-    claims
-        .check()
-        .can(Resource::Channels, Action::View)?
-        .in_role(&KnownRoles::Admin)?;
+    claims.in_role_with(
+        KnownRoles::Admin,
+        &[(Resource::Channels, Action::View)],
+    )?;
 
     let channels = channels_repo
         .get_paginated(&pagination.before, pagination.page_size)
@@ -56,10 +56,10 @@ pub async fn get_by_id(
     channel_id: Path<Key<Channel>>,
     channels_repo: Dep<dyn ChannelsRepo>,
 ) -> ApiResult<Json<ChannelDto>> {
-    claims
-        .check()
-        .in_role(&KnownRoles::Admin)?
-        .can(Resource::Channels, Action::View);
+    claims.in_role_with(
+        KnownRoles::Admin,
+        &[(Resource::Channels, Action::View)],
+    )?;
 
     Ok(Json(ChannelDto::new(channels_repo.get(&channel_id).await?)))
 }

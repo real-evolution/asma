@@ -30,7 +30,7 @@ pub async fn update(
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<()> {
     claims.in_role_with(
-        &KnownRoles::Admin,
+        KnownRoles::Admin,
         &[(Resource::Roles, Action::Modify)],
     )?;
 

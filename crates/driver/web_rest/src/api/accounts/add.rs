@@ -24,11 +24,7 @@ pub async fn add(
     accounts_repo: Dep<dyn AccountsRepo>,
     hash_svc: Dep<dyn CryptoHashService>,
 ) -> ApiResult<Created<Key<Account>, AccountDto>> {
-    claims
-        .check()
-        .can(Resource::Accounts, Action::Add)?
-        .in_any(&[KnownRoles::Admin])?
-        .of(&form.user_id)?;
+    claims.can(&[(Resource::Accounts, Action::Add)])?;
 
     let password_hash = hash_svc.hash(&form.password)?;
     let state = if form.is_active {

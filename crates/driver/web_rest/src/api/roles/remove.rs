@@ -20,7 +20,7 @@ pub async fn remove(
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<()> {
     claims.in_role_with(
-        &KnownRoles::Admin,
+        KnownRoles::Admin,
         &[(Resource::Roles, Action::Remove)],
     )?;
 
@@ -54,8 +54,8 @@ pub async fn remove_permission(
     permission_id: Path<Key<Permission>>,
     roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<()> {
-    claims.check().in_role_with(
-        &KnownRoles::Admin,
+    claims.in_role_with(
+        KnownRoles::Admin,
         &[
             (Resource::Roles, Action::Modify),
             (Resource::Permissions, Action::Remove),
