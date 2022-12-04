@@ -22,17 +22,17 @@ pub trait InsertRepo<E: Entity, I> {
 
 #[async_trait::async_trait]
 pub trait ChildRepo<E: Entity, P: Entity> {
-    async fn get_paginated_for(
+    async fn get_paginated_of(
         &self,
         parent_key: &Key<P>,
         before: &DateTime<Utc>,
         limit: usize,
     ) -> RepoResult<Vec<E>>;
 
-    async fn get_for(&self, key: &Key<E>, parent_key: &Key<P>)
+    async fn get_of(&self, key: &Key<E>, parent_key: &Key<P>)
         -> RepoResult<E>;
 
-    async fn remove_for(
+    async fn remove_of(
         &self,
         key: &Key<E>,
         parent_key: &Key<P>,

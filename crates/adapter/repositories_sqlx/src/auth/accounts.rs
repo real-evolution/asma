@@ -94,7 +94,7 @@ impl AccountsRepo for SqlxAccountsRepo {
 }
 
 impl ChildRepo<Account, User> for SqlxAccountsRepo {
-    async fn get_paginated_for(
+    async fn get_paginated_of(
         &self,
         user_id: &Key<User>,
         before: &DateTime<Utc>,
@@ -118,7 +118,7 @@ impl ChildRepo<Account, User> for SqlxAccountsRepo {
         )
     }
 
-    async fn get_for(
+    async fn get_of(
         &self,
         key: &Key<Account>,
         parent_key: &Key<User>,
@@ -135,7 +135,7 @@ impl ChildRepo<Account, User> for SqlxAccountsRepo {
         )
     }
 
-    async fn remove_for(
+    async fn remove_of(
         &self,
         key: &Key<Account>,
         parent_key: &Key<User>,

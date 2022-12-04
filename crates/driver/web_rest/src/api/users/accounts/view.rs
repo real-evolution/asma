@@ -47,7 +47,7 @@ pub async fn get_all_of(
         .or(claims.in_role(&KnownRoles::Admin))?;
 
     let accounts = accounts_repo
-        .get_paginated_for(&user_id, &pagination.before, pagination.page_size)
+        .get_paginated_of(&user_id, &pagination.before, pagination.page_size)
         .await?
         .into_iter()
         .map(|a| AccountDto::from(a))
@@ -82,7 +82,7 @@ pub async fn get_of_by_id(
         .of(&user_id)
         .or(claims.in_role(&KnownRoles::Admin))?;
 
-    let account = accounts_repo.get_for(&account_id, &user_id)?;
+    let account = accounts_repo.get_of(&account_id, &user_id)?;
 
     Ok(Json(AccountDto::from(account)))
 }
