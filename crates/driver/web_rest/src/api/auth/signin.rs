@@ -9,15 +9,6 @@ use crate::extractors::di::Dep;
 use crate::extractors::validated_json::ValidatedJson;
 use crate::util::claims::Claims;
 
-#[utoipa::path(
-    post,
-    path = "/api/auth/signin",
-    request_body = UserCredentials,
-    responses(
-        (status = 200, description = "Signed in successfully", body = TokenPair),
-        (status = 403, description = "Invalid credentials were received"),
-    ),
-)]
 pub async fn signin(
     TypedHeader(agent): TypedHeader<UserAgent>,
     ClientIp(ip): ClientIp,
