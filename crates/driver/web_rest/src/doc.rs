@@ -33,14 +33,13 @@ const OPENAPI_URL: &str = "/api-doc/openapi.json";
         api::users::add::add,
         api::users::update::update,
         api::users::remove::remove,
-        api::users::accounts::view::get_accounts_of,
 
         // accounts
-        api::accounts::view::get_all,
-        api::accounts::view::get_by_id,
-        api::accounts::add::add,
-        api::accounts::update::update_password,
-        api::accounts::remove::remove,
+        api::users::accounts::view::get_all_of,
+        api::users::accounts::view::get_of_by_id,
+        //api::users::accounts::add::add,
+        api::users::accounts::update::update_password,
+        api::users::accounts::remove::remove,
 
         // channels
         api::link::channels::view::get_all,
