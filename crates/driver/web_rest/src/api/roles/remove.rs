@@ -1,9 +1,11 @@
-use axum::extract::Path;
+use axum::{extract::Path, Json};
 use kernel_entities::entities::auth::*;
 use kernel_entities::traits::Key;
-use kernel_repositories::auth::RolesRepo;
+use kernel_repositories::auth::{RolesRepo, AccountsRepo};
 
 use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
+
+use super::dtos::RemoveAccountFromRoleDto;
 
 #[utoipa::path(
     delete,
@@ -65,6 +67,45 @@ pub async fn remove_permission(
     roles_repo
         .remove_permission(&role_id, &permission_id)
         .await?;
+
+    Ok(())
+}
+
+#[utoipa::path(
+    delete,
+    path = "/api/roles/{role_id}/accounts",
+    request_body = AddAccountToRoleDto,
+    responses(
+        (status = 200, description = "Account removed"),
+        (status = 404, description = "Role or account or user does not exist"),
+    ),
+    params(
+        (
+            "role_id" = Key<Role>,
+            Path,
+            description = "Id of the role to remove the account from"
+        ),
+    )
+)]
+pub async fn remove_from(
+    claims: Claims,
+    role_id: Path<Key<Role>>,
+    Json(form): Json<RemoveAccountFromRoleDto>,
+    roles_repo: Dep<dyn RolesRepo>,
+    accounts_repo: Dep<dyn AccountsRepo>,
+) -> ApiResult<()> {
+    claims.in_role_with(
+        KnownRoles::UserOwner,
+        &[(Resource::Roles, Action::Modify)],
+    )?;
+
+    let role = roles_repo.get(&role_id).await?;
+    claims.in_role(role.code.as_str())?;
+
+    let account = accounts_repo.get(&form.account_id).await?;
+    claims.of(&account.user_id)?;
+
+    roles_repo.remove_from(&account.id, &role.id).await?;
 
     Ok(())
 }
