@@ -26,7 +26,6 @@ pub struct AccountRole {
 pub enum KnownRoles {
     Root,
     Admin,
-    Regular,
     UserOwner,
 }
 
@@ -35,7 +34,6 @@ impl Into<&str> for KnownRoles {
         match self {
             KnownRoles::Root => "root",
             KnownRoles::Admin => "admin",
-            KnownRoles::Regular => "regular",
             KnownRoles::UserOwner => "user_owner",
         }
     }
