@@ -1,31 +1,31 @@
 use axum::body::HttpBody;
-use axum::extract::{FromRequest, Json, RequestParts};
+use axum::extract::{FromRequest, Json};
+use axum::http::Request;
 use axum::BoxError;
 use serde::de::DeserializeOwned;
 use validator::Validate;
 
-use crate::error::ApiError;
+use crate::error::{ApiError, ApiResult};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ValidatedJson<T>(pub T);
 
 #[async_trait::async_trait]
-impl<T, B> FromRequest<B> for ValidatedJson<T>
+impl<T, S, B> FromRequest<S, B> for ValidatedJson<T>
 where
     T: DeserializeOwned + Validate,
-    B: HttpBody + Send,
-    B::Data: Send,
-    B::Error: Into<BoxError>,
+    S: Send + Sync,
+    B: Send + HttpBody,
+    B::Error: Send + Sync + Into<BoxError>,
+    B::Data: Send + Sync,
 {
     type Rejection = ApiError;
 
-    async fn from_request(
-        req: &mut RequestParts<B>,
-    ) -> Result<Self, Self::Rejection> {
-        let Json(value) = Json::<T>::from_request(req).await?;
+    async fn from_request(req: Request<B>, state: &S) -> ApiResult<Self> {
+        let Json(object) = Json::<T>::from_request(req, state).await?;
 
-        value.validate()?;
+        object.validate()?;
 
-        Ok(ValidatedJson(value))
+        Ok(Self(object))
     }
 }
