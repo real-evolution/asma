@@ -19,7 +19,7 @@ pub async fn setup(
     Ok(())
 }
 
-pub fn routes() -> Router {
+pub fn routes() -> Router<AppState> {
     Router::new().route("/", post(setup))
 }
 

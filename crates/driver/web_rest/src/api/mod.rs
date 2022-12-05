@@ -7,12 +7,13 @@ pub mod setup;
 pub mod users;
 
 use axum::Router;
+use driver_web_common::state::AppState;
 use kernel_services::error::AppResult;
 
-pub fn api_routes() -> AppResult<Router> {
-    debug!("creating router with Swagger/OpenAPI support");
+pub fn api_routes() -> AppResult<Router<AppState>> {
+    debug!("creating api router");
 
-    Ok(Router::new()
+    Ok(Router::<AppState>::new()
         .nest("/diag", diag::routes())
         .nest("/setup", setup::routes())
         .nest("/auth", auth::routes())

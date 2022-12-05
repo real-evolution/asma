@@ -8,8 +8,9 @@ use axum::{
     routing::{get, put},
     Router,
 };
+use driver_web_common::state::AppState;
 
-pub fn routes() -> Router {
+pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/", get(view::get_all).post(add::add))
         .route("/:account_id", get(view::get_by_id).delete(remove::remove))
