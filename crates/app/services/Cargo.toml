@@ -15,6 +15,7 @@ kernel_services = { path = "../../kernel/services" }
 
 # workspace dependencies
 async-trait = { workspace = true}
+derive_more = { workspace = true}
 chrono = { workspace = true }
 shaku = { workspace = true }
 serde = { workspace = true }
