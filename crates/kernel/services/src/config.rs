@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 #[macro_export]
 macro_rules! get_config {
-    ($svc:ident, $section:expr => $cfg:ty) => {
+    ($svc:expr, $section:expr => $cfg:ty) => {
         $svc.get_section($section)?.try_into::<$cfg>()
     };
 }
