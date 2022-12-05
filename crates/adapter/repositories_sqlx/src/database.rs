@@ -7,41 +7,30 @@ use crate::util::error::map_sqlx_error;
 pub(crate) type DbType = sqlx::postgres::Postgres;
 pub(crate) type PoolType = sqlx::Pool<DbType>;
 
-#[async_trait]
-pub trait SqlxDatabaseConnection: Interface {
-    fn get(&self) -> &PoolType;
-    async fn acquire(&self) -> RepoResult<PoolConnection<DbType>>;
-}
+#[derive(Debug, Clone)]
+pub(crate) struct SqlxPool(pub PoolType);
 
-pub struct SqlxPool {
-    inner: PoolType,
-}
+#[derive(Debug)]
+struct SqlxTransactionWrapper<'c>(sqlx::Transaction<'c, DbType>);
 
-pub struct SqlxTransactionManager {
-    inner: PoolType,
-}
-
-#[async_trait]
-impl SqlxDatabaseConnection for SqlxPool {
-    fn get(&self) -> &PoolType {
-        &self.inner
+impl SqlxPool {
+    pub(crate) fn get(&self) -> &PoolType {
+        &self.0
     }
 
-    async fn acquire(&self) -> RepoResult<PoolConnection<DbType>> {
-        Ok(self.inner.acquire().await.map_err(map_sqlx_error)?)
+    pub(crate) async fn acquire(&self) -> RepoResult<PoolConnection<DbType>> {
+        Ok(self.0.acquire().await.map_err(map_sqlx_error)?)
     }
 }
 
 #[async_trait]
-impl TransactionManager for SqlxTransactionManager {
+impl TransactionManager for SqlxPool {
     async fn begin(&self) -> RepoResult<Box<dyn Transaction>> {
-        let tx = self.inner.begin().await.map_err(map_sqlx_error)?;
+        let tx = self.0.begin().await.map_err(map_sqlx_error)?;
 
         Ok(Box::new(SqlxTransactionWrapper(tx)))
     }
 }
-
-struct SqlxTransactionWrapper<'c>(sqlx::Transaction<'c, DbType>);
 
 #[async_trait]
 impl<'c> Transaction for SqlxTransactionWrapper<'c> {
