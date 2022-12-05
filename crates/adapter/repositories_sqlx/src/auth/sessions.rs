@@ -8,19 +8,16 @@ use kernel_repositories::auth::*;
 use kernel_repositories::error::RepoResult;
 use kernel_repositories::traits::*;
 use ormx::{Delete, Patch, Table};
-use shaku::Component;
 
 use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
 
-#[derive(Component, Repo)]
+#[derive(Constructor, Repo)]
 #[repo(
     table = "sessions",
     read(entity = "Session", model = "models::SessionModel"),
     insert(entity = "InsertSession", model = "models::InsertSessionModel")
 )]
-#[shaku(interface = SessionsRepo)]
 pub struct SqlxSessionsRepo {
-    #[shaku(inject)]
     db: Arc<dyn SqlxDatabaseConnection>,
 }
 

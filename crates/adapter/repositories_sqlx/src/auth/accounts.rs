@@ -7,21 +7,18 @@ use kernel_repositories::auth::{AccountsRepo, InsertAccount};
 use kernel_repositories::error::RepoResult;
 use kernel_repositories::traits::*;
 use ormx::{Delete, Patch, Table};
-use shaku::Component;
 
 use crate::database::SqlxDatabaseConnection;
 use crate::util::error::map_sqlx_error;
 use crate::{sqlx_ok, sqlx_vec_ok};
 
-#[derive(Component, Repo)]
+#[derive(Repo)]
 #[repo(
     table = "accounts",
     read(entity = "Account", model = "models::AccountModel"),
     insert(entity = "InsertAccount", model = "models::InsertAccountModel")
 )]
-#[shaku(interface = AccountsRepo)]
 pub struct SqlxAccountsRepo {
-    #[shaku(inject)]
     db: Arc<dyn SqlxDatabaseConnection>,
 }
 

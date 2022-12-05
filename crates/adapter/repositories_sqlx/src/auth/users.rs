@@ -5,19 +5,16 @@ use chrono::Utc;
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{auth::*, error::*, traits::*};
 use ormx::{Delete, Patch, Table};
-use shaku::Component;
 
 use crate::util::error::map_sqlx_error;
 use crate::{database::SqlxDatabaseConnection, sqlx_ok};
 
-#[derive(Component, Repo)]
+#[derive(Repo)]
 #[repo(
     table = "users",
     read(entity = "User", model = "models::UserModel"),
     insert(entity = "InsertUser", model = "models::InsertUserModel")
 )]
-#[shaku(interface = UsersRepo)]
-pub struct SqlxUsersRepo {
     #[shaku(inject)]
     db: Arc<dyn SqlxDatabaseConnection>,
 }

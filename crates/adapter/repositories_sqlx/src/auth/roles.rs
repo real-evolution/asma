@@ -8,21 +8,18 @@ use kernel_repositories::auth::*;
 use kernel_repositories::error::*;
 use kernel_repositories::traits::*;
 use ormx::{Delete, Patch, Table};
-use shaku::Component;
 use tracing::warn;
 
 use crate::database::SqlxDatabaseConnection;
 use crate::{sqlx_ok, sqlx_vec_ok, util::error::map_sqlx_error};
 
-#[derive(Component, Repo)]
+#[derive(Repo)]
 #[repo(
     table = "roles",
     read(entity = "Role", model = "models::RoleModel"),
     insert(entity = "InsertRole", model = "models::InsertRoleModel")
 )]
-#[shaku(interface = RolesRepo)]
 pub struct SqlxRolesRepo {
-    #[shaku(inject)]
     db: Arc<dyn SqlxDatabaseConnection>,
 }
 
