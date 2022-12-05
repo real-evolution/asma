@@ -17,40 +17,56 @@ pub struct TomlConfigService(Config);
 
 impl ConfigService for TomlConfigService {
     fn get_section<'de>(&self, section: &str) -> AppResult<ConfigObject<'de>> {
+        debug!("reading configuration section `{section}`");
+
         let val = self.0.get::<Value>(section).map_err(map_config_error)?;
 
         Ok(ConfigObject::new(Box::new(<dyn Deserializer>::erase(val))))
     }
 
     fn get(&self, key: &str) -> AppResult<ConfigValue> {
+        debug!("reading a configuration object with key `{key}`");
+
         let val = self.0.get::<Value>(key).map_err(map_config_error)?;
 
         Ok(map_config_value(val.kind))
     }
 
     fn get_bool(&self, key: &str) -> AppResult<bool> {
+        debug!("reading a configuration boolean with key `{key}`");
+
         Ok(self.0.get_bool(key).map_err(map_config_error)?)
     }
 
     fn get_int(&self, key: &str) -> AppResult<i64> {
+        debug!("reading a configuration integer with key `{key}`");
+
         Ok(self.0.get_int(key).map_err(map_config_error)?)
     }
 
     fn get_float(&self, key: &str) -> AppResult<f64> {
+        debug!("reading a configuration float with key `{key}`");
+
         Ok(self.0.get_float(key).map_err(map_config_error)?)
     }
 
     fn get_string(&self, key: &str) -> AppResult<String> {
+        debug!("reading a configuration string with key `{key}`");
+
         Ok(self.0.get_string(key).map_err(map_config_error)?)
     }
 
     fn get_array(&self, key: &str) -> AppResult<Vec<ConfigValue>> {
+        debug!("reading a configuration array with key `{key}`");
+
         Ok(map_config_array(
             self.0.get_array(key).map_err(map_config_error)?,
         ))
     }
 
     fn get_map(&self, key: &str) -> AppResult<HashMap<String, ConfigValue>> {
+        debug!("reading a configuration map with key `{key}`");
+
         Ok(map_config_table(
             self.0.get_table(key).map_err(map_config_error)?,
         ))
