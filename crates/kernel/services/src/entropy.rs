@@ -1,8 +1,6 @@
-use shaku::Interface;
-
 use crate::error::AppResult;
 
-pub trait EntropyService: Interface {
+pub trait EntropyService: Send + Sync {
     fn next_bool(&self) -> AppResult<bool>;
     fn next_u8(&self) -> AppResult<u8>;
     fn next_u16(&self) -> AppResult<u16>;

@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use erased_serde::Deserializer;
 use serde::Deserialize;
-use shaku::Interface;
 
 #[macro_export]
 macro_rules! get_config {
@@ -14,7 +13,7 @@ pub use get_config;
 
 use crate::error::AppResult;
 
-pub trait ConfigService: Interface {
+pub trait ConfigService: Send + Sync {
     fn get_section<'de>(&self, section: &str) -> AppResult<ConfigObject<'de>>;
     fn get(&self, key: &str) -> AppResult<ConfigValue>;
     fn get_bool(&self, key: &str) -> AppResult<bool>;
