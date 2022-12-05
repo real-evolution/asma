@@ -1,6 +1,5 @@
 use async_trait::async_trait;
 use kernel_repositories::{error::RepoResult, Transaction, TransactionManager};
-use shaku::{Component, Interface};
 use sqlx::pool::PoolConnection;
 
 use crate::util::error::map_sqlx_error;
@@ -14,14 +13,10 @@ pub trait SqlxDatabaseConnection: Interface {
     async fn acquire(&self) -> RepoResult<PoolConnection<DbType>>;
 }
 
-#[derive(Component)]
-#[shaku(interface = SqlxDatabaseConnection)]
 pub struct SqlxPool {
     inner: PoolType,
 }
 
-#[derive(Component)]
-#[shaku(interface = TransactionManager)]
 pub struct SqlxTransactionManager {
     inner: PoolType,
 }
