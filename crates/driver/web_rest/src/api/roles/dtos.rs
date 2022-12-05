@@ -3,17 +3,16 @@ use common_validation::identifier;
 use kernel_entities::{entities::auth::*, traits::Key};
 use mapper::Mapper;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 use validator::Validate;
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RoleDto {
     #[serde(flatten)]
     pub role: Role,
 }
 
-#[derive(Debug, Deserialize, Mapper, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Mapper, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[from(Permission)]
 pub struct PermissionDto {
@@ -23,14 +22,14 @@ pub struct PermissionDto {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RoleWithPermissionsDto {
     #[serde(flatten)]
     pub role: RoleDto,
     pub permissions: Vec<PermissionDto>,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct AddRoleDto {
     #[validate(custom = "identifier")]
@@ -39,21 +38,21 @@ pub struct AddRoleDto {
     pub friendly_name: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddPermissionDto {
     pub resource: Resource,
     pub actions: Actions,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateRoleDto {
     #[validate(length(min = 4, max = 64))]
     pub friendly_name: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct AddAccountToRoleDto {
     pub user_id: Key<User>,

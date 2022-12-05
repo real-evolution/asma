@@ -25,10 +25,9 @@ pub fn routes() -> Router {
 
 pub mod dtos {
     use serde::Deserialize;
-    use utoipa::ToSchema;
     use validator::Validate;
 
-    #[derive(Clone, Debug, Deserialize, ToSchema, Validate)]
+    #[derive(Clone, Debug, Deserialize, Validate)]
     #[serde(rename_all = "camelCase")]
     pub struct RootAccountDetails {
         #[validate(length(min = 4))]

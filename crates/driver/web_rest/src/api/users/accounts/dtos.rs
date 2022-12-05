@@ -7,10 +7,9 @@ use kernel_entities::{
 };
 use mapper::Mapper;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 use validator::Validate;
 
-#[derive(Constructor, Debug, Deserialize, Mapper, Serialize, ToSchema)]
+#[derive(Constructor, Debug, Deserialize, Mapper, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[from(Account)]
 pub struct AccountDto {
@@ -24,7 +23,7 @@ pub struct AccountDto {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Constructor, Debug, Deserialize, Serialize, ToSchema, Validate)]
+#[derive(Constructor, Debug, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct AddAccountDto {
     #[validate(custom = "username")]
@@ -35,7 +34,7 @@ pub struct AddAccountDto {
     pub is_active: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
+#[derive(Debug, Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateAccountPasswordDto {
     pub old_password: String,
