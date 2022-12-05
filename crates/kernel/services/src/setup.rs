@@ -1,7 +1,7 @@
 use crate::error::AppResult;
 
-#[async_trait::async_trait()]
-pub trait SetupService {
+#[async_trait::async_trait]
+pub trait SetupService: Send + Sync {
     async fn is_setup(&self) -> AppResult<bool>;
     async fn setup(
         &self,
