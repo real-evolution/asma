@@ -1,13 +1,9 @@
-use axum::{Extension, Router};
-use kernel_services::{config::ConfigService, error::AppResult, get_config};
+use axum::Router;
+use driver_web_common::state::AppState;
+use kernel_services::error::AppResult;
 
 use crate::api;
-use crate::config::{ApiConfig, API_CONFIG_SECTION};
 
-pub fn make_app(config_svc: &dyn ConfigService) -> AppResult<Router> {
-    let conf = get_config!(config_svc, API_CONFIG_SECTION => ApiConfig)?;
-
-    Ok(Router::new()
-        .nest("/api", api::api_routes()?)
-        .layer(Extension(conf)))
+pub fn make_app() -> AppResult<Router<AppState>> {
+    Ok(Router::new().nest("/api", api::api_routes()?))
 }
