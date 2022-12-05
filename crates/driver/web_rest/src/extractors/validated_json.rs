@@ -15,7 +15,7 @@ impl<T, S, B> FromRequest<S, B> for ValidatedJson<T>
 where
     T: DeserializeOwned + Validate,
     S: Send + Sync,
-    B: Send + HttpBody,
+    B: Send + HttpBody + 'static,
     B::Error: Send + Sync + Into<BoxError>,
     B::Data: Send + Sync,
 {
