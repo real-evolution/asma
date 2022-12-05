@@ -9,18 +9,13 @@ pub type Argon2CryptoHashService<'a> =
 
 impl<'a> Argon2CryptoHashService<'a> {
     pub fn new() -> Self {
-        Self {
-            hasher: argon2::Argon2::default(),
-        }
+        Self(argon2::Argon2::default())
     }
 }
 
-pub struct CryptoHashServiceImpl<H>
+pub struct CryptoHashServiceImpl<H>(H)
 where
-    H: PasswordHasher + PasswordVerifier + Sync + Send + 'static,
-{
-    hasher: H,
-}
+    H: PasswordHasher + PasswordVerifier + Sync + Send + 'static;
 
 impl<H> CryptoHashService for CryptoHashServiceImpl<H>
 where
@@ -30,7 +25,7 @@ where
         let salt = SaltString::generate(&mut OsRng);
 
         Ok(self
-            .hasher
+            .0
             .hash_password(plain.as_bytes(), &salt)
             .map_err(map_hash_error)?
             .to_string())
@@ -40,7 +35,7 @@ where
         let hash = PasswordHash::new(hash).map_err(map_hash_error)?;
 
         Ok(self
-            .hasher
+            .0
             .verify_password(plain.as_bytes(), &hash)
             .map_err(map_hash_error)?)
     }
