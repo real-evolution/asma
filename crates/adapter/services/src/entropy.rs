@@ -16,65 +16,64 @@ const SPECIAL: &str = "`~!@#$%^&*()-_=+[]{};:'\"|\\,.<>/?";
 pub type BasicEntropyService = EntropyServiceImpl<rand::rngs::SmallRng>;
 pub type SecureEntropyService = EntropyServiceImpl<rand::rngs::OsRng>;
 
-pub struct EntropyServiceImpl<R: RngCore + Send + Sync + 'static> {
-    rng: WriteLock<R>,
-}
+#[derive(Default)]
+pub struct EntropyServiceImpl<R: RngCore + Send + Sync + 'static>(WriteLock<R>);
 
 impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
     fn next_bool(&self) -> AppResult<bool> {
-        Ok(self.rng.lock()?.gen())
+        Ok(self.0.lock()?.gen())
     }
 
     fn next_u8(&self) -> AppResult<u8> {
-        Ok(self.rng.lock()?.gen())
+        Ok(self.0.lock()?.gen())
     }
 
     fn next_u16(&self) -> AppResult<u16> {
-        Ok(self.rng.lock()?.gen())
+        Ok(self.0.lock()?.gen())
     }
 
     fn next_u32(&self) -> AppResult<u32> {
-        Ok(self.rng.lock()?.gen())
+        Ok(self.0.lock()?.gen())
     }
 
     fn next_u64(&self) -> AppResult<u64> {
-        Ok(self.rng.lock()?.gen())
+        Ok(self.0.lock()?.gen())
     }
 
     fn next_u128(&self) -> AppResult<u128> {
-        Ok(self.rng.lock()?.gen())
+        Ok(self.0.lock()?.gen())
     }
 
     fn next_usize(&self) -> AppResult<usize> {
-        Ok(self.rng.lock()?.gen())
+        Ok(self.0.lock()?.gen())
     }
 
     fn next_u8_ranged(&self, min: u8, max: u8) -> AppResult<u8> {
-        Ok(self.rng.lock()?.gen_range(min..max))
+        Ok(self.0.lock()?.gen_range(min..max))
     }
 
     fn next_u16_ranged(&self, min: u16, max: u16) -> AppResult<u16> {
-        Ok(self.rng.lock()?.gen_range(min..max))
+        Ok(self.0.lock()?.gen_range(min..max))
     }
 
     fn next_u32_ranged(&self, min: u32, max: u32) -> AppResult<u32> {
-        Ok(self.rng.lock()?.gen_range(min..max))
+        Ok(self.0.lock()?.gen_range(min..max))
     }
 
     fn next_u64_ranged(&self, min: u64, max: u64) -> AppResult<u64> {
-        Ok(self.rng.lock()?.gen_range(min..max))
+        Ok(self.0.lock()?.gen_range(min..max))
     }
 
     fn next_u128_ranged(&self, min: u128, max: u128) -> AppResult<u128> {
-        Ok(self.rng.lock()?.gen_range(min..max))
+        Ok(self.0.lock()?.gen_range(min..max))
     }
 
     fn next_usize_ranged(&self, min: usize, max: usize) -> AppResult<usize> {
-        Ok(self.rng.lock()?.gen_range(min..max))
+        Ok(self.0.lock()?.gen_range(min..max))
     }
 
     fn next_bytes_inplace(&self, buf: &mut [u8]) -> AppResult<()> {
-        self.rng
+        self.0
             .lock()?
             .try_fill_bytes(buf)
             .map_err(|err| AppError::Unknown(err.into()))?;
