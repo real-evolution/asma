@@ -1,15 +1,15 @@
-use axum::extract::Path;
+use axum::extract::{Path, State};
+use driver_web_common::state::AppState;
 use kernel_entities::entities::auth::*;
 use kernel_entities::traits::Key;
-use kernel_repositories::auth::AccountsRepo;
 
-use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
+use crate::{error::ApiResult, util::claims::Claims};
 
 pub async fn remove(
     claims: Claims,
     user_id: Path<Key<User>>,
     account_id: Path<Key<Account>>,
-    accounts_repo: Dep<dyn AccountsRepo>,
+    state: State<AppState>,
 ) -> ApiResult<()> {
     claims.of_with(
         &user_id,
@@ -19,5 +19,12 @@ pub async fn remove(
         ],
     )?;
 
-    Ok(accounts_repo.remove_of(&user_id, &account_id).await?)
+    state
+        .data
+        .auth()
+        .accounts()
+        .remove_of(&user_id, &account_id)
+        .await?;
+
+    Ok(())
 }

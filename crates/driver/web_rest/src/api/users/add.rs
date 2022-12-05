@@ -1,10 +1,12 @@
+use axum::extract::State;
+use driver_web_common::state::AppState;
 use kernel_entities::entities::auth::*;
-use kernel_repositories::auth::{InsertUser, UsersRepo};
+use kernel_repositories::auth::InsertUser;
 
 use super::dtos::AddUserDto;
 use crate::{
     error::ApiResult,
-    extractors::{di::Dep, validated_json::ValidatedJson},
+    extractors::validated_json::ValidatedJson,
     util::{
         claims::Claims,
         response::{Created, EntityCreated},
@@ -13,13 +15,16 @@ use crate::{
 
 pub async fn add(
     claims: Claims,
+    state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddUserDto>,
-    users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<EntityCreated<User>> {
     claims
         .in_role_with(KnownRoles::Admin, &[(Resource::Users, Action::Add)])?;
 
-    let user = users_repo
+    let user = state
+        .data
+        .auth()
+        .users()
         .create(InsertUser::new(
             form.username,
             form.display_name,

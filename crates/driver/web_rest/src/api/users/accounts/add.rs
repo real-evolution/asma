@@ -1,21 +1,20 @@
-use axum::extract::Path;
+use axum::extract::{Path, State};
+use driver_web_common::state::AppState;
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::auth::{AccountsRepo, InsertAccount};
-use kernel_services::crypto::hash::CryptoHashService;
+use kernel_repositories::auth::InsertAccount;
 
 use super::dtos::{AccountDto, AddAccountDto};
 use crate::{
     error::ApiResult,
-    extractors::{di::Dep, validated_json::ValidatedJson},
+    extractors::validated_json::ValidatedJson,
     util::{claims::Claims, response::Created},
 };
 
 pub async fn add(
     claims: Claims,
     user_id: Path<Key<User>>,
+    state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddAccountDto>,
-    accounts_repo: Dep<dyn AccountsRepo>,
-    hash_svc: Dep<dyn CryptoHashService>,
 ) -> ApiResult<Created<Key<Account>, AccountDto>> {
     claims.of_with(
         &user_id,
@@ -25,17 +24,16 @@ pub async fn add(
         ],
     )?;
 
-    let account: AccountDto = accounts_repo
+    let account: AccountDto = state
+        .data
+        .auth()
+        .accounts()
         .create(InsertAccount::new(
             user_id.0.clone(),
             form.account_name,
             form.holder_name,
-            hash_svc.hash(&form.password)?,
-            if form.is_active {
-                AccountState::Active
-            } else {
-                AccountState::Inactive
-            },
+            state.hash.hash(&form.password)?,
+            form.is_active.into(),
         ))
         .await?
         .into();

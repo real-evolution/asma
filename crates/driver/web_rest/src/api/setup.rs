@@ -1,19 +1,19 @@
-use axum::{routing::post, Json, Router};
-use axum_client_ip::ClientIp;
-use chrono::Utc;
-use kernel_services::setup::SetupService;
+use std::net::SocketAddr;
 
-use crate::{error::ApiResult, extractors::di::Dep};
+use axum::{extract::*, routing::post, Router};
+use chrono::Utc;
+use driver_web_common::state::AppState;
+
 use crate::{error::ApiResult, extractors::validated_json::ValidatedJson};
 
 pub async fn setup(
-    setup_svc: Dep<dyn SetupService>,
-    ClientIp(ip): ClientIp,
-    Json(form): Json<dtos::RootAccountDetails>,
+    State(state): State<AppState>,
+    ConnectInfo(ip): ConnectInfo<SocketAddr>,
+    ValidatedJson(form): ValidatedJson<dtos::RootAccountDetails>,
 ) -> ApiResult<()> {
     info!("a setup request was made from: `{ip}`");
 
-    setup_svc.setup(form.holder_name, form.password).await?;
+    state.setup.setup(form.holder_name, form.password).await?;
 
     info!("system was setup successfully at: {}", Utc::now());
     Ok(())

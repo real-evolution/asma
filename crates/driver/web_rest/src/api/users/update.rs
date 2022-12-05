@@ -1,27 +1,31 @@
-use axum::extract::Path;
+use axum::extract::{Path, State};
+use driver_web_common::state::AppState;
 use kernel_entities::entities::auth::{Action, KnownRoles, Resource, User};
 use kernel_entities::traits::Key;
-use kernel_repositories::auth::UsersRepo;
 
 use super::dtos::UpdateUserDto;
 use crate::{
-    error::ApiResult,
-    extractors::{di::Dep, validated_json::ValidatedJson},
+    error::ApiResult, extractors::validated_json::ValidatedJson,
     util::claims::Claims,
 };
 
 pub async fn update(
     claims: Claims,
     user_id: Path<Key<User>>,
+    state: State<AppState>,
     ValidatedJson(form): ValidatedJson<UpdateUserDto>,
-    users_repo: Dep<dyn UsersRepo>,
 ) -> ApiResult<()> {
     claims.in_role_with(
         KnownRoles::Admin,
         &[(Resource::Users, Action::Modify)],
     )?;
 
-    Ok(users_repo
+    state
+        .data
+        .auth()
+        .users()
         .set_display_name(&user_id, form.display_name)
-        .await?)
+        .await?;
+
+    Ok(())
 }

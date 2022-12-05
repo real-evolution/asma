@@ -1,13 +1,14 @@
-use axum::{extract::Path, Json};
+use axum::{
+    extract::{Path, State},
+    Json,
+};
+use driver_web_common::state::AppState;
 use itertools::Itertools;
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::auth::AccountsRepo;
 
 use crate::{
-    api::dtos::pagination::Pagination,
-    error::ApiResult,
-    extractors::{di::Dep, validated_query::ValidatedQuery},
-    util::claims::Claims,
+    api::dtos::pagination::Pagination, error::ApiResult,
+    extractors::validated_query::ValidatedQuery, util::claims::Claims,
 };
 
 use super::dtos::AccountDto;
@@ -15,8 +16,8 @@ use super::dtos::AccountDto;
 pub async fn get_all(
     claims: Claims,
     user_id: Path<Key<User>>,
+    state: State<AppState>,
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
-    accounts_repo: Dep<dyn AccountsRepo>,
 ) -> ApiResult<Json<Vec<AccountDto>>> {
     claims
         .can(&[
@@ -26,7 +27,10 @@ pub async fn get_all(
         .of(&user_id)
         .or(claims.in_role(KnownRoles::Admin))?;
 
-    let accounts = accounts_repo
+    let accounts = state
+        .data
+        .auth()
+        .accounts()
         .get_paginated_of(&user_id, &pagination.before, pagination.page_size)
         .await?
         .into_iter()
@@ -40,7 +44,7 @@ pub async fn get_by_id(
     claims: Claims,
     user_id: Path<Key<User>>,
     account_id: Path<Key<Account>>,
-    accounts_repo: Dep<dyn AccountsRepo>,
+    state: State<AppState>,
 ) -> ApiResult<Json<AccountDto>> {
     claims
         .can(&[
@@ -50,7 +54,12 @@ pub async fn get_by_id(
         .of(&user_id)
         .or(claims.in_role(KnownRoles::Admin))?;
 
-    let account = accounts_repo.get_of(&user_id, &account_id).await?;
+    let account = state
+        .data
+        .auth()
+        .accounts()
+        .get_of(&user_id, &account_id)
+        .await?;
 
-    Ok(Json(AccountDto::from(account)))
+    Ok(Json(account.into()))
 }

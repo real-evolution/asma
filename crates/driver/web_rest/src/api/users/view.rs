@@ -1,28 +1,32 @@
-use axum::{extract::Path, Json};
+use axum::{
+    extract::{Path, State},
+    Json,
+};
+use driver_web_common::state::AppState;
 use itertools::Itertools;
 use kernel_entities::{
     entities::auth::{Action, KnownRoles, Resource, User},
     traits::Key,
 };
-use kernel_repositories::auth::UsersRepo;
 
 use super::dtos::UserDto;
 use crate::{
-    api::dtos::pagination::Pagination,
-    error::ApiResult,
-    extractors::{di::Dep, validated_query::ValidatedQuery},
-    util::claims::Claims,
+    api::dtos::pagination::Pagination, error::ApiResult,
+    extractors::validated_query::ValidatedQuery, util::claims::Claims,
 };
 
 pub async fn get_all(
     claims: Claims,
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
-    users_repo: Dep<dyn UsersRepo>,
+    state: State<AppState>,
 ) -> ApiResult<Json<Vec<UserDto>>> {
     claims
         .in_role_with(KnownRoles::Admin, &[(Resource::Users, Action::View)])?;
 
-    let users = users_repo
+    let users = state
+        .data
+        .auth()
+        .users()
         .get_paginated(&pagination.before, pagination.page_size)
         .await?
         .into_iter()
@@ -35,9 +39,11 @@ pub async fn get_all(
 pub async fn get_by_id(
     claims: Claims,
     user_id: Path<Key<User>>,
-    users_repo: Dep<dyn UsersRepo>,
+    state: State<AppState>,
 ) -> ApiResult<Json<UserDto>> {
     claims.can(&[(Resource::Users, Action::View)])?;
 
-    Ok(Json(UserDto::new(users_repo.get(&user_id).await?)))
+    let user = state.data.auth().users().get(&user_id).await?;
+
+    Ok(Json(UserDto::new(user)))
 }

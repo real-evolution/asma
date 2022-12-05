@@ -1,11 +1,15 @@
-use axum::{extract::Path, Json};
+use axum::{
+    extract::{Path, State},
+    Json,
+};
+use driver_web_common::state::AppState;
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::auth::{AccountsRepo, InsertRole, RolesRepo};
+use kernel_repositories::auth::InsertRole;
 
 use super::dtos::{AddAccountToRoleDto, AddPermissionDto, AddRoleDto};
 use crate::{
     error::ApiResult,
-    extractors::{di::Dep, validated_json::ValidatedJson},
+    extractors::validated_json::ValidatedJson,
     util::{
         claims::Claims,
         response::{Created, EntityCreated},
@@ -14,13 +18,16 @@ use crate::{
 
 pub async fn add(
     claims: Claims,
+    state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddRoleDto>,
-    roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<EntityCreated<Role>> {
     claims
         .in_role_with(KnownRoles::Admin, &[(Resource::Roles, Action::Add)])?;
 
-    let role = roles_repo
+    let role = state
+        .data
+        .auth()
+        .roles()
         .create(InsertRole::new(form.code, form.friendly_name))
         .await?;
 
@@ -30,8 +37,8 @@ pub async fn add(
 pub async fn add_permission(
     claims: Claims,
     role_id: Path<Key<Role>>,
+    state: State<AppState>,
     Json(form): Json<AddPermissionDto>,
-    roles_repo: Dep<dyn RolesRepo>,
 ) -> ApiResult<EntityCreated<Permission>> {
     claims.in_role_with(
         KnownRoles::Root,
@@ -41,7 +48,10 @@ pub async fn add_permission(
         ],
     )?;
 
-    let permission = roles_repo
+    let permission = state
+        .data
+        .auth()
+        .roles()
         .add_permission(&role_id, form.resource, form.actions)
         .await?;
 
@@ -54,22 +64,26 @@ pub async fn add_permission(
 pub async fn add_to(
     claims: Claims,
     role_id: Path<Key<Role>>,
+    state: State<AppState>,
     Json(form): Json<AddAccountToRoleDto>,
-    roles_repo: Dep<dyn RolesRepo>,
-    accounts_repo: Dep<dyn AccountsRepo>,
 ) -> ApiResult<()> {
     claims.in_role_with(
         KnownRoles::UserOwner,
         &[(Resource::Roles, Action::Modify)],
     )?;
 
-    let role = roles_repo.get(&role_id).await?;
+    let role = state.data.auth().roles().get(&role_id).await?;
     claims.in_role(role.code.as_str())?;
 
-    let account = accounts_repo.get(&form.account_id).await?;
+    let account = state.data.auth().accounts().get(&form.account_id).await?;
     claims.of(&account.user_id)?;
 
-    roles_repo.add_to(&account.id, &role.id).await?;
+    state
+        .data
+        .auth()
+        .roles()
+        .add_to(&account.id, &role.id)
+        .await?;
 
     Ok(())
 }
