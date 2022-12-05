@@ -4,19 +4,16 @@ use adapter_proc_macros::Repo;
 use kernel_entities::{entities::link::*, traits::Key};
 use kernel_repositories::{error::RepoResult, link::*, traits::*};
 use ormx::{Delete, Table};
-use shaku::Component;
 
 use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
 
-#[derive(Component, Repo)]
+#[derive(Repo)]
 #[repo(
     table = "channels",
     read(entity = "Channel", model = "models::ChannelModel"),
     insert(entity = "InsertChannel", model = "models::InsertChannelModel")
 )]
-#[shaku(interface = ChannelsRepo)]
 pub struct SqlxChannelsRepo {
-    #[shaku(inject)]
     db: Arc<dyn SqlxDatabaseConnection>,
 }
 
