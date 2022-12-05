@@ -3,7 +3,6 @@ use argon2::{PasswordHash, PasswordHasher, PasswordVerifier};
 use kernel_services::crypto::hash::CryptoHashService;
 use kernel_services::error::{AppResult, CryptoError};
 use rand::rngs::OsRng;
-use shaku::Component;
 
 pub type Argon2CryptoHashService<'a> =
     CryptoHashServiceImpl<argon2::Argon2<'a>>;
@@ -16,8 +15,6 @@ impl<'a> Argon2CryptoHashService<'a> {
     }
 }
 
-#[derive(Component)]
-#[shaku(interface = CryptoHashService)]
 pub struct CryptoHashServiceImpl<H>
 where
     H: PasswordHasher + PasswordVerifier + Sync + Send + 'static,

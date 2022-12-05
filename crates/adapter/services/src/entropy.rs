@@ -5,7 +5,6 @@ use kernel_services::entropy::{
 };
 use kernel_services::error::{AppError, AppResult};
 use rand::{Rng, RngCore};
-use shaku::Component;
 
 const UPPER_ALPHA: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const LOWER_ALPHA: &str = "abcdefghijklmnopqrstuvwxyz";
@@ -17,8 +16,6 @@ const SPECIAL: &str = "`~!@#$%^&*()-_=+[]{};:'\"|\\,.<>/?";
 pub type BasicEntropyService = EntropyServiceImpl<rand::rngs::SmallRng>;
 pub type SecureEntropyService = EntropyServiceImpl<rand::rngs::OsRng>;
 
-#[derive(Component)]
-#[shaku(interface = EntropyService)]
 pub struct EntropyServiceImpl<R: RngCore + Send + Sync + 'static> {
     rng: WriteLock<R>,
 }

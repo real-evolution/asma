@@ -3,7 +3,6 @@ use kernel_services::config::*;
 use config::{Config, File, FileFormat, Value, ValueKind};
 use erased_serde::*;
 use kernel_services::error::{AppResult, ConfigError};
-use shaku::Component;
 
 use std::collections::HashMap;
 use std::{env, io};
@@ -12,8 +11,6 @@ const QUALIFIER: &str = "com";
 const ORGANIZATION: &str = "SGSTel";
 const APPLICATION: &str = "asma";
 
-#[derive(Component)]
-#[shaku(interface = ConfigService)]
 pub struct TomlConfigService {
     cfg: Config,
 }
