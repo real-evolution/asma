@@ -4,8 +4,8 @@ use sqlx::pool::PoolConnection;
 
 use crate::util::error::map_sqlx_error;
 
-pub type DbType = sqlx::postgres::Postgres;
-pub type PoolType = sqlx::Pool<DbType>;
+pub(crate) type DbType = sqlx::postgres::Postgres;
+pub(crate) type PoolType = sqlx::Pool<DbType>;
 
 #[async_trait]
 pub trait SqlxDatabaseConnection: Interface {
