@@ -12,29 +12,20 @@ use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::crypto::hash::CryptoHashService;
 use kernel_services::entropy::EntropyService;
 use kernel_services::error::{AppResult, AuthError};
-use shaku::Component;
 
-#[derive(Component)]
-#[shaku(interface = AuthService)]
 pub struct AppAuthService {
     config: config::AuthConfig,
 
-    #[shaku(inject)]
     users: Arc<dyn UsersRepo>,
 
-    #[shaku(inject)]
     accounts: Arc<dyn AccountsRepo>,
 
-    #[shaku(inject)]
     roles: Arc<dyn RolesRepo>,
 
-    #[shaku(inject)]
     sessions: Arc<dyn SessionsRepo>,
 
-    #[shaku(inject)]
     hash_svc: Arc<dyn CryptoHashService>,
 
-    #[shaku(inject)]
     entropy_svc: Arc<dyn EntropyService>,
 }
 
