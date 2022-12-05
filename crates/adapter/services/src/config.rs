@@ -82,7 +82,7 @@ impl TomlConfigService {
         Self::from_files(&paths)
     }
 
-    fn get_config_files() -> anyhow::Result<Vec<String>> {
+    pub fn get_config_files() -> anyhow::Result<Vec<String>> {
         let mut config_dir = directories::ProjectDirs::from(
             QUALIFIER,
             ORGANIZATION,
