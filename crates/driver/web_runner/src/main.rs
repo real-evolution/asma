@@ -10,7 +10,7 @@ use std::process::{ExitCode, Termination};
 
 #[tokio::main]
 async fn main() -> impl Termination {
-    if let Err(err) = launch::launch_with_di().await {
+    if let Err(err) = launch::launch().await {
         error!("app terminated with error: {}", err);
         return ExitCode::FAILURE;
     }
@@ -18,4 +18,3 @@ async fn main() -> impl Termination {
     info!("app exited normally");
     return ExitCode::FAILURE;
 }
-
