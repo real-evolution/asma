@@ -4,12 +4,13 @@ use chrono::Utc;
 use kernel_entities::entities::auth::User;
 use kernel_entities::entities::link::{Channel, ChannelPlatform};
 use kernel_entities::traits::Key;
-use kernel_repositories::link::{ChannelsRepo, InsertChannel};
+use kernel_repositories::link::InsertChannel;
+use kernel_repositories::DataStore;
 use kernel_services::error::AppResult;
 use kernel_services::link::{channels::ChannelsService, models::ChannelInfo};
 
 pub struct AppChannelsService {
-    channels: Arc<dyn ChannelsRepo>,
+    data: Arc<dyn DataStore>,
 }
 
 #[async_trait::async_trait]
@@ -20,7 +21,9 @@ impl ChannelsService for AppChannelsService {
         info: ChannelInfo,
     ) -> AppResult<Channel> {
         Ok(self
-            .channels
+            .data
+            .link()
+            .channels()
             .create(InsertChannel::new(
                 user_id.clone(),
                 info.name,
@@ -38,7 +41,9 @@ impl ChannelsService for AppChannelsService {
         info: ChannelInfo,
     ) -> AppResult<Channel> {
         Ok(self
-            .channels
+            .data
+            .link()
+            .channels()
             .create(InsertChannel::new(
                 user_id.clone(),
                 info.name,
@@ -52,8 +57,8 @@ impl ChannelsService for AppChannelsService {
 
     async fn toggle_channel(
         &self,
-        channel_id: &Key<Channel>,
-        is_active: bool,
+        _channel_id: &Key<Channel>,
+        _is_active: bool,
     ) -> AppResult<()> {
         todo!()
     }
