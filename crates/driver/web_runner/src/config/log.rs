@@ -1,3 +1,4 @@
+use derive_more::Display;
 use kernel_services::{config::ConfigService, get_config};
 
 use anyhow::Result;
@@ -75,7 +76,7 @@ enum LogFormatter {
     Json,
 }
 
-#[derive(Debug, Deserialize_enum_str)]
+#[derive(Debug, Display, Deserialize_enum_str)]
 #[serde(rename_all = "snake_case")]
 enum LogLevel {
     Trace,
@@ -111,6 +112,10 @@ pub fn configure_logger_with<'a, C: ConfigService + ?Sized>(
             LogConfig::default()
         });
 
+    if let Err(_) = std::env::var(ENV_LOG_KEY) {
+        std::env::set_var(ENV_LOG_KEY, conf.level.to_string());
+    }
+
     let fmt = tracing_subscriber::fmt()
         .with_file(conf.show_file)
         .with_target(conf.show_target)
@@ -119,8 +124,8 @@ pub fn configure_logger_with<'a, C: ConfigService + ?Sized>(
         .with_thread_names(conf.show_thread_names)
         .with_ansi(conf.use_ansi)
         .with_level(conf.show_level)
-        .with_env_filter(EnvFilter::from_env(ENV_LOG_KEY))
-        .with_max_level(conf.level);
+        .with_max_level(conf.level)
+        .with_env_filter(EnvFilter::from_env(ENV_LOG_KEY));
 
     match conf.formatter {
         LogFormatter::Full => set_global_default(fmt.finish()),
