@@ -1,10 +1,9 @@
 use async_trait::async_trait;
-use shaku::Interface;
 
 use crate::error::RepoResult;
 
 #[async_trait]
-pub trait TransactionManager: Interface {
+pub trait TransactionManager: Send + Sync {
     async fn begin(&self) -> RepoResult<Box<dyn Transaction>>;
 }
 

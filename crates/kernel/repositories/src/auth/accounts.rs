@@ -1,7 +1,6 @@
 use chrono::{DateTime, Utc};
 use derive_more::Constructor;
 use kernel_entities::{entities::auth::*, traits::Key};
-use shaku::Interface;
 
 use crate::{error::RepoResult, traits::*};
 
@@ -10,7 +9,8 @@ pub trait AccountsRepo:
     Repo<Account>
     + InsertRepo<Account, InsertAccount>
     + ChildRepo<Account, User>
-    + Interface
+    + Send
+    + Sync
 {
     async fn get_of_user_by_name(
         &self,

@@ -4,13 +4,12 @@ use kernel_entities::{
     entities::{auth::User, link::*},
     traits::Key,
 };
-use shaku::Interface;
 
 use crate::traits::*;
 
 #[async_trait::async_trait]
 pub trait ChannelsRepo:
-    Repo<Channel> + InsertRepo<Channel, InsertChannel> + Interface
+    Repo<Channel> + InsertRepo<Channel, InsertChannel> + Send + Sync
 {
 }
 

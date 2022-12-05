@@ -1,14 +1,12 @@
 use kernel_entities::entities::auth::*;
 use kernel_entities::entities::link::Channel;
 use kernel_entities::traits::Key;
-use shaku::Interface;
 
 use crate::error::AppResult;
-
 use crate::link::models::ChannelInfo;
 
 #[async_trait::async_trait]
-pub trait ChannelsService: Interface {
+pub trait ChannelsService: Send + Sync {
     async fn create_telegram_channel_for(
         &self,
         user_id: &Key<User>,
