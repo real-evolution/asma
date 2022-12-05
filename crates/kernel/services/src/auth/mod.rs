@@ -2,13 +2,12 @@ pub mod error;
 pub mod models;
 
 use kernel_entities::{entities::auth::*, traits::Key};
-use shaku::Interface;
 
 use self::models::AccessRule;
 use crate::error::AppResult;
 
 #[async_trait::async_trait]
-pub trait AuthService: Interface {
+pub trait AuthService: Send + Sync {
     async fn signin(
         &self,
         account_name: &str,
