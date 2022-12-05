@@ -1,13 +1,12 @@
-use std::sync::Arc;
-
 use adapter_proc_macros::Repo;
 use chrono::Utc;
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{auth::*, error::*, traits::*};
 use ormx::{Delete, Patch, Table};
 
+use crate::database::SqlxPool;
+use crate::sqlx_ok;
 use crate::util::error::map_sqlx_error;
-use crate::{database::SqlxDatabaseConnection, sqlx_ok};
 
 #[derive(Repo)]
 #[repo(
@@ -15,14 +14,12 @@ use crate::{database::SqlxDatabaseConnection, sqlx_ok};
     read(entity = "User", model = "models::UserModel"),
     insert(entity = "InsertUser", model = "models::InsertUserModel")
 )]
-    #[shaku(inject)]
-    db: Arc<dyn SqlxDatabaseConnection>,
-}
+pub(crate) struct SqlxUsersRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
 impl UsersRepo for SqlxUsersRepo {
     async fn get_by_username(&self, username: &str) -> RepoResult<User> {
-        sqlx_ok!(models::UserModel::by_username(self.db.get(), username).await)
+        sqlx_ok!(models::UserModel::by_username(self.0.get(), username).await)
     }
 
     async fn set_display_name(
@@ -35,7 +32,7 @@ impl UsersRepo for SqlxUsersRepo {
                 display_name: value,
                 updated_at: Utc::now()
             }
-            .patch_row(self.db.get(), id.value())
+            .patch_row(self.0.get(), id.value())
             .await
         )
     }

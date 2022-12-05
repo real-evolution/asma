@@ -1,11 +1,9 @@
-use std::sync::Arc;
-
 use adapter_proc_macros::Repo;
 use kernel_entities::{entities::link::*, traits::Key};
 use kernel_repositories::{error::RepoResult, link::*, traits::*};
 use ormx::{Delete, Table};
 
-use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
+use crate::{database::SqlxPool, util::error::map_sqlx_error};
 
 #[derive(Repo)]
 #[repo(
@@ -13,9 +11,7 @@ use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
     read(entity = "Channel", model = "models::ChannelModel"),
     insert(entity = "InsertChannel", model = "models::InsertChannelModel")
 )]
-pub struct SqlxChannelsRepo {
-    db: Arc<dyn SqlxDatabaseConnection>,
-}
+pub(crate) struct SqlxChannelsRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
 impl ChannelsRepo for SqlxChannelsRepo {}

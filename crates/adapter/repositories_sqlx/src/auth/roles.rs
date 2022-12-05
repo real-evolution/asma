@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use adapter_proc_macros::Repo;
 use chrono::Utc;
@@ -10,7 +10,7 @@ use kernel_repositories::traits::*;
 use ormx::{Delete, Patch, Table};
 use tracing::warn;
 
-use crate::database::SqlxDatabaseConnection;
+use crate::database::SqlxPool;
 use crate::{sqlx_ok, sqlx_vec_ok, util::error::map_sqlx_error};
 
 #[derive(Repo)]
@@ -19,9 +19,7 @@ use crate::{sqlx_ok, sqlx_vec_ok, util::error::map_sqlx_error};
     read(entity = "Role", model = "models::RoleModel"),
     insert(entity = "InsertRole", model = "models::InsertRoleModel")
 )]
-pub struct SqlxRolesRepo {
-    db: Arc<dyn SqlxDatabaseConnection>,
-}
+pub(crate) struct SqlxRolesRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
 impl RolesRepo for SqlxRolesRepo {
@@ -31,7 +29,7 @@ impl RolesRepo for SqlxRolesRepo {
     ) -> RepoResult<Vec<Permission>> {
         sqlx_vec_ok!(
             models::PermissionModel::by_role(
-                self.db.get(),
+                self.0.get(),
                 role_id.value_ref(),
             )
             .await
@@ -53,7 +51,7 @@ impl RolesRepo for SqlxRolesRepo {
             "#,
             account_id.value_ref()
         )
-        .fetch_all(self.db.get())
+        .fetch_all(self.0.get())
         .await
         .map_err(map_sqlx_error)?
         .into_iter()
@@ -82,7 +80,7 @@ impl RolesRepo for SqlxRolesRepo {
                 friendly_name: value,
                 updated_at: Utc::now(),
             }
-            .patch_row(self.db.get(), role_id.value())
+            .patch_row(self.0.get(), role_id.value())
             .await
         )
     }
@@ -103,7 +101,7 @@ impl RolesRepo for SqlxRolesRepo {
             actions.inner(),
             role_id.value_ref()
         )
-        .fetch_one(self.db.get())
+        .fetch_one(self.0.get())
         .await
         .map_err(map_sqlx_error)?;
 
@@ -115,7 +113,7 @@ impl RolesRepo for SqlxRolesRepo {
 
         sqlx_ok!(
             models::PermissionModel::insert(
-                self.db.acquire().await?.as_mut(),
+                self.0.acquire().await?.as_mut(),
                 models::InsertPermissionModel {
                     id: uuid::Uuid::new_v4(),
                     role_id: role_id.value(),
@@ -137,7 +135,7 @@ impl RolesRepo for SqlxRolesRepo {
             permission_id.value_ref(),
             role_id.value_ref(),
         )
-        .execute(self.db.get())
+        .execute(self.0.get())
         .await
         .map_err(map_sqlx_error)?;
 
@@ -150,7 +148,7 @@ impl RolesRepo for SqlxRolesRepo {
         role_id: &Key<Role>,
     ) -> RepoResult<()> {
         models::AccountRoleModel::insert(
-            self.db.acquire().await?.as_mut(),
+            self.0.acquire().await?.as_mut(),
             models::InsertAccountRoleModel {
                 id: uuid::Uuid::new_v4(),
                 account_id: account_id.value(),
@@ -177,7 +175,7 @@ impl RolesRepo for SqlxRolesRepo {
             account_id.value_ref(),
             role_id.value_ref(),
         )
-        .execute(self.db.get())
+        .execute(self.0.get())
         .await
         .map_err(map_sqlx_error)?;
 

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use adapter_proc_macros::Repo;
 use chrono::{DateTime, Utc};
 use kernel_entities::{entities::auth::*, traits::Key};
@@ -8,7 +6,7 @@ use kernel_repositories::error::RepoResult;
 use kernel_repositories::traits::*;
 use ormx::{Delete, Patch, Table};
 
-use crate::database::SqlxDatabaseConnection;
+use crate::database::SqlxPool;
 use crate::util::error::map_sqlx_error;
 use crate::{sqlx_ok, sqlx_vec_ok};
 
@@ -18,9 +16,7 @@ use crate::{sqlx_ok, sqlx_vec_ok};
     read(entity = "Account", model = "models::AccountModel"),
     insert(entity = "InsertAccount", model = "models::InsertAccountModel")
 )]
-pub struct SqlxAccountsRepo {
-    db: Arc<dyn SqlxDatabaseConnection>,
-}
+pub(crate) struct SqlxAccountsRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
 impl AccountsRepo for SqlxAccountsRepo {
@@ -39,7 +35,7 @@ impl AccountsRepo for SqlxAccountsRepo {
                 user_id.value_ref(),
                 account_name,
             )
-            .fetch_one(self.db.get())
+            .fetch_one(self.0.get())
             .await
         )
     }
@@ -54,7 +50,7 @@ impl AccountsRepo for SqlxAccountsRepo {
                 password_hash: value,
                 updated_at: Utc::now()
             }
-            .patch_row(self.db.get(), id.value())
+            .patch_row(self.0.get(), id.value())
             .await
         )
     }
@@ -69,7 +65,7 @@ impl AccountsRepo for SqlxAccountsRepo {
                 holder_name: value,
                 updated_at: Utc::now()
             }
-            .patch_row(self.db.get(), id.value())
+            .patch_row(self.0.get(), id.value())
             .await
         )
     }
@@ -84,7 +80,7 @@ impl AccountsRepo for SqlxAccountsRepo {
                 state: value.into(),
                 updated_at: Utc::now()
             }
-            .patch_row(self.db.get(), id.value())
+            .patch_row(self.0.get(), id.value())
             .await
         )
     }
@@ -109,7 +105,7 @@ impl AccountsRepo for SqlxAccountsRepo {
                 before,
                 limit as i64,
             )
-            .fetch_all(self.db.get())
+            .fetch_all(self.0.get())
             .await
         )
     }
@@ -136,7 +132,7 @@ impl AccountsRepo for SqlxAccountsRepo {
                 before,
                 limit as i64,
             )
-            .fetch_all(self.db.get())
+            .fetch_all(self.0.get())
             .await
         )
     }
@@ -163,7 +159,7 @@ impl ChildRepo<Account, User> for SqlxAccountsRepo {
                 before,
                 limit as i64
             )
-            .fetch_all(self.db.get())
+            .fetch_all(self.0.get())
             .await
         )
     }
@@ -180,7 +176,7 @@ impl ChildRepo<Account, User> for SqlxAccountsRepo {
                 id.value_ref(),
                 user_id.value_ref()
             )
-            .fetch_one(self.db.get())
+            .fetch_one(self.0.get())
             .await
         )
     }
@@ -196,7 +192,7 @@ impl ChildRepo<Account, User> for SqlxAccountsRepo {
             id.value_ref(),
             user_id.value_ref()
         )
-        .fetch_one(self.db.get())
+        .fetch_one(self.0.get())
         .await
         .map_err(map_sqlx_error)?;
 

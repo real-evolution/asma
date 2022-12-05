@@ -1,7 +1,6 @@
-use std::sync::Arc;
-
 use adapter_proc_macros::Repo;
 use chrono::{Duration, Utc};
+use derive_more::Constructor;
 use kernel_entities::entities::auth::*;
 use kernel_entities::traits::*;
 use kernel_repositories::auth::*;
@@ -9,7 +8,7 @@ use kernel_repositories::error::RepoResult;
 use kernel_repositories::traits::*;
 use ormx::{Delete, Patch, Table};
 
-use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
+use crate::{database::SqlxPool, util::error::map_sqlx_error};
 
 #[derive(Constructor, Repo)]
 #[repo(
@@ -17,9 +16,7 @@ use crate::{database::SqlxDatabaseConnection, util::error::map_sqlx_error};
     read(entity = "Session", model = "models::SessionModel"),
     insert(entity = "InsertSession", model = "models::InsertSessionModel")
 )]
-pub struct SqlxSessionsRepo {
-    db: Arc<dyn SqlxDatabaseConnection>,
-}
+pub(crate) struct SqlxSessionsRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
 impl SessionsRepo for SqlxSessionsRepo {
@@ -28,7 +25,7 @@ impl SessionsRepo for SqlxSessionsRepo {
         account_id: &Key<Account>,
     ) -> RepoResult<Vec<Session>> {
         Ok(models::SessionModel::by_account_id(
-            self.db.get(),
+            self.0.get(),
             account_id.value_ref(),
         )
         .await
@@ -54,7 +51,7 @@ impl SessionsRepo for SqlxSessionsRepo {
             device_identifier,
             Utc::now()
         )
-        .fetch_one(self.db.get())
+        .fetch_one(self.0.get())
         .await
         .map_err(map_sqlx_error)?
         .into())
@@ -71,7 +68,7 @@ impl SessionsRepo for SqlxSessionsRepo {
             account_id.value_ref(),
             Utc::now(),
         )
-        .fetch_one(self.db.get())
+        .fetch_one(self.0.get())
         .await
         .map_err(map_sqlx_error)?;
 
@@ -94,7 +91,7 @@ impl SessionsRepo for SqlxSessionsRepo {
             unique_identifier,
             Utc::now()
         )
-        .fetch_one(self.db.get())
+        .fetch_one(self.0.get())
         .await
         .map_err(map_sqlx_error)?
         .into())
@@ -113,7 +110,7 @@ impl SessionsRepo for SqlxSessionsRepo {
             expires_at: Some(Utc::now() + validity),
             updated_at: Utc::now(),
         }
-        .patch_row(self.db.get(), id.value())
+        .patch_row(self.0.get(), id.value())
         .await
         .map_err(map_sqlx_error)?;
 
