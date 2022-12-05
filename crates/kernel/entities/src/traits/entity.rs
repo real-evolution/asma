@@ -25,6 +25,7 @@ pub trait MutableEntity: Entity {
     serde::Deserialize,
 )]
 #[repr(transparent)]
+#[serde(transparent)]
 pub struct Key<E, T = KeyType>(T, #[serde(skip)] PhantomData<E>);
 
 impl<E, T: Clone> Key<E, T> {
