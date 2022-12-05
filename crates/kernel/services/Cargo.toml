@@ -23,6 +23,5 @@ erased-serde = { workspace = true }
 itertools = { workspace = true }
 lazy_static = { workspace = true }
 serde = { workspace = true }
-shaku = { workspace = true }
 thiserror = { workspace = true }
 validator = { workspace = true }

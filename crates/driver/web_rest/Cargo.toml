@@ -12,7 +12,6 @@ axum-auth = "0"
 axum-client-ip = "0"
 jsonwebtoken = "8"
 mapper = { git = "https://github.com/kumarmo2/mapper.git", branch = "v0.1" }
-shaku_axum = "0"
 
 # project dependencies
 common_macros = { path = "../../common/macros" }

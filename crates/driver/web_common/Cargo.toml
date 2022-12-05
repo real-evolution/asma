@@ -15,5 +15,4 @@ adapter_services = { path = "../../adapter/services" }
 
 # workspace dependencies
 anyhow = { workspace = true }
-shaku = { workspace = true }
 tracing = { workspace = true }
