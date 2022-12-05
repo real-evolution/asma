@@ -12,7 +12,6 @@ use quote::{quote, ToTokens};
 )]
 pub struct RepoDeriveInput {
     ident: syn::Ident,
-    data: darling::ast::Data<(), PoolFieldReceiver>,
     table: String,
     read: RepoReadTypes,
     #[darling(default)]
@@ -31,33 +30,14 @@ struct RepoInsertTypes {
     model: syn::Type,
 }
 
-#[derive(Debug, FromField)]
-#[darling(attributes(pool))]
-struct PoolFieldReceiver {
-    ident: Option<syn::Ident>,
-    ty: syn::Type,
-}
-
 impl ToTokens for RepoDeriveInput {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let RepoDeriveInput {
             ref ident,
-            ref data,
             ref table,
             ref read,
             ref insert,
         } = *self;
-
-        let pool = data
-            .as_ref()
-            .take_struct()
-            .expect("Should never be enum")
-            .fields
-            .first()
-            .expect("Should have a pool field as the only field")
-            .ident
-            .clone()
-            .unwrap();
 
         let (read_entity, read_model) = (&read.entity, &read.model);
 
@@ -73,7 +53,7 @@ impl ToTokens for RepoDeriveInput {
             #[async_trait::async_trait]
             impl Repo<#read_entity> for #ident {
                 async fn get(&self, id: &Key<#read_entity>) -> RepoResult<#read_entity> {
-                    Ok(#read_model::get(self.#pool.get(), id.value())
+                    Ok(#read_model::get(self.0.get(), id.value())
                         .await
                         .map_err(map_sqlx_error)?
                         .into())
@@ -90,7 +70,7 @@ impl ToTokens for RepoDeriveInput {
                         before,
                         limit as i64,
                     )
-                    .fetch_all(self.#pool.get())
+                    .fetch_all(self.0.get())
                     .await
                     .map_err(map_sqlx_error)?
                     .into_iter()
@@ -99,7 +79,7 @@ impl ToTokens for RepoDeriveInput {
                 }
 
                 async fn remove(&self, key: &Key<#read_entity>) -> RepoResult<()> {
-                    #read_model::delete_row(self.db.get(), key.value())
+                    #read_model::delete_row(self.0.get(), key.value())
                         .await
                         .map_err(map_sqlx_error)?;
 
@@ -119,7 +99,7 @@ impl ToTokens for RepoDeriveInput {
 
                         Ok(
                             #read_model::insert(
-                                self.db.acquire().await?.as_mut(),
+                                self.0.acquire().await?.as_mut(),
                                 insert,
                             )
                             .await
