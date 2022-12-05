@@ -7,12 +7,8 @@ use kernel_entities::traits::Key;
 use kernel_repositories::link::{ChannelsRepo, InsertChannel};
 use kernel_services::error::AppResult;
 use kernel_services::link::{channels::ChannelsService, models::ChannelInfo};
-use shaku::Component;
 
-#[derive(Component)]
-#[shaku(interface = ChannelsService)]
 pub struct AppChannelsService {
-    #[shaku(inject)]
     channels: Arc<dyn ChannelsRepo>,
 }
 
