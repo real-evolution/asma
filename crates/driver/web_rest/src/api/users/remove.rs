@@ -5,15 +5,6 @@ use kernel_repositories::auth::UsersRepo;
 
 use crate::{error::ApiResult, extractors::di::Dep, util::claims::Claims};
 
-#[utoipa::path(
-    delete,
-    path = "/api/users/{user_id}",
-    responses((status = 200, description = "User removed")),
-    responses((status = 404, description = "User not found")),
-    params(
-        ("user_id" = Key<User>, Path, description = "Id of the user to remove"),
-    )
-)]
 pub async fn remove(
     claims: Claims,
     user_id: Path<Key<User>>,

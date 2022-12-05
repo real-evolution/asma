@@ -12,25 +12,6 @@ use crate::{
 
 use super::dtos::AccountDto;
 
-#[utoipa::path(
-    get,
-    path = "/api/users/{user_id}/accounts",
-    responses(
-        (
-            status = 200,
-            description = "All accounts of the specified user",
-            body = Vec<AccountDto>
-        ),
-    ),
-    params(
-        (
-            "user_id" = Key<User>,
-            Path,
-            description = "Id of the user to get accounts for"
-        ),
-        ("pagination" = Pagination, Query, description = "Pagination parameters")
-    )
-)]
 pub async fn get_all(
     claims: Claims,
     user_id: Path<Key<User>>,
@@ -55,18 +36,6 @@ pub async fn get_all(
     Ok(Json(accounts))
 }
 
-#[utoipa::path(
-    get,
-    path = "/api/users/{user_id}/accounts/{account_id}",
-    responses(
-        (status = 200, description = "Account with `id", body = AccountDto),
-        (status = 404, description = "No accounts with `id` were found"),
-    ),
-    params(
-        ("user_id" = Key<User>, Path, description = "Id of the user to get"),
-        ("account_id" = Key<Account>, Path, description = "Id of the account to get"),
-    )
-)]
 pub async fn get_by_id(
     claims: Claims,
     user_id: Path<Key<User>>,

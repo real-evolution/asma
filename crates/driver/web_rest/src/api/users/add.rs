@@ -11,12 +11,6 @@ use crate::{
     },
 };
 
-#[utoipa::path(
-    post,
-    path = "/api/users",
-    request_body = AddUserDto,
-    responses((status = 201, description = "User created")),
-)]
 pub async fn add(
     claims: Claims,
     ValidatedJson(form): ValidatedJson<AddUserDto>,

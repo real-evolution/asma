@@ -10,19 +10,6 @@ use crate::{
     util::claims::Claims,
 };
 
-#[utoipa::path(
-    patch,
-    path = "/api/roles/{role_id}",
-    request_body = UpdateRoleDto,
-    responses((status = 200, description = "Role updated")),
-    params(
-        (
-            "role_id" = Key<Role>,
-            Path,
-            description = "Id of the role to be updated"
-        ),
-    )
-)]
 pub async fn update(
     claims: Claims,
     role_id: Path<Key<Role>>,

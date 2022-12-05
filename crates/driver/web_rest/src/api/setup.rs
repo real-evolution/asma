@@ -4,16 +4,8 @@ use chrono::Utc;
 use kernel_services::setup::SetupService;
 
 use crate::{error::ApiResult, extractors::di::Dep};
+use crate::{error::ApiResult, extractors::validated_json::ValidatedJson};
 
-#[utoipa::path(
-    post,
-    path = "/api/setup",
-    request_body = RootDetails,
-    responses(
-        (status = 200, description = "System setup successfully"),
-        (status = 500, description = "Internal error"),
-    ),
-)]
 pub async fn setup(
     setup_svc: Dep<dyn SetupService>,
     ClientIp(ip): ClientIp,

@@ -12,12 +12,6 @@ use crate::{
     },
 };
 
-#[utoipa::path(
-    post,
-    path = "/api/roles",
-    request_body = AddRoleDto,
-    responses((status = 201, description = "Role created")),
-)]
 pub async fn add(
     claims: Claims,
     ValidatedJson(form): ValidatedJson<AddRoleDto>,
@@ -33,22 +27,6 @@ pub async fn add(
     Ok(Created::new("/api/roles", role).into())
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/roles/{role_id}/permissions",
-    request_body = AddPermissionDto,
-    responses(
-        (status = 201, description = "Permission created", body = Key<Permission>),
-        (status = 404, description = "Role not found"),
-    ),
-    params(
-        (
-            "role_id" = Key<Role>,
-            Path,
-            description = "Id of the role to add the permission to"
-        ),
-    )
-)]
 pub async fn add_permission(
     claims: Claims,
     role_id: Path<Key<Role>>,
@@ -73,22 +51,6 @@ pub async fn add_permission(
     ))
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/roles/{role_id}/accounts",
-    request_body = AddAccountToRoleDto,
-    responses(
-        (status = 200, description = "Account added"),
-        (status = 404, description = "Role or account or user does not exist"),
-    ),
-    params(
-        (
-            "role_id" = Key<Role>,
-            Path,
-            description = "Id of the role to add the account to"
-        ),
-    )
-)]
 pub async fn add_to(
     claims: Claims,
     role_id: Path<Key<Role>>,

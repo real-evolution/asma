@@ -10,18 +10,6 @@ use crate::{
     util::{claims::Claims, response::Created},
 };
 
-#[utoipa::path(
-    post,
-    path = "/api/users/{user_id}/accounts",
-    request_body = AddAccountDto,
-    responses(
-        (status = 201, description = "Account created"),
-        (status = 404, description = "User not found"),
-    ),
-    params(
-        ("user_id" = Key<Account>, Path, description = "Id of the user to add the account to"),
-    )
-)]
 pub async fn add(
     claims: Claims,
     user_id: Path<Key<User>>,

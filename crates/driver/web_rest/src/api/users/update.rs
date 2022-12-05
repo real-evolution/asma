@@ -10,19 +10,6 @@ use crate::{
     util::claims::Claims,
 };
 
-#[utoipa::path(
-    patch,
-    path = "/api/users/{user_id}",
-    request_body = UpdateUserDto,
-    responses((status = 200, description = "User updated")),
-    params(
-        (
-            "user_id" = Key<User>,
-            Path,
-            description = "Id of the user to be updated"
-        ),
-    )
-)]
 pub async fn update(
     claims: Claims,
     user_id: Path<Key<User>>,

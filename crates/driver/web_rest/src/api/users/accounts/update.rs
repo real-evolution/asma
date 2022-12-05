@@ -10,27 +10,6 @@ use crate::{
     util::claims::Claims,
 };
 
-#[utoipa::path(
-    put,
-    path = "/api/users/{user_id}/accounts/{account_id}/password",
-    request_body = UpdateAccountPasswordDto,
-    responses((status = 200, description = "Account password updated")),
-    responses((status = 401, description = "Invalid old password")),
-    responses((status = 404, description = "User or account not found")),
-    params(
-        (
-            "user_id" = Key<User>,
-            Path,
-            description = "Id of the user to update its account password"
-        ),
-
-        (
-            "account_id" = Key<Account>,
-            Path,
-            description = "Id of the account to update its password"
-        ),
-    )
-)]
 pub async fn update_password(
     claims: Claims,
     user_id: Path<Key<User>>,

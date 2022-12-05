@@ -12,14 +12,6 @@ use crate::{
     util::claims::Claims,
 };
 
-#[utoipa::path(
-    get,
-    path = "/api/link/channels",
-    responses(
-        (status = 200, description = "All available channels", body = Vec<ChannelDto>),
-    ),
-    params(("pagination" = Pagination, Query, description = "Pagination parameters"))
-)]
 pub async fn get_all(
     claims: Claims,
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
@@ -40,17 +32,6 @@ pub async fn get_all(
     Ok(Json(channels))
 }
 
-#[utoipa::path(
-    get,
-    path = "/api/link/channels/{channel_id}",
-    responses(
-        (status = 200, description = "Channel with `id", body = ChannelDto),
-        (status = 404, description = "No channels with `id` were found"),
-    ),
-    params(
-        ("channel_id" = Key<Channel>, Path, description = "Id of the channel to get"),
-    )
-)]
 pub async fn get_by_id(
     claims: Claims,
     channel_id: Path<Key<Channel>>,

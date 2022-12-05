@@ -14,14 +14,6 @@ use crate::{
     util::claims::Claims,
 };
 
-#[utoipa::path(
-    get,
-    path = "/api/users",
-    responses(
-        (status = 200, description = "All available users", body = Vec<UserDto>),
-    ),
-    params(("pagination" = Pagination, Query, description = "Pagination parameters"))
-)]
 pub async fn get_all(
     claims: Claims,
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
@@ -40,17 +32,6 @@ pub async fn get_all(
     Ok(Json(users))
 }
 
-#[utoipa::path(
-    get,
-    path = "/api/users/{user_id}",
-    responses(
-        (status = 200, description = "User with `id", body = UserDto),
-        (status = 404, description = "No users with `id` were found"),
-    ),
-    params(
-        ("user_id" = Key<User>, Path, description = "Id of the user to get"),
-    )
-)]
 pub async fn get_by_id(
     claims: Claims,
     user_id: Path<Key<User>>,
