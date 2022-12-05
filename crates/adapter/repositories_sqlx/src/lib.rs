@@ -33,3 +33,19 @@ impl DataStore for SqlxDataStore {
     }
 }
 
+pub async fn create_sqlx_datastore(
+    conf: config::DataConfig,
+) -> anyhow::Result<Arc<dyn DataStore>> {
+    tracing::debug!(
+        "openning database connection to: {}",
+        conf.get_concealed_connection_string()?
+    );
+
+    let pool = SqlxPool(conf.into_pool().await?);
+
+    Ok(Arc::new(SqlxDataStore {
+        auth: SqlxAuthDataStore::new(pool.clone()),
+        link: SqlxLinkDataStore::new(pool.clone()),
+        pool,
+    }))
+}
