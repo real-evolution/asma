@@ -3,29 +3,22 @@ pub mod config;
 use std::sync::Arc;
 
 use chrono::{Duration, Utc};
+use derive_more::Constructor;
 use kernel_entities::entities::auth::*;
 use kernel_entities::traits::Key;
-use kernel_repositories::auth::*;
 use kernel_repositories::error::RepoError;
+use kernel_repositories::{auth::*, DataStore};
 use kernel_services::auth::models::AccessRule;
 use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::crypto::hash::CryptoHashService;
 use kernel_services::entropy::EntropyService;
 use kernel_services::error::{AppResult, AuthError};
 
+#[derive(Constructor)]
 pub struct AppAuthService {
     config: config::AuthConfig,
-
-    users: Arc<dyn UsersRepo>,
-
-    accounts: Arc<dyn AccountsRepo>,
-
-    roles: Arc<dyn RolesRepo>,
-
-    sessions: Arc<dyn SessionsRepo>,
-
+    data: Arc<dyn DataStore>,
     hash_svc: Arc<dyn CryptoHashService>,
-
     entropy_svc: Arc<dyn EntropyService>,
 }
 
@@ -38,7 +31,7 @@ impl AuthService for AppAuthService {
         password: &str,
         device_info: DeviceInfo,
     ) -> AppResult<(User, Account, Session)> {
-        let user = self.users.get_by_username(username).await?;
+        let user = self.data.auth().users().get_by_username(username).await?;
 
         if !user.is_active {
             return Err(AuthError::InactiveUser {
@@ -49,7 +42,9 @@ impl AuthService for AppAuthService {
         }
 
         let account = self
-            .accounts
+            .data
+            .auth()
+            .accounts()
             .get_of_user_by_name(&user.id, account_name)
             .await?;
 
@@ -68,11 +63,15 @@ impl AuthService for AppAuthService {
         }
 
         if let Ok(session) = self
-            .sessions
+            .data
+            .auth()
+            .sessions()
             .get_active_for(&account.id, &device_info.device_identifier)
             .await
         {
-            self.sessions
+            self.data
+                .auth()
+                .sessions()
                 .update(
                     &session.id,
                     &device_info.last_address,
@@ -89,7 +88,12 @@ impl AuthService for AppAuthService {
             return Ok((user, account, session));
         }
 
-        if self.sessions.get_active_count_for(&account.id).await?
+        if self
+            .data
+            .auth()
+            .sessions()
+            .get_active_count_for(&account.id)
+            .await?
             >= self.config.max_sessions_count
         {
             warn!(
@@ -104,7 +108,9 @@ impl AuthService for AppAuthService {
         }
 
         let session = self
-            .sessions
+            .data
+            .auth()
+            .sessions()
             .create(InsertSession {
                 account_id: account.id.clone(),
                 device_identifier: device_info.device_identifier,
@@ -134,7 +140,9 @@ impl AuthService for AppAuthService {
             .get_session_by_token(refresh_token, &device_info.device_identifier)
             .await?;
 
-        self.sessions
+        self.data
+            .auth()
+            .sessions()
             .update(
                 &session.id,
                 &device_info.last_address,
@@ -155,7 +163,7 @@ impl AuthService for AppAuthService {
             .get_session_by_token(refresh_token, device_identifier)
             .await?;
 
-        Ok(self.sessions.remove(&session.id).await?)
+        Ok(self.data.auth().sessions().remove(&session.id).await?)
     }
 
     async fn get_access_rules_for(
@@ -163,7 +171,9 @@ impl AuthService for AppAuthService {
         account_id: &Key<Account>,
     ) -> AppResult<Vec<AccessRule>> {
         Ok(self
-            .roles
+            .data
+            .auth()
+            .roles()
             .get_roles_with_permissions_for(account_id)
             .await?
             .into_iter()
@@ -178,14 +188,21 @@ impl AuthService for AppAuthService {
         old_password: &str,
         new_password: &str,
     ) -> AppResult<()> {
-        let account = self.accounts.get_of(user_id, account_id).await?;
+        let account = self
+            .data
+            .auth()
+            .accounts()
+            .get_of(user_id, account_id)
+            .await?;
 
         if self.hash_svc.hash(old_password)? != account.password_hash {
             return Err(AuthError::OldPasswordWrong.into());
         }
 
         Ok(self
-            .accounts
+            .data
+            .auth()
+            .accounts()
             .set_password_hash(account_id, self.hash_svc.hash(new_password)?)
             .await?)
     }
@@ -198,7 +215,9 @@ impl AppAuthService {
         device_identifier: &str,
     ) -> AppResult<Session> {
         match self
-            .sessions
+            .data
+            .auth()
+            .sessions()
             .get_active_by_token(refresh_token, device_identifier)
             .await
         {
