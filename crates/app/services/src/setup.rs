@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
+use derive_more::Constructor;
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::{auth::*, error::RepoError, TransactionManager};
+use kernel_repositories::{auth::*, error::RepoError, DataStore};
 use kernel_services::{
     crypto::hash::CryptoHashService,
     error::AppResult,
@@ -13,22 +14,18 @@ const SYSTEM_USER_DISPLAY_NAME: &str = "System User";
 const ROOT_ACCOUNT_NAME: &str = "root";
 const ROOT_ROLE_DESCRIPTION: &str = "Full system access";
 
+#[derive(Constructor)]
 pub struct AppSetupService {
-    tx_mgr: Arc<dyn TransactionManager>,
-
-    users: Arc<dyn UsersRepo>,
-
-    accounts: Arc<dyn AccountsRepo>,
-
-    roles: Arc<dyn RolesRepo>,
-
+    data: Arc<dyn DataStore>,
     hash_svc: Arc<dyn CryptoHashService>,
 }
 
 impl AppSetupService {
     async fn create_system_user(&self) -> AppResult<User> {
         let system_user = self
-            .users
+            .data
+            .auth()
+            .users()
             .create(InsertUser::new(
                 SYSTEM_USER_USERNAME.to_owned(),
                 SYSTEM_USER_DISPLAY_NAME.to_owned(),
@@ -46,7 +43,9 @@ impl AppSetupService {
         root_password: String,
     ) -> AppResult<Account> {
         let root_account = self
-            .accounts
+            .data
+            .auth()
+            .accounts()
             .create(InsertAccount::new(
                 user_id,
                 ROOT_ACCOUNT_NAME.to_owned(),
@@ -65,7 +64,9 @@ impl AppSetupService {
     ) -> AppResult<()> {
         // create root role
         let role = self
-            .roles
+            .data
+            .auth()
+            .roles()
             .create(InsertRole::new(
                 KnownRoles::Root.to_string(),
                 Some(ROOT_ROLE_DESCRIPTION.to_owned()),
@@ -73,16 +74,26 @@ impl AppSetupService {
             .await?;
 
         // add account to root role
-        self.roles.add_to(root_account_id, &role.id).await?;
+        self.data
+            .auth()
+            .roles()
+            .add_to(root_account_id, &role.id)
+            .await?;
 
         Ok(())
     }
 }
 
-#[async_trait::async_trait()]
+#[async_trait::async_trait]
 impl SetupService for AppSetupService {
     async fn is_setup(&self) -> AppResult<bool> {
-        match self.users.get_by_username(SYSTEM_USER_USERNAME).await {
+        match self
+            .data
+            .auth()
+            .users()
+            .get_by_username(SYSTEM_USER_USERNAME)
+            .await
+        {
             Ok(_) => Ok(true),
             Err(RepoError::NotFound) => return Ok(false),
             Err(err) => return Err(err.into()),
@@ -98,7 +109,7 @@ impl SetupService for AppSetupService {
             return Err(SetupError::AlreadySetup.into());
         }
 
-        let tx = self.tx_mgr.begin().await?;
+        let tx = self.data.tx().begin().await?;
 
         {
             let system_user = self.create_system_user().await?;
