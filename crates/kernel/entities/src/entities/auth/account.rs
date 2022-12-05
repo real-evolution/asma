@@ -36,3 +36,13 @@ impl Into<i32> for AccountState {
         self.repr()
     }
 }
+
+impl From<bool> for AccountState {
+    fn from(value: bool) -> Self {
+        if value {
+            Self::Active
+        } else {
+            Self::Inactive
+        }
+    }
+}
