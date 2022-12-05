@@ -7,29 +7,21 @@ use kernel_services::{
     error::AppResult,
     setup::{error::SetupError, SetupService},
 };
-use shaku::Component;
 
 const SYSTEM_USER_USERNAME: &str = "system";
 const SYSTEM_USER_DISPLAY_NAME: &str = "System User";
 const ROOT_ACCOUNT_NAME: &str = "root";
 const ROOT_ROLE_DESCRIPTION: &str = "Full system access";
 
-#[derive(Component)]
-#[shaku(interface = SetupService)]
 pub struct AppSetupService {
-    #[shaku(inject)]
     tx_mgr: Arc<dyn TransactionManager>,
 
-    #[shaku(inject)]
     users: Arc<dyn UsersRepo>,
 
-    #[shaku(inject)]
     accounts: Arc<dyn AccountsRepo>,
 
-    #[shaku(inject)]
     roles: Arc<dyn RolesRepo>,
 
-    #[shaku(inject)]
     hash_svc: Arc<dyn CryptoHashService>,
 }
 
