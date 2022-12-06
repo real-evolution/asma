@@ -2,8 +2,8 @@ use axum::extract::FromRequestParts;
 use axum::headers::authorization::Bearer;
 use axum::headers::Authorization;
 use axum::http::request::Parts;
-use axum::Extension;
 use axum::TypedHeader;
+use driver_web_common::state::AppState;
 use jsonwebtoken::errors::{Error, ErrorKind};
 use jsonwebtoken::{DecodingKey, Validation};
 
@@ -12,15 +12,12 @@ use crate::error::{ApiError, ApiResult};
 use crate::util::claims::Claims;
 
 #[async_trait::async_trait]
-impl<S> FromRequestParts<S> for Claims
-where
-    S: Send + Sync,
-{
+impl FromRequestParts<AppState> for Claims {
     type Rejection = ApiError;
 
     async fn from_request_parts(
         parts: &mut Parts,
-        state: &S,
+        state: &AppState,
     ) -> ApiResult<Self> {
         let auth = TypedHeader::<Authorization<Bearer>>::from_request_parts(
             parts, state,
@@ -31,14 +28,11 @@ where
             Error::from(ErrorKind::InvalidToken)
         })?;
 
-        let token_conf =
-            Extension::<ApiConfig>::from_request_parts(parts, state)
-                .await
-                .expect("could not read api config using `axum::Extension<T>`");
+        let config = ApiConfig::from_request_parts(parts, state).await?;
 
         Ok(jsonwebtoken::decode::<Claims>(
             &auth.token(),
-            &DecodingKey::from_secret(token_conf.token.signing_key.as_bytes()),
+            &DecodingKey::from_secret(config.token.signing_key.as_bytes()),
             &Validation::default(),
         )
         .map(|data| data.claims)?)
