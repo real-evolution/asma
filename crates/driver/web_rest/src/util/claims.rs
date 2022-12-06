@@ -99,6 +99,10 @@ impl Claims {
         role: R,
         perms: &[(Resource, A)],
     ) -> ApiResult<&Self> {
+        if let Ok(_) = self.is_root() {
+            return Ok(self);
+        }
+
         let Some(role_perms) = self.roles.get(role.into()) else {
             return Self::insufficient_permissions();
         };
