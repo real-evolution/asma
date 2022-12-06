@@ -8,12 +8,11 @@ use kernel_entities::traits::Key;
 use super::dtos::{PermissionDto, RoleDto, RoleWithPermissionsDto};
 use crate::api::dtos::pagination::Pagination;
 use crate::error::ApiResult;
-use crate::extractors::validated_query::ValidatedQuery;
 use crate::util::claims::Claims;
 
 pub async fn get_all(
     claims: Claims,
-    ValidatedQuery(pagination): ValidatedQuery<Pagination>,
+    pagination: Pagination,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<RoleDto>>> {
     claims
@@ -26,7 +25,7 @@ pub async fn get_all(
         .get_paginated(&pagination.before, pagination.page_size)
         .await?
         .into_iter()
-        .map(|r| RoleDto { role: r })
+        .map(|r| r.into())
         .collect_vec();
 
     Ok(Json(roles))
@@ -51,7 +50,7 @@ pub async fn get_by_id(
         .collect_vec();
 
     Ok(Json(RoleWithPermissionsDto {
-        role: RoleDto { role },
+        role: role.into(),
         permissions,
     }))
 }

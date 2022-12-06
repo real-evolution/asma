@@ -11,13 +11,12 @@ use kernel_entities::{
 
 use super::dtos::UserDto;
 use crate::{
-    api::dtos::pagination::Pagination, error::ApiResult,
-    extractors::validated_query::ValidatedQuery, util::claims::Claims,
+    api::dtos::pagination::Pagination, error::ApiResult, util::claims::Claims,
 };
 
 pub async fn get_all(
     claims: Claims,
-    ValidatedQuery(pagination): ValidatedQuery<Pagination>,
+    pagination: Pagination,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<UserDto>>> {
     claims

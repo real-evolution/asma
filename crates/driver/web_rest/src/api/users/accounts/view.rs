@@ -7,8 +7,7 @@ use itertools::Itertools;
 use kernel_entities::{entities::auth::*, traits::Key};
 
 use crate::{
-    api::dtos::pagination::Pagination, error::ApiResult,
-    extractors::validated_query::ValidatedQuery, util::claims::Claims,
+    api::dtos::pagination::Pagination, error::ApiResult, util::claims::Claims,
 };
 
 use super::dtos::AccountDto;
@@ -17,7 +16,7 @@ pub async fn get_all(
     claims: Claims,
     user_id: Path<Key<User>>,
     state: State<AppState>,
-    ValidatedQuery(pagination): ValidatedQuery<Pagination>,
+    pagination: Pagination,
 ) -> ApiResult<Json<Vec<AccountDto>>> {
     claims
         .can(&[
