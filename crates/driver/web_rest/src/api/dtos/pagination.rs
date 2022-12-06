@@ -17,6 +17,15 @@ pub struct Pagination {
     pub page_size: usize,
 }
 
+impl Default for Pagination {
+    fn default() -> Self {
+        Self {
+            before: default_before_timestamp(),
+            page_size: default_page_size(),
+        }
+    }
+}
+
 impl Into<(DateTime<Utc>, usize)> for Pagination {
     fn into(self) -> (DateTime<Utc>, usize) {
         (self.before, self.page_size)
