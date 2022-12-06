@@ -40,14 +40,18 @@ impl RolesRepo for SqlxRolesRepo {
         &self,
         account_id: &Key<Account>,
     ) -> RepoResult<HashMap<String, Vec<(Resource, Actions)>>> {
-        let items = sqlx::query!(
+        let items = sqlx::query_as!(
+            models::RolePermissionPair,
             r#"
-            SELECT roles.code, permissions.resource, permissions.actions
-            FROM   roles
-            JOIN   account_roles
-              ON   account_roles.account_id = $1
-            JOIN   permissions
-              ON   permissions.role_id = account_roles.role_id
+               SELECT roles.code,
+                      permissions.resource as "resource?",
+                      permissions.actions as "actions?"
+                 FROM roles
+                 JOIN account_roles
+                   ON account_roles.account_id = $1
+            LEFT JOIN permissions
+                   ON permissions.role_id = account_roles.role_id
+                WHERE roles.is_active = TRUE AND account_roles.is_active = TRUE
             "#,
             account_id.value_ref()
         )
@@ -55,17 +59,25 @@ impl RolesRepo for SqlxRolesRepo {
         .await
         .map_err(map_sqlx_error)?
         .into_iter()
-        .map(|i| {
-            if let Some(res) = Resource::from_repr(i.resource) {
-                Some((i.code, (res, Actions::from_bits(i.actions))))
-            } else {
-                warn!("unknown resource with code `{}`", i.resource);
-                None
-            }
+        .filter_map(|i| {
+            let (Some(res), Some(act)) = (i.resource, i.actions) else {
+                return Some((i.code, None))
+            };
+
+            let Some(res) = Resource::from_repr(res) else {
+                warn!("unknown resource with code `{}`", res);
+                return None;
+            };
+
+            Some((i.code, Some((res, Actions::from_bits(act)))))
         })
-        .filter(|i| i.is_some())
-        .map(|i| i.unwrap())
-        .into_group_map();
+        .into_group_map()
+        .into_iter()
+        .map(|(code, perms)| {
+            (code, perms.into_iter().filter_map(|i| i).collect())
+        })
+        .collect();
+        //.map(|(code, perms)| (code, perms.into_iter().filter_map(|i| i)));
 
         Ok(items)
     }
@@ -250,6 +262,13 @@ mod models {
                 is_active: true,
             }
         }
+    }
+
+    #[derive(sqlx::FromRow)]
+    pub struct RolePermissionPair {
+        pub code: String,
+        pub resource: Option<i64>,
+        pub actions: Option<i32>,
     }
 
     generate_mapping!(Permission, PermissionModel, 5);
