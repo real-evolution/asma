@@ -5,11 +5,16 @@ use mapper::Mapper;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Mapper, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[from(Role)]
 pub struct RoleDto {
-    #[serde(flatten)]
-    pub role: Role,
+    pub id: Key<Role>,
+    pub code: String,
+    pub friendly_name: Option<String>,
+    pub is_active: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize, Mapper, Serialize)]
@@ -23,6 +28,7 @@ pub struct PermissionDto {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RoleWithPermissionsDto {
     #[serde(flatten)]
     pub role: RoleDto,
