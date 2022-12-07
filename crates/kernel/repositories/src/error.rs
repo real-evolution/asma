@@ -13,6 +13,9 @@ pub enum RepoError {
     #[error("not items were found")]
     NotFound,
 
+    #[error("an item with the same unique values already exists")]
+    AlreadyExists,
+
     #[error("duplicate item: {0}")]
     DuplicateValue(String),
 }
