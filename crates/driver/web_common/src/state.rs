@@ -57,7 +57,7 @@ pub async fn create_state() -> anyhow::Result<AppState> {
         entropy.clone(),
     ));
     // setup
-    let setup = Arc::new(AppSetupService::new(data.clone(), hash.clone()));
+    let setup = Arc::new(AppSetupService::new(data.clone(), auth.clone()));
 
     debug!("building application state");
     Ok(Arc::new(AppStateImpl {

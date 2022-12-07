@@ -4,7 +4,7 @@ use derive_more::Constructor;
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{auth::*, error::RepoError, DataStore};
 use kernel_services::{
-    crypto::hash::CryptoHashService,
+    auth::AuthService,
     error::AppResult,
     setup::{error::SetupError, SetupService},
 };
@@ -17,7 +17,7 @@ const ROOT_ROLE_DESCRIPTION: &str = "Full system access";
 #[derive(Constructor)]
 pub struct AppSetupService {
     data: Arc<dyn DataStore>,
-    hash_svc: Arc<dyn CryptoHashService>,
+    auth_svc: Arc<dyn AuthService>,
 }
 
 impl AppSetupService {
@@ -43,16 +43,14 @@ impl AppSetupService {
         root_password: String,
     ) -> AppResult<Account> {
         let root_account = self
-            .data
-            .auth()
-            .accounts()
-            .create(InsertAccount::new(
+            .auth_svc
+            .add_account_for(
                 user_id,
-                ROOT_ACCOUNT_NAME.to_owned(),
+                ROOT_ACCOUNT_NAME.into(),
                 root_holder_name,
-                self.hash_svc.hash(&root_password)?,
-                AccountState::Active,
-            ))
+                root_password,
+                true,
+            )
             .await?;
 
         Ok(root_account)

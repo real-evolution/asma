@@ -1,7 +1,6 @@
 use axum::extract::{Path, State};
 use driver_web_common::state::AppState;
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::auth::InsertAccount;
 
 use super::dtos::{AccountDto, AddAccountDto};
 use crate::{
@@ -25,16 +24,14 @@ pub async fn add(
     )?;
 
     let account: AccountDto = state
-        .data
-        .auth()
-        .accounts()
-        .create(InsertAccount::new(
-            user_id.0.clone(),
+        .auth
+        .add_account_for(
+            user_id.clone(),
             form.account_name,
             form.holder_name,
-            state.hash.hash(&form.password)?,
-            form.is_active.into(),
-        ))
+            form.password,
+            form.is_active,
+        )
         .await?
         .into();
 
