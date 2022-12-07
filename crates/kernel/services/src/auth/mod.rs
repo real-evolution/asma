@@ -33,6 +33,15 @@ pub trait AuthService: Send + Sync {
         account_id: &Key<Account>,
     ) -> AppResult<Vec<AccessRule>>;
 
+    async fn add_account_for(
+        &self,
+        user_id: Key<User>,
+        account_name: String,
+        holder_name: Option<String>,
+        password: String,
+        is_active: bool,
+    ) -> AppResult<Account>;
+
     async fn update_password_for(
         &self,
         user_id: &Key<User>,
