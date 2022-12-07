@@ -12,6 +12,8 @@ pub trait Repo<E: Entity> {
         limit: usize,
     ) -> RepoResult<Vec<E>>;
 
+    async fn exists(&self, key: &Key<E>) -> RepoResult<bool>;
+
     async fn remove(&self, key: &Key<E>) -> RepoResult<()>;
 }
 
