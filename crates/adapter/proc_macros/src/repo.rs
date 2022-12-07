@@ -49,6 +49,9 @@ impl ToTokens for RepoDeriveInput {
             LIMIT $2"#,
         );
 
+        let exists_query =
+            format!(r#"SELECT EXISTS (SELECT 1 FROM {table} WHERE id = $1)"#,);
+
         tokens.extend(quote! {
             #[async_trait::async_trait]
             impl Repo<#read_entity> for #ident {
@@ -76,6 +79,18 @@ impl ToTokens for RepoDeriveInput {
                     .into_iter()
                     .map(|u| u.into())
                     .collect())
+                }
+
+                async fn exists(&self, key: &Key<#read_entity>) -> RepoResult<bool> {
+                    let exists = sqlx::query_scalar!(
+                        #exists_query,
+                        key.value_ref(),
+                    )
+                    .fetch_one(self.0.get())
+                    .await
+                    .map_err(map_sqlx_error)?;
+
+                    Ok(exists.unwrap_or(false))
                 }
 
                 async fn remove(&self, key: &Key<#read_entity>) -> RepoResult<()> {
