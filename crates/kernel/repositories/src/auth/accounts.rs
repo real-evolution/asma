@@ -18,24 +18,6 @@ pub trait AccountsRepo:
         account_name: &str,
     ) -> RepoResult<Account>;
 
-    async fn set_password_hash(
-        &self,
-        id: &Key<Account>,
-        value: String,
-    ) -> RepoResult<()>;
-
-    async fn set_holder_name(
-        &self,
-        id: &Key<Account>,
-        value: Option<String>,
-    ) -> RepoResult<()>;
-
-    async fn set_state(
-        &self,
-        id: &Key<Account>,
-        value: AccountState,
-    ) -> RepoResult<()>;
-
     async fn get_in_role(
         &self,
         role_id: &Key<Role>,
@@ -50,6 +32,30 @@ pub trait AccountsRepo:
         before: &DateTime<Utc>,
         limit: usize,
     ) -> RepoResult<Vec<Account>>;
+
+    async fn set_holder_name(
+        &self,
+        id: &Key<Account>,
+        value: Option<String>,
+    ) -> RepoResult<()>;
+
+    async fn set_password_hash(
+        &self,
+        id: &Key<Account>,
+        value: String,
+    ) -> RepoResult<()>;
+
+    async fn set_state(
+        &self,
+        id: &Key<Account>,
+        value: AccountState,
+    ) -> RepoResult<()>;
+
+    async fn exists_with_name_for(
+        &self,
+        user_id: &Key<User>,
+        account_name: &str,
+    ) -> RepoResult<bool>;
 }
 
 #[derive(Constructor, Debug)]
