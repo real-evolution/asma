@@ -8,7 +8,7 @@ use ormx::{Delete, Patch, Table};
 
 use crate::database::SqlxPool;
 use crate::util::error::map_sqlx_error;
-use crate::{sqlx_ok, sqlx_vec_ok};
+use crate::*;
 
 #[derive(Repo)]
 #[repo(
@@ -36,51 +36,6 @@ impl AccountsRepo for SqlxAccountsRepo {
                 account_name,
             )
             .fetch_one(self.0.get())
-            .await
-        )
-    }
-
-    async fn set_password_hash(
-        &self,
-        id: &Key<Account>,
-        value: String,
-    ) -> RepoResult<()> {
-        sqlx_ok!(
-            models::UpdateAccountPasswordModel {
-                password_hash: value,
-                updated_at: Utc::now()
-            }
-            .patch_row(self.0.get(), id.value())
-            .await
-        )
-    }
-
-    async fn set_holder_name(
-        &self,
-        id: &Key<Account>,
-        value: Option<String>,
-    ) -> RepoResult<()> {
-        sqlx_ok!(
-            models::UpdateAccountHolderNameModel {
-                holder_name: value,
-                updated_at: Utc::now()
-            }
-            .patch_row(self.0.get(), id.value())
-            .await
-        )
-    }
-
-    async fn set_state(
-        &self,
-        id: &Key<Account>,
-        value: AccountState,
-    ) -> RepoResult<()> {
-        sqlx_ok!(
-            models::UpdateAccountStateModel {
-                state: value.into(),
-                updated_at: Utc::now()
-            }
-            .patch_row(self.0.get(), id.value())
             .await
         )
     }
@@ -133,6 +88,70 @@ impl AccountsRepo for SqlxAccountsRepo {
                 limit as i64,
             )
             .fetch_all(self.0.get())
+            .await
+        )
+    }
+
+    async fn exists_with_name_for(
+        &self,
+        user_id: &Key<User>,
+        account_name: &str,
+    ) -> RepoResult<bool> {
+        Ok(sqlx::query_scalar!(
+            r#"SELECT EXISTS (
+                SELECT 1 FROM accounts
+                WHERE user_id = $1 AND account_name = $2
+            )"#,
+            user_id.value_ref(),
+            account_name
+        )
+        .fetch_one(self.0.get())
+        .await
+        .map_err(map_sqlx_error)?
+        .unwrap_or(false))
+    }
+
+    async fn set_holder_name(
+        &self,
+        id: &Key<Account>,
+        value: Option<String>,
+    ) -> RepoResult<()> {
+        sqlx_ok!(
+            models::UpdateAccountHolderNameModel {
+                holder_name: value,
+                updated_at: Utc::now()
+            }
+            .patch_row(self.0.get(), id.value())
+            .await
+        )
+    }
+
+    async fn set_password_hash(
+        &self,
+        id: &Key<Account>,
+        value: String,
+    ) -> RepoResult<()> {
+        sqlx_ok!(
+            models::UpdateAccountPasswordModel {
+                password_hash: value,
+                updated_at: Utc::now()
+            }
+            .patch_row(self.0.get(), id.value())
+            .await
+        )
+    }
+
+    async fn set_state(
+        &self,
+        id: &Key<Account>,
+        value: AccountState,
+    ) -> RepoResult<()> {
+        sqlx_ok!(
+            models::UpdateAccountStateModel {
+                state: value.into(),
+                updated_at: Utc::now()
+            }
+            .patch_row(self.0.get(), id.value())
             .await
         )
     }
