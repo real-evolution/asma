@@ -181,6 +181,39 @@ impl AuthService for AppAuthService {
             .collect())
     }
 
+    async fn add_account_for(
+        &self,
+        user_id: Key<User>,
+        account_name: String,
+        holder_name: Option<String>,
+        password: String,
+        is_active: bool,
+    ) -> AppResult<Account> {
+        if self
+            .data
+            .auth()
+            .accounts()
+            .exists_with_name_for(&user_id, &account_name)
+            .await?
+        {
+            return Err(RepoError::AlreadyExists.into());
+        }
+
+        Ok(self
+            .data
+            .auth()
+            .accounts()
+            .create(InsertAccount::new(
+                user_id,
+                account_name.to_owned(),
+                holder_name,
+                self.hash_svc.hash(&password)?,
+                is_active.into(),
+            ))
+            .await?
+            .into())
+    }
+
     async fn update_password_for(
         &self,
         user_id: &Key<User>,
