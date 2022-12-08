@@ -64,12 +64,11 @@ impl RolesRepo for SqlxRolesRepo {
                 return Some((i.code, None))
             };
 
-            let Some(res) = Resource::from_repr(res) else {
+            if let Resource::Unknown = Resource::from(res) {
                 warn!("unknown resource with code `{}`", res);
-                return None;
-            };
+            }
 
-            Some((i.code, Some((res, Actions::from_bits(act)))))
+            Some((i.code, Some((Resource::from(res), Actions::from(act)))))
         })
         .into_group_map()
         .into_iter()
@@ -103,14 +102,17 @@ impl RolesRepo for SqlxRolesRepo {
         resource: Resource,
         actions: Actions,
     ) -> RepoResult<Permission> {
+        let resource: i64 = resource.into();
+        let actions: i32 = actions.into();
+
         let exists = sqlx::query_scalar!(
             r#"
             SELECT EXISTS (
                 SELECT 1 FROM permissions
                 WHERE resource = $1 AND actions = $2 AND role_id = $3
             )"#,
-            resource as i64,
-            actions.inner(),
+            resource,
+            actions,
             role_id.value_ref()
         )
         .fetch_one(self.0.get())
@@ -129,8 +131,8 @@ impl RolesRepo for SqlxRolesRepo {
                 models::InsertPermissionModel {
                     id: uuid::Uuid::new_v4(),
                     role_id: role_id.value(),
-                    actions,
                     resource,
+                    actions,
                 },
             )
             .await
@@ -243,10 +245,8 @@ mod models {
     #[ormx(table = "permissions", id = id, insertable, deletable)]
     pub struct PermissionModel {
         pub id: KeyType,
-        #[ormx(custom_type)]
-        pub resource: Resource,
-        #[ormx(custom_type)]
-        pub actions: Actions,
+        pub resource: i64,
+        pub actions: i32,
         #[ormx(get_many=by_role)]
         pub role_id: KeyType,
         #[ormx(default)]
