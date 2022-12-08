@@ -33,7 +33,10 @@ mod models {
         pub platform: i32,
         pub api_key: String,
         pub valid_until: Option<DateTime<Utc>>,
+        #[ormx(set)]
         pub is_active: bool,
+        #[ormx(default, set)]
+        pub max_instances: Option<i64>,
         pub user_id: KeyType,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
@@ -55,5 +58,5 @@ mod models {
         }
     }
 
-    generate_mapping!(Channel, ChannelModel, 9);
+    generate_mapping!(Channel, ChannelModel, 10);
 }

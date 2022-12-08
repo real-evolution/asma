@@ -5,8 +5,9 @@ CREATE TABLE channels
     name VARCHAR NOT NULL,
     platform INTEGER NOT NULL,
     api_key VARCHAR NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE NOT NULL,
     valid_until TIMESTAMPTZ NULL,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    max_instances INT8 NULL,
     user_id UUID NOT NULL,
 
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,

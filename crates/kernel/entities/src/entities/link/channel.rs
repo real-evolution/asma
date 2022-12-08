@@ -22,6 +22,7 @@ pub struct Channel {
     pub api_key: String,
     pub valid_until: Option<DateTime<Utc>>,
     pub is_active: bool,
+    pub max_instances: Option<i64>,
     pub user_id: Key<User>,
 }
 
