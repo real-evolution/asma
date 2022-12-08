@@ -5,9 +5,6 @@ use validator::Validate;
 use crate::api::dtos::pagination::Pagination;
 use crate::error::{ApiError, ApiResult};
 
-#[derive(Debug, Clone, Copy, Default)]
-pub struct ValidatedQuery<T>(pub T);
-
 #[async_trait::async_trait]
 impl<S> FromRequestParts<S> for Pagination
 where
