@@ -8,8 +8,6 @@ CREATE TABLE instances
     phone_number VARCHAR NULL,
 
     last_active TIMESTAMPTZ NULL,
-    is_default BOOLEAN DEFAULT FALSE NOT NULL,
-
     channel_id UUID NOT NULL,
 
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,

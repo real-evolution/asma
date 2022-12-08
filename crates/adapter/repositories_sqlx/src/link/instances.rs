@@ -36,12 +36,10 @@ mod models {
         pub phone_number: Option<String>,
         #[ormx(default, set)]
         pub last_active: Option<DateTime<Utc>>,
-        #[ormx(default, set)]
-        pub is_default: bool,
         pub channel_id: KeyType,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
     }
 
-    generate_mapping!(Instance, InstanceModel, 8);
+    generate_mapping!(Instance, InstanceModel, 7);
 }
