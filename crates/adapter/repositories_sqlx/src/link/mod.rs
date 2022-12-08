@@ -1,5 +1,6 @@
 mod channels;
 mod peers;
+mod instances;
 
 use kernel_repositories::link::*;
 
