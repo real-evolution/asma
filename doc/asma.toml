@@ -1,0 +1,107 @@
+[web]
+# Web server listening address. 0.0.0.0 (or :: for IPv6) means listening on
+# all interfaces. 127.0.0.1 (or ::1) can be used to only listen on the
+# loopback interface for development purposes.
+listen_address = "0.0.0.0"
+# Web server listening port.
+listen_port = 8080
+
+[log]
+# Log entires display format. This accepts the following values:
+# - Full: Gives full output. This is ideal for a production setup, where logs
+#         are written to a log file.
+# - Pretty: Use a human friendly format. This should be used in development
+#           only, because of the use of colors that are not needed in
+#           production environment.
+# - Compact: Gives a compact output (one line per log entry). This is intended
+#            to be used in production with console output.
+# - Json: Outputs a structured JSON-formatted log entries. This is ideal for
+#         a production setup, where logs need to be parsed, and used in other
+#         componenents.
+formatter = "pretty"
+# Whether to include the full name of the file that the log entry originated
+# from or not
+show_file = true
+# Whether to include the number of the line that the log entry originated
+# from or not
+how_line = true
+# Whether to include the name of the crate that created the log entry or not
+show_target = true
+# Whether to include the thread identifier in the logs or not
+show_thread_id = false
+# Whether to include the thread name (can be empty) in the logs or not
+show_thread_names = false
+# Whether to include the log level in the logs or not
+show_level = true
+# Whether to use ANSI codes (to enable text coloring, formatting, etc..) in
+# the logs text or not. This should be `false` for logs that are saved to
+# the disk
+use_ansi = true
+# Maximum log level to be used. This is useful to filter logs depending on the
+# current environment. Each level enables all the levels below it.
+# This can be one of the following:
+# - trace: Trace logs (function calls, handler invokations, etc..). This
+#          should be enabled during development only.
+# - debug: Logs used by developers to show verbose logs. This should be enabled
+#          during development only.l
+# - info: Informational logs. Includes regular events that need to be reported.
+#         This is the recommended level for production environments.
+# - warn: Warning logs. This includes potentially erronous events that were
+#         handled by the system.
+# - error: Recoverable errors.
+# - off: Completely turn off all logs
+level = "debug"
+
+[auth]
+# Seconds that sessions should be valid for. After this duration, further
+# attempts of refreshing the session should fail, and a new sign-in is required
+signin_validity_seconds = 259200
+# Seconds that refreshed sessions should be valid for. After this duration,
+# further attempts of refreshing the session should fail, and a new sign-in
+# is required
+refresh_validity_seconds = 259200
+# Maximum number of allowed simultaneous sessions for the same account.
+max_sessions_count = 12
+# Generated refresh tokens lengths.
+refresh_token_length = 128
+
+[api]
+# Whether to disable root account privileges not not
+disable_root = false
+
+[api.token]
+# JWT token issuer value
+issuer = "asma.sgstel.com.ye"
+# JWT token audience value
+audience = "asma.sgstel.com.ye"
+# JWT token validity in seconds.
+timeout_seconds = 600
+# JWT token signing secret key. This value should be protected against
+# unauthorized access, as it may compromise the system's security.
+signing_key = "TFyW14CKP8nH0NMlvQYOntm04uU84n9N5yQVRDDppZlh3mMcJHS"
+
+[data]
+# Databae connection driver. Supported drivers are: postgres (PostgreSQL),
+# mysql (MySQL), mssql (Microsoft SQL Server), and mariadb (MariaDB),
+driver = "postgres"
+# Database server address
+host = "localhost"
+# Database server listening port
+port = 5432
+# Database server username
+username = "postgres"
+# Database server password
+password = "123"
+# Database to be used by the system
+database = "asma_test"
+
+[data.pool]
+# Minumum number of connections to be opened & pooled to the database server
+min_connections = 8
+# Maximum number of connections to be opened & pooled to the database server
+max_connections = 64
+# Lifetime of connections (in seconds), after which the connections should be
+# closed
+max_lifetime = 120000
+# Whether to created connections lazily (on demand) or not
+lazy = true
