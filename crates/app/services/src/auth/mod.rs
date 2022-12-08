@@ -8,7 +8,6 @@ use kernel_entities::entities::auth::*;
 use kernel_entities::traits::Key;
 use kernel_repositories::error::RepoError;
 use kernel_repositories::{auth::*, DataStore};
-use kernel_services::auth::models::AccessRule;
 use kernel_services::auth::{models::DeviceInfo, AuthService};
 use kernel_services::crypto::hash::CryptoHashService;
 use kernel_services::entropy::EntropyService;
@@ -164,21 +163,6 @@ impl AuthService for AppAuthService {
             .await?;
 
         Ok(self.data.auth().sessions().remove(&session.id).await?)
-    }
-
-    async fn get_access_rules_for(
-        &self,
-        account_id: &Key<Account>,
-    ) -> AppResult<Vec<AccessRule>> {
-        Ok(self
-            .data
-            .auth()
-            .roles()
-            .get_roles_with_permissions_for(account_id)
-            .await?
-            .into_iter()
-            .map(|i| AccessRule::new(i.0, i.1))
-            .collect())
     }
 
     async fn add_account_for(

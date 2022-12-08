@@ -3,7 +3,6 @@ pub mod models;
 
 use kernel_entities::{entities::auth::*, traits::Key};
 
-use self::models::AccessRule;
 use crate::error::AppResult;
 
 #[async_trait::async_trait]
@@ -27,11 +26,6 @@ pub trait AuthService: Send + Sync {
         refresh_token: &str,
         device_identifier: &str,
     ) -> AppResult<()>;
-
-    async fn get_access_rules_for(
-        &self,
-        account_id: &Key<Account>,
-    ) -> AppResult<Vec<AccessRule>>;
 
     async fn add_account_for(
         &self,
