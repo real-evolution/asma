@@ -100,6 +100,30 @@ impl BitXor for Action {
     }
 }
 
+impl BitAnd for Actions {
+    type Output = Actions;
+
+    fn bitand(self, rhs: Actions) -> Self::Output {
+        Actions(self.0 | rhs.inner())
+    }
+}
+
+impl BitOr for Actions {
+    type Output = Actions;
+
+    fn bitor(self, rhs: Actions) -> Self::Output {
+        Actions(self.0 | rhs.inner())
+    }
+}
+
+impl BitXor for Actions {
+    type Output = Actions;
+
+    fn bitxor(self, rhs: Actions) -> Self::Output {
+        Actions(self.0 ^ rhs.inner())
+    }
+}
+
 impl BitAnd<Action> for Actions {
     type Output = Actions;
 
