@@ -20,18 +20,18 @@ use crate::traits::*;
     Hash,
     PartialEq,
     Serialize_repr,
-    sqlx::Type,
 )]
 pub enum Resource {
-    Users = 0,
-    Accounts = 1,
-    Roles = 2,
-    Permissions = 3,
-    Channels = 4,
+    Unknown = 0,
+    Users = 1,
+    Accounts = 2,
+    Roles = 3,
+    Permissions = 4,
+    Channels = 5,
 }
 
 #[repr(i32)]
-#[derive(Clone, Copy, Debug, Deserialize, Display, Serialize, sqlx::Type)]
+#[derive(Clone, Copy, Debug, Deserialize, Display, Serialize)]
 pub enum Action {
     Global = 1,
     View = 2,
@@ -41,7 +41,7 @@ pub enum Action {
 }
 
 #[entity(entity_type = "immutable")]
-#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into)]
 pub struct Permission {
     pub resource: Resource,
     pub actions: Actions,
@@ -50,7 +50,7 @@ pub struct Permission {
 
 #[repr(transparent)]
 #[derive(
-    Clone, Copy, Debug, Deserialize, Default, PartialEq, Serialize, sqlx::Type,
+    Clone, Copy, Debug, Deserialize, Default, From, Into, PartialEq, Serialize,
 )]
 pub struct Actions(i32);
 
@@ -61,14 +61,6 @@ impl From<Action> for Actions {
 }
 
 impl Actions {
-    pub fn from_bits(inner: i32) -> Self {
-        Self(inner)
-    }
-
-    pub fn inner(self) -> i32 {
-        self.0 as i32
-    }
-
     pub fn has<A: Into<Self> + Copy>(&self, rhs: &A) -> bool {
         let rhs: Self = (*rhs).into();
 
@@ -104,7 +96,7 @@ impl BitAnd for Actions {
     type Output = Actions;
 
     fn bitand(self, rhs: Actions) -> Self::Output {
-        Actions(self.0 | rhs.inner())
+        Actions(self.0 | rhs.0)
     }
 }
 
@@ -112,7 +104,7 @@ impl BitOr for Actions {
     type Output = Actions;
 
     fn bitor(self, rhs: Actions) -> Self::Output {
-        Actions(self.0 | rhs.inner())
+        Actions(self.0 | rhs.0)
     }
 }
 
@@ -120,7 +112,7 @@ impl BitXor for Actions {
     type Output = Actions;
 
     fn bitxor(self, rhs: Actions) -> Self::Output {
-        Actions(self.0 ^ rhs.inner())
+        Actions(self.0 ^ rhs.0)
     }
 }
 
@@ -153,5 +145,17 @@ impl Not for Actions {
 
     fn not(self) -> Self::Output {
         Self(!self.0)
+    }
+}
+
+impl From<i64> for Resource {
+    fn from(value: i64) -> Self {
+        Self::from_repr(value).unwrap_or(Resource::Unknown)
+    }
+}
+
+impl Into<i64> for Resource {
+    fn into(self) -> i64 {
+        self.repr()
     }
 }

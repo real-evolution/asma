@@ -7,7 +7,7 @@ use crate::traits::*;
 use super::Channel;
 
 #[entity(entity_type = "immutable")]
-#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into)]
 pub struct Instance {
     pub platform_identifier: String,
     pub display_name: Option<String>,

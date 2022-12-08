@@ -4,7 +4,7 @@ use kernel_proc_macros::*;
 use super::Account;
 use crate::traits::*;
 
-#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, sqlx::Type)]
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
 pub enum OAuth2Provider {
     Google,
     Facebook,
@@ -12,7 +12,7 @@ pub enum OAuth2Provider {
 }
 
 #[entity]
-#[derive(Clone, Debug, sqlx::FromRow)]
+#[derive(Clone, Debug)]
 pub struct OAuth2Login {
     pub provider: OAuth2Provider,
     pub provided_name: Option<String>,

@@ -6,16 +6,14 @@ use kernel_proc_macros::*;
 use crate::{entities::auth::User, traits::*};
 
 #[EnumRepr(type = "i32")]
-#[derive(
-    Clone, Copy, Debug, serde::Deserialize, serde::Serialize, sqlx::Type,
-)]
+#[derive(Clone, Copy, Debug, serde::Deserialize, serde::Serialize)]
 pub enum ChannelPlatform {
     Telegram = 0,
     WhatsApp = 1,
 }
 
 #[entity]
-#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into)]
 pub struct Channel {
     pub name: String,
     pub platform: ChannelPlatform,

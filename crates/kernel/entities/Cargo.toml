@@ -19,6 +19,5 @@ enumflags2 = { workspace = true }
 lazy_static = { workspace = true }
 serde = { workspace = true }
 serde_repr = { workspace = true }
-sqlx = { workspace = true }
 uuid = { workspace = true }
 validator = { workspace = true }

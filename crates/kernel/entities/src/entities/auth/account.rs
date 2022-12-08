@@ -6,9 +6,7 @@ use super::*;
 use crate::traits::*;
 
 #[EnumRepr(type = "i32")]
-#[derive(
-    Clone, Copy, Debug, serde::Deserialize, serde::Serialize, sqlx::Type,
-)]
+#[derive(Clone, Copy, Debug, serde::Deserialize, serde::Serialize)]
 pub enum AccountState {
     Inactive = 0,
     Active = 1,
@@ -16,7 +14,7 @@ pub enum AccountState {
 }
 
 #[entity]
-#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into)]
 pub struct Account {
     pub account_name: String,
     pub holder_name: Option<String>,

@@ -7,7 +7,7 @@ use kernel_proc_macros::*;
 use chrono::{DateTime, Utc};
 
 #[entity]
-#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into)]
 pub struct Session {
     pub device_identifier: String,
     pub agent: String,

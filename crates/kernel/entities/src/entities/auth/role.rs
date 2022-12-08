@@ -7,7 +7,7 @@ use super::Account;
 use crate::traits::*;
 
 #[entity]
-#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into)]
 pub struct Role {
     pub code: String,
     pub friendly_name: Option<String>,
@@ -15,7 +15,7 @@ pub struct Role {
 }
 
 #[entity]
-#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into)]
 pub struct AccountRole {
     pub account_id: Key<Account>,
     pub role_id: Key<Role>,

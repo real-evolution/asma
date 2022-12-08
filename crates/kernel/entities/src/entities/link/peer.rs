@@ -4,7 +4,7 @@ use kernel_proc_macros::*;
 use crate::{entities::auth::User, traits::*};
 
 #[entity]
-#[derive(Clone, Debug, From, Into, sqlx::FromRow)]
+#[derive(Clone, Debug, From, Into)]
 pub struct Peer {
     pub display_name: Option<String>,
     pub comment: Option<String>,
