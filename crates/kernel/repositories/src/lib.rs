@@ -4,6 +4,7 @@ pub mod traits;
 pub use database_connection::*;
 
 pub mod auth;
+pub mod comm;
 pub mod error;
 pub mod link;
 
