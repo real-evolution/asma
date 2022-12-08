@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 
-use crate::traits::Key;
+use crate::traits::{Entity, Key};
 
 use super::{attachment::Attachment, chat::Chat};
 
@@ -27,4 +27,14 @@ pub struct Message {
     pub sent_at: DateTime<Utc>,
     pub delivered_at: Option<DateTime<Utc>>,
     pub seen_at: Option<DateTime<Utc>>,
+}
+
+impl Entity for Message {
+    fn id(&self) -> &Key<Self> {
+        &self.id
+    }
+
+    fn created_at(&self) -> DateTime<Utc> {
+        self.sent_at
+    }
 }
