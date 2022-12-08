@@ -1,4 +1,5 @@
 mod channels;
+mod peers;
 
 use kernel_repositories::link::*;
 
