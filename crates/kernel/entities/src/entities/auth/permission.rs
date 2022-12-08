@@ -17,6 +17,7 @@ use crate::traits::*;
     Deserialize_repr,
     Display,
     Eq,
+    Hash,
     PartialEq,
     Serialize_repr,
     sqlx::Type,
@@ -48,7 +49,9 @@ pub struct Permission {
 }
 
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize, sqlx::Type)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Default, PartialEq, Serialize, sqlx::Type,
+)]
 pub struct Actions(i32);
 
 impl From<Action> for Actions {
