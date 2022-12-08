@@ -23,8 +23,14 @@ pub struct Claims {
     pub user_display_name: String,
     pub account_id: Key<Account>,
     pub account_name: String,
+
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub holder_name: Option<String>,
+
+    #[serde(skip_serializing_if = "HashSet::is_empty")]
     pub roles: HashSet<String>,
+
+    #[serde(skip_serializing_if = "HashMap::is_empty", default)]
     pub permissions: HashMap<Resource, Actions>,
 
     #[serde(skip)]
