@@ -10,10 +10,9 @@ pub async fn remove(
     user_id: Path<Key<User>>,
     state: State<AppState>,
 ) -> ApiResult<()> {
-    claims.in_role_with(
-        KnownRoles::Admin,
-        &[(Resource::Users, Action::Remove)],
-    )?;
+    claims
+        .in_role(KnownRoles::Admin)?
+        .can(&[(Resource::Users, Action::Remove)])?;
 
     state.data.auth().users().remove(&user_id).await?;
 

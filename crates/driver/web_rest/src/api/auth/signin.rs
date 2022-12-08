@@ -39,12 +39,16 @@ pub async fn signin(
         )
         .await?;
 
-    let access_rules =
-        state.auth.get_access_rules_for(&session.account_id).await?;
+    let roles = state
+        .data
+        .auth()
+        .roles()
+        .get_roles_with_permissions_for(&session.account_id)
+        .await?;
 
     let refresh_token = session.refresh_token.clone();
     let access_token =
-        Claims::new(user, account, session, access_rules, config).encode()?;
+        Claims::new(user, account, session, roles, config).encode()?;
 
     Ok(Json(TokenPair {
         access_token,

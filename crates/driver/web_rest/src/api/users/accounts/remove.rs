@@ -11,13 +11,10 @@ pub async fn remove(
     account_id: Path<Key<Account>>,
     state: State<AppState>,
 ) -> ApiResult<()> {
-    claims.of_with(
-        &user_id,
-        &[
-            (Resource::Users, Action::Modify),
-            (Resource::Accounts, Action::Remove),
-        ],
-    )?;
+    claims.of(&user_id)?.can(&[
+        (Resource::Users, Action::Modify),
+        (Resource::Accounts, Action::Remove),
+    ])?;
 
     state
         .data

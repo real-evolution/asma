@@ -20,7 +20,8 @@ pub async fn get_all(
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<UserDto>>> {
     claims
-        .in_role_with(KnownRoles::Admin, &[(Resource::Users, Action::View)])?;
+        .in_role(KnownRoles::Admin)?
+        .can(&[(Resource::Users, Action::View)])?;
 
     let users = state
         .data

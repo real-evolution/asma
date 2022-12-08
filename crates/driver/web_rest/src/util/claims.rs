@@ -46,7 +46,8 @@ impl Claims {
             None => conf_exp,
         };
 
-        let (roles, permissions): (HashSet<_>, Vec<_>) = roles.into_iter().unzip();
+        let (roles, permissions): (HashSet<_>, Vec<_>) =
+            roles.into_iter().unzip();
 
         let permissions = permissions
             .into_iter()

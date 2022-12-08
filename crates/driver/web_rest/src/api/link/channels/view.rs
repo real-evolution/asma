@@ -16,10 +16,9 @@ pub async fn get_all(
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<ChannelDto>>> {
-    claims.in_role_with(
-        KnownRoles::Admin,
-        &[(Resource::Channels, Action::View)],
-    )?;
+    claims
+        .in_role(KnownRoles::Admin)?
+        .can(&[(Resource::Channels, Action::View)])?;
 
     let channels = state
         .data
@@ -39,10 +38,9 @@ pub async fn get_by_id(
     channel_id: Path<Key<Channel>>,
     state: State<AppState>,
 ) -> ApiResult<Json<ChannelDto>> {
-    claims.in_role_with(
-        KnownRoles::Admin,
-        &[(Resource::Channels, Action::View)],
-    )?;
+    claims
+        .in_role(KnownRoles::Admin)?
+        .can(&[(Resource::Channels, Action::View)])?;
 
     let channel = state.data.link().channels().get(&channel_id).await?;
 

@@ -22,7 +22,8 @@ pub async fn add(
     ValidatedJson(form): ValidatedJson<AddRoleDto>,
 ) -> ApiResult<EntityCreated<Role>> {
     claims
-        .in_role_with(KnownRoles::Admin, &[(Resource::Roles, Action::Add)])?;
+        .in_role(KnownRoles::Admin)?
+        .can(&[(Resource::Roles, Action::Add)])?;
 
     let role = state
         .data
@@ -40,13 +41,7 @@ pub async fn add_permission(
     state: State<AppState>,
     Json(form): Json<AddPermissionDto>,
 ) -> ApiResult<EntityCreated<Permission>> {
-    claims.in_role_with(
-        KnownRoles::Root,
-        &[
-            (Resource::Roles, Action::Modify),
-            (Resource::Permissions, Action::Add),
-        ],
-    )?;
+    claims.is_root()?;
 
     let permission = state
         .data
@@ -67,10 +62,7 @@ pub async fn add_to(
     state: State<AppState>,
     Json(form): Json<AddAccountToRoleDto>,
 ) -> ApiResult<()> {
-    claims.in_role_with(
-        KnownRoles::UserOwner,
-        &[(Resource::Roles, Action::Modify)],
-    )?;
+    claims.in_role(KnownRoles::UserOwner)?;
 
     let role = state.data.auth().roles().get(&role_id).await?;
     claims.in_role(role.code.as_str())?;

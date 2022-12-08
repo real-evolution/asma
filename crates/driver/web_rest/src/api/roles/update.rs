@@ -15,10 +15,9 @@ pub async fn update(
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<UpdateRoleDto>,
 ) -> ApiResult<()> {
-    claims.in_role_with(
-        KnownRoles::Admin,
-        &[(Resource::Roles, Action::Modify)],
-    )?;
+    claims
+        .in_role(KnownRoles::Admin)?
+        .can(&[(Resource::Roles, Action::Modify)])?;
 
     state
         .data
