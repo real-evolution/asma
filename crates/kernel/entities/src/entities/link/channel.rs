@@ -2,11 +2,12 @@ use chrono::{DateTime, Utc};
 use derive_more::{From, Into};
 use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
+use serde::{Deserialize, Serialize};
 
 use crate::{entities::auth::User, traits::*};
 
 #[EnumRepr(type = "i32")]
-#[derive(Clone, Copy, Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum ChannelPlatform {
     Telegram = 0,
     WhatsApp = 1,
