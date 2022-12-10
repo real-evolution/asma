@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 
-use crate::entities::link::Instance;
+use crate::entities::link::{Instance, Peer};
 use crate::traits::Entity;
 use crate::{entities::auth::User, traits::Key};
 
@@ -16,8 +16,9 @@ pub struct Chat {
     pub id: Key<Chat>,
     pub label: Option<String>,
     pub state: ChatState,
-    pub user_id: Key<User>,
+    pub peer_id: Key<Peer>,
     pub instance_id: Key<Instance>,
+    pub user_id: Key<User>,
     pub started_at: DateTime<Utc>,
 }
 

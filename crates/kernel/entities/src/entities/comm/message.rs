@@ -20,13 +20,13 @@ pub struct MessageModification {
 #[derive(Clone, Debug)]
 pub struct Message {
     pub id: Key<Message>,
-    pub chat_id: Key<Chat>,
     pub text: Option<String>,
     pub modifications: Option<Vec<MessageModification>>,
     pub attachments: Option<Vec<Attachment>>,
     pub sent_at: DateTime<Utc>,
     pub delivered_at: Option<DateTime<Utc>>,
     pub seen_at: Option<DateTime<Utc>>,
+    pub chat_id: Key<Chat>,
 }
 
 impl Entity for Message {
