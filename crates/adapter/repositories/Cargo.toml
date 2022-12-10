@@ -1,0 +1,7 @@
+[package]
+name = "adapter_repositories"
+description = "Repositories implementation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

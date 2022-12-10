@@ -1,0 +1,7 @@
+[package]
+name = "adapter_repositories_postgres"
+description = "PostgreSQL-specific repositories implementation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
