@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use validator::ValidationError;
 use validators::traits::ValidateString;
 
@@ -36,4 +37,12 @@ pub fn identifier(value: &str) -> Result<(), ValidationError> {
 
 pub fn username(value: &str) -> Result<(), ValidationError> {
     validate::<Username>("username", value)
+}
+
+pub fn in_future(value: &DateTime<Utc>) -> Result<(), ValidationError> {
+    if value < &Utc::now() {
+        return Err(ValidationError::new("value cannot be in the past"));
+    }
+
+    Ok(())
 }

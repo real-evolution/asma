@@ -10,6 +10,7 @@ authors.workspace = true
 validators = "0"
 
 # workspace dependencies
+chrono = { workspace = true }
 lazy_static = { workspace = true }
 regex = { workspace = true }
 validator = { workspace = true }
