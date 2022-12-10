@@ -5,6 +5,8 @@ use crate::error::RepoResult;
 
 #[async_trait::async_trait]
 pub trait Repo<E: Entity> {
+    type Entity;
+
     async fn get(&self, key: &Key<E>) -> RepoResult<E>;
     async fn get_paginated(
         &self,
@@ -13,7 +15,6 @@ pub trait Repo<E: Entity> {
     ) -> RepoResult<Vec<E>>;
 
     async fn exists(&self, key: &Key<E>) -> RepoResult<bool>;
-
     async fn remove(&self, key: &Key<E>) -> RepoResult<()>;
 }
 
