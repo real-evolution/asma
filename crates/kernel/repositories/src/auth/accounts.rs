@@ -6,7 +6,7 @@ use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait AccountsRepo:
-    Repo<Account, Entity = Account>
+    Repo<Entity = Account>
     + InsertRepo<Account, InsertAccount>
     + ChildRepo<Account, User>
     + Send

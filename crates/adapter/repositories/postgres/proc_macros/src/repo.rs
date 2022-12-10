@@ -54,7 +54,7 @@ impl ToTokens for RepoDeriveInput {
 
         tokens.extend(quote! {
             #[async_trait::async_trait]
-            impl Repo<#read_entity> for #ident {
+            impl Repo for #ident {
                 type Entity = #read_entity;
 
                 async fn get(&self, id: &Key<#read_entity>) -> RepoResult<#read_entity> {

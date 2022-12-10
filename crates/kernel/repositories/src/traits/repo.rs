@@ -4,18 +4,18 @@ use kernel_entities::traits::{Entity, Key};
 use crate::error::RepoResult;
 
 #[async_trait::async_trait]
-pub trait Repo<E: Entity> {
+pub trait Repo {
     type Entity;
 
-    async fn get(&self, key: &Key<E>) -> RepoResult<E>;
+    async fn get(&self, key: &Key<Self::Entity>) -> RepoResult<Self::Entity>;
     async fn get_paginated(
         &self,
         before: &DateTime<Utc>,
         limit: usize,
-    ) -> RepoResult<Vec<E>>;
+    ) -> RepoResult<Vec<Self::Entity>>;
 
-    async fn exists(&self, key: &Key<E>) -> RepoResult<bool>;
-    async fn remove(&self, key: &Key<E>) -> RepoResult<()>;
+    async fn exists(&self, key: &Key<Self::Entity>) -> RepoResult<bool>;
+    async fn remove(&self, key: &Key<Self::Entity>) -> RepoResult<()>;
 }
 
 #[async_trait::async_trait]
