@@ -40,7 +40,7 @@ pub async fn create_state() -> anyhow::Result<AppState> {
 
     debug!("creating datastore");
     let conf = get_config!(config, DATA_CONFIG_SECTION => DataConfig)?;
-    let data = create_sqlx_datastore(conf).await?;
+    let data = create_datastore(conf).await?;
 
     debug!("creating base services");
     let config = Arc::new(config);

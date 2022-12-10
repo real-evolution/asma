@@ -33,7 +33,7 @@ impl DataStore for SqlxDataStore {
     }
 }
 
-pub async fn create_sqlx_datastore(
+pub async fn create_datastore(
     conf: config::DataConfig,
 ) -> anyhow::Result<Arc<dyn DataStore>> {
     tracing::debug!(
