@@ -10,7 +10,7 @@ authors.workspace = true
 app_services = { path = "../../app/services" }
 kernel_repositories = { path = "../../kernel/repositories" }
 kernel_services = { path = "../../kernel/services" }
-adapter_repositories_sqlx = { path = "../../adapter/repositories_sqlx" }
+adapter_repositories_postgres = { path = "../../adapter/repositories/postgres" }
 adapter_services = { path = "../../adapter/services" }
 
 # workspace dependencies

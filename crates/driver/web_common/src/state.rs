@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use adapter_repositories_sqlx::*;
+use adapter_repositories_postgres::*;
 use adapter_services::config::TomlConfigService;
 use adapter_services::crypto::hash::Argon2CryptoHashService;
 use adapter_services::entropy::SecureEntropyService;
