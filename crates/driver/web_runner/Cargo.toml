@@ -16,7 +16,6 @@ tracing-subscriber = { version = "0", features = ["env-filter", "json"] }
 # project dependencies
 common_validation = { path = "../../common/validation" }
 common_macros = { path = "../../common/macros" }
-adapter_repositories_sqlx = { path = "../../adapter/repositories_sqlx" }
 kernel_services = { path = "../../kernel/services" }
 driver_web_common = { path = "../web_common" }
 driver_web_rest = { path = "../web_rest" }
