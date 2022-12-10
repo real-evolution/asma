@@ -1,5 +1,5 @@
 [package]
-name = "adapter_repositories_postgres_proc_macros"
+name = "proc_macros"
 description = "A crate to hold macros used by postgres data repositories"
 edition.workspace = true
 version.workspace = true

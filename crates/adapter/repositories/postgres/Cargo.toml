@@ -5,3 +5,27 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# crate dependencies
+ormx = { git = "https://github.com/clouds56/ormx", features = ["postgres"] }
+seq-macro = "0"
+
+# project dependencies
+proc_macros = { path = "proc_macros" }
+common_validation = { path = "../../../common/validation" }
+kernel_entities = { path = "../../../kernel/entities" }
+kernel_repositories = { path = "../../../kernel/repositories" }
+
+# workspace dependencies
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+chrono = { workspace = true }
+derive_more = { workspace = true }
+itertools = { workspace = true }
+lazy_static = { workspace = true }
+regex = { workspace = true }
+sqlx = { workspace = true }
+serde = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+validator = { workspace = true }
