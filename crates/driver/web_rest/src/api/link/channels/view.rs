@@ -1,4 +1,4 @@
-use axum::extract::State;
+use axum::extract::{Query, State};
 use axum::{extract::Path, Json};
 use driver_web_common::state::AppState;
 use itertools::Itertools;
@@ -14,35 +14,73 @@ use crate::{
 pub async fn get_all(
     claims: Claims,
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
+    user_id: Option<Query<Key<User>>>,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<ChannelDto>>> {
-    claims
-        .in_role(KnownRoles::Admin)?
-        .can(&[(Resource::Channels, Action::View)])?;
+    claims.can(&[(Resource::Channels, Action::View)])?;
 
-    let channels = state
-        .data
-        .link()
-        .channels()
-        .get_paginated(&pagination.before, pagination.page_size)
-        .await?
-        .into_iter()
-        .map(|c| ChannelDto::new(c))
-        .collect_vec();
+    let channels = match user_id {
+        Some(user_id) => {
+            claims.of(&user_id)?;
 
-    Ok(Json(channels))
+            state
+                .data
+                .link()
+                .channels()
+                .get_paginated_of(
+                    &user_id,
+                    &pagination.before,
+                    pagination.page_size,
+                )
+                .await?
+        }
+
+        None => {
+            claims.in_role(KnownRoles::Admin)?;
+
+            state
+                .data
+                .link()
+                .channels()
+                .get_paginated(&pagination.before, pagination.page_size)
+                .await?
+        }
+    };
+
+    Ok(Json(
+        channels
+            .into_iter()
+            .map(|c| ChannelDto::new(c))
+            .collect_vec(),
+    ))
 }
 
 pub async fn get_by_id(
     claims: Claims,
     channel_id: Path<Key<Channel>>,
+    user_id: Option<Query<Key<User>>>,
     state: State<AppState>,
 ) -> ApiResult<Json<ChannelDto>> {
-    claims
-        .in_role(KnownRoles::Admin)?
-        .can(&[(Resource::Channels, Action::View)])?;
+    claims.can(&[(Resource::Channels, Action::View)])?;
 
-    let channel = state.data.link().channels().get(&channel_id).await?;
+    let channel = match user_id {
+        Some(user_id) => {
+            claims.of(&user_id)?;
+
+            state
+                .data
+                .link()
+                .channels()
+                .get_of(&user_id, &channel_id)
+                .await?
+        }
+
+        None => {
+            claims.in_role(KnownRoles::Admin)?;
+
+            state.data.link().channels().get(&channel_id).await?
+        }
+    };
 
     Ok(Json(ChannelDto::new(channel)))
 }
