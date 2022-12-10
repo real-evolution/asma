@@ -5,8 +5,9 @@ members = [
   "crates/app/*",
   "crates/driver/*",
   "crates/adapter/*",
-  "crates/adapter/repositories/postgres",
   "crates/adapter/repositories/mongodb",
+  "crates/adapter/repositories/postgres",
+  "crates/adapter/repositories/postgres/proc_macros",
 ]
 
 [workspace.package]
