@@ -1,9 +1,15 @@
-use kernel_entities::{entities::link::*, traits::Key};
+use chrono::{DateTime, Utc};
+use kernel_entities::{
+    entities::{auth::User, link::*},
+    traits::Key,
+};
 use kernel_repositories::{error::RepoResult, link::*, traits::*};
 use ormx::{Delete, Table};
 use proc_macros::Repo;
 
-use crate::{database::SqlxPool, util::error::map_sqlx_error};
+use crate::{
+    database::SqlxPool, sqlx_ok, sqlx_vec_ok, util::error::map_sqlx_error,
+};
 
 #[derive(Repo)]
 #[repo(
@@ -15,6 +21,68 @@ pub(crate) struct SqlxChannelsRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
 impl ChannelsRepo for SqlxChannelsRepo {}
+
+#[async_trait::async_trait]
+impl ChildRepo<User> for SqlxChannelsRepo {
+    async fn get_paginated_of(
+        &self,
+        user_id: &Key<User>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Self::Entity>> {
+        sqlx_vec_ok!(
+            sqlx::query_as!(
+                models::ChannelModel,
+                r#"
+                SELECT * FROM channels
+                WHERE user_id = $1 AND created_at <= $2
+                ORDER BY created_at
+                LIMIT $3
+                "#,
+                user_id.value_ref(),
+                before,
+                limit as i64
+            )
+            .fetch_all(self.0.get())
+            .await
+        )
+    }
+
+    async fn get_of(
+        &self,
+        user_id: &Key<User>,
+        id: &Key<Self::Entity>,
+    ) -> RepoResult<Self::Entity> {
+        sqlx_ok!(
+            sqlx::query_as!(
+                models::ChannelModel,
+                r#"SELECT * FROM channels WHERE id = $1 AND user_id = $2"#,
+                id.value_ref(),
+                user_id.value_ref()
+            )
+            .fetch_one(self.0.get())
+            .await
+        )
+    }
+
+    async fn remove_of(
+        &self,
+        user_id: &Key<User>,
+        id: &Key<Self::Entity>,
+    ) -> RepoResult<()> {
+        sqlx::query_as!(
+            models::ChannelModel,
+            r#"DELETE FROM channels WHERE id = $1 AND user_id = $2"#,
+            id.value_ref(),
+            user_id.value_ref()
+        )
+        .fetch_one(self.0.get())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(())
+    }
+}
 
 mod models {
     use chrono::{DateTime, Utc};

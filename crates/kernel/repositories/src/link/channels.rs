@@ -9,7 +9,11 @@ use crate::traits::*;
 
 #[async_trait::async_trait]
 pub trait ChannelsRepo:
-    Repo<Entity = Channel> + InsertRepo<InsertChannel> + Send + Sync
+    Repo<Entity = Channel>
+    + InsertRepo<InsertChannel>
+    + ChildRepo<User>
+    + Send
+    + Sync
 {
 }
 
