@@ -158,13 +158,13 @@ impl AccountsRepo for SqlxAccountsRepo {
 }
 
 #[async_trait::async_trait]
-impl ChildRepo<Account, User> for SqlxAccountsRepo {
+impl ChildRepo<User> for SqlxAccountsRepo {
     async fn get_paginated_of(
         &self,
         user_id: &Key<User>,
         before: &DateTime<Utc>,
         limit: usize,
-    ) -> RepoResult<Vec<Account>> {
+    ) -> RepoResult<Vec<Self::Entity>> {
         sqlx_vec_ok!(
             sqlx::query_as!(
                 models::AccountModel,

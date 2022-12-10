@@ -7,7 +7,7 @@ use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait RolesRepo:
-    Repo<Entity = Role> + InsertRepo<Role, InsertRole> + Send + Sync
+    Repo<Entity = Role> + InsertRepo<InsertRole> + Send + Sync
 {
     async fn get_permissions_of(
         &self,

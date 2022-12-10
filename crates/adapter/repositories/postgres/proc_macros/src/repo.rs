@@ -110,8 +110,8 @@ impl ToTokens for RepoDeriveInput {
 
             tokens.extend(quote! {
                 #[async_trait::async_trait]
-                impl InsertRepo<#read_entity, #insert_entity> for #ident {
-                    async fn create(&self, insert: #insert_entity) -> RepoResult<#read_entity> {
+                impl InsertRepo<#insert_entity> for #ident {
+                    async fn create(&self, insert: #insert_entity) -> RepoResult<Self::Entity> {
                         let insert: #insert_model = insert.into();
 
                         Ok(

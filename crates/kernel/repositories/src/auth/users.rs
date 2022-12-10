@@ -5,7 +5,7 @@ use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait UsersRepo:
-    Repo<Entity = User> + InsertRepo<User, InsertUser> + Send + Sync
+    Repo<Entity = User> + InsertRepo<InsertUser> + Send + Sync
 {
     async fn get_by_username(&self, username: &str) -> RepoResult<User>;
 

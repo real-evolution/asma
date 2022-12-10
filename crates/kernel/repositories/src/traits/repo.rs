@@ -19,24 +19,28 @@ pub trait Repo {
 }
 
 #[async_trait::async_trait]
-pub trait InsertRepo<E: Entity, I> {
-    async fn create(&self, model: I) -> RepoResult<E>;
+pub trait InsertRepo<I>: Repo {
+    async fn create(&self, model: I) -> RepoResult<Self::Entity>;
 }
 
 #[async_trait::async_trait]
-pub trait ChildRepo<E: Entity, P: Entity> {
+pub trait ChildRepo<P: Entity>: Repo {
     async fn get_paginated_of(
         &self,
         parent_key: &Key<P>,
         before: &DateTime<Utc>,
         limit: usize,
-    ) -> RepoResult<Vec<E>>;
+    ) -> RepoResult<Vec<Self::Entity>>;
 
-    async fn get_of(&self, parent_key: &Key<P>, key: &Key<E>) -> RepoResult<E>;
+    async fn get_of(
+        &self,
+        parent_key: &Key<P>,
+        key: &Key<Self::Entity>,
+    ) -> RepoResult<Self::Entity>;
 
     async fn remove_of(
         &self,
         parent_key: &Key<P>,
-        key: &Key<E>,
+        key: &Key<Self::Entity>,
     ) -> RepoResult<()>;
 }
