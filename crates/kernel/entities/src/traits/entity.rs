@@ -2,6 +2,7 @@ use std::{fmt::Display, marker::PhantomData};
 
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema_repr;
+use serde::{Deserialize, Serialize};
 
 pub type KeyType = uuid::Uuid;
 
@@ -14,18 +15,7 @@ pub trait MutableEntity: Entity {
     fn updated_at(&self) -> DateTime<Utc>;
 }
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    JsonSchema_repr,
-    PartialOrd,
-    Ord,
-    serde::Serialize,
-    serde::Deserialize,
-)]
+#[derive(Clone, Copy, Debug, JsonSchema_repr, Serialize, Deserialize)]
 #[repr(transparent)]
 #[serde(transparent)]
 pub struct Key<E, T = KeyType>(T, #[serde(skip)] PhantomData<E>);
@@ -61,3 +51,17 @@ impl<E, T: Display> Display for Key<E, T> {
         write!(f, "{}", self.0)
     }
 }
+
+impl<E, T: std::hash::Hash> std::hash::Hash for Key<E, T> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+    }
+}
+
+impl<E, T: PartialEq> PartialEq for Key<E, T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.eq(&other.0)
+    }
+}
+
+impl<E, T: Eq> Eq for Key<E, T> {}
