@@ -2,7 +2,6 @@ pub mod auth;
 pub mod diag;
 pub mod dtos;
 pub mod link;
-pub mod roles;
 pub mod setup;
 pub mod users;
 
@@ -17,7 +16,6 @@ pub fn api_routes() -> AppResult<ApiRouter<AppState>> {
         .nest("/diag", diag::routes())
         .nest("/setup", setup::routes())
         .nest("/auth", auth::routes())
-        .nest("/roles", roles::routes())
         .nest("/users", users::routes())
         .nest("/link", link::routes()))
 }

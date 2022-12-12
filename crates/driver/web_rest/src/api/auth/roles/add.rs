@@ -32,7 +32,7 @@ pub async fn add(
         .create(InsertRole::new(form.code, form.friendly_name))
         .await?;
 
-    Ok(Created::new("/api/roles", role).into())
+    Ok(Created::new("/api/auth/roles", role).into())
 }
 
 pub async fn add_permission(
@@ -51,7 +51,7 @@ pub async fn add_permission(
         .await?;
 
     Ok(Created::new(
-        format!("/api/roles/{}", role_id.0),
+        format!("/api/auth/roles/{}", role_id.0),
         permission,
     ))
 }
