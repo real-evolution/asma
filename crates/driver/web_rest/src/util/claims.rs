@@ -48,7 +48,7 @@ impl Claims {
         config: ApiConfig,
     ) -> Claims {
         let iat = Utc::now().timestamp();
-        let conf_exp = iat + config.token.timout_seconds;
+        let conf_exp = iat + config.token.timeout_seconds;
         let exp = match session.expires_at {
             Some(session_exp) => min(conf_exp, session_exp.timestamp()),
             None => conf_exp,

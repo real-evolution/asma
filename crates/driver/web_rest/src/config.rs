@@ -32,7 +32,7 @@ pub struct ApiTokenConfig {
 
     #[validate(range(min = 1))]
     #[serde(default = "default_timeout_seconds")]
-    pub timout_seconds: i64,
+    pub timeout_seconds: i64,
 
     #[serde(default = "default_signing_key")]
     pub signing_key: String,
