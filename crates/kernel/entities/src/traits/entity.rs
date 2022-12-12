@@ -1,6 +1,7 @@
 use std::{fmt::Display, marker::PhantomData};
 
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema_repr;
 
 pub type KeyType = uuid::Uuid;
 
@@ -19,6 +20,7 @@ pub trait MutableEntity: Entity {
     Debug,
     PartialEq,
     Eq,
+    JsonSchema_repr,
     PartialOrd,
     Ord,
     serde::Serialize,

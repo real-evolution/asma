@@ -2,19 +2,20 @@ use chrono::{DateTime, Utc};
 use derive_more::{From, Into};
 use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
+use schemars::{JsonSchema, JsonSchema_repr};
 use serde::{Deserialize, Serialize};
 
 use crate::{entities::auth::User, traits::*};
 
 #[EnumRepr(type = "i32")]
-#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, JsonSchema_repr, Deserialize, Serialize)]
 pub enum ChannelPlatform {
     Telegram = 0,
     WhatsApp = 1,
 }
 
 #[entity]
-#[derive(Clone, Debug, From, Into)]
+#[derive(Clone, Debug, From, Into, JsonSchema)]
 pub struct Channel {
     pub name: String,
     pub platform: ChannelPlatform,

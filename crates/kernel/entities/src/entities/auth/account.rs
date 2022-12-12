@@ -1,12 +1,14 @@
 use derive_more::{From, Into};
 use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
+use schemars::{JsonSchema, JsonSchema_repr};
+use serde::{Deserialize, Serialize};
 
 use super::*;
 use crate::traits::*;
 
 #[EnumRepr(type = "i32")]
-#[derive(Clone, Copy, Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Copy, Debug, JsonSchema_repr, Deserialize, Serialize)]
 pub enum AccountState {
     Inactive = 0,
     Active = 1,
@@ -14,7 +16,7 @@ pub enum AccountState {
 }
 
 #[entity]
-#[derive(Clone, Debug, From, Into)]
+#[derive(Clone, Debug, From, Into, JsonSchema)]
 pub struct Account {
     pub account_name: String,
     pub holder_name: Option<String>,

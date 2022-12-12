@@ -2,12 +2,13 @@ use std::fmt::Display;
 
 use derive_more::{From, Into};
 use kernel_proc_macros::*;
+use schemars::JsonSchema;
 
 use super::Account;
 use crate::traits::*;
 
 #[entity]
-#[derive(Clone, Debug, From, Into)]
+#[derive(Clone, Debug, From, Into, JsonSchema)]
 pub struct Role {
     pub code: String,
     pub friendly_name: Option<String>,
@@ -15,7 +16,7 @@ pub struct Role {
 }
 
 #[entity]
-#[derive(Clone, Debug, From, Into)]
+#[derive(Clone, Debug, From, Into, JsonSchema)]
 pub struct AccountRole {
     pub account_id: Key<Account>,
     pub role_id: Key<Role>,

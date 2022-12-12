@@ -3,6 +3,7 @@ use std::ops::{BitAnd, BitOr, BitXor, Not};
 use derive_more::{Display, From, Into};
 use enum_repr::EnumRepr;
 use kernel_proc_macros::*;
+use schemars::{JsonSchema, JsonSchema_repr};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -18,6 +19,7 @@ use crate::traits::*;
     Display,
     Eq,
     Hash,
+    JsonSchema_repr,
     PartialEq,
     Serialize_repr,
 )]
@@ -30,8 +32,8 @@ pub enum Resource {
     Channels = 5,
 }
 
-#[repr(i32)]
-#[derive(Clone, Copy, Debug, Deserialize, Display, Serialize)]
+#[EnumRepr(type = "i32")]
+#[derive(Clone, Copy, Debug, JsonSchema_repr, Deserialize, Serialize)]
 pub enum Action {
     Global = 1,
     View = 2,
@@ -41,7 +43,7 @@ pub enum Action {
 }
 
 #[entity(entity_type = "immutable")]
-#[derive(Clone, Debug, From, Into)]
+#[derive(Clone, Debug, From, Into, JsonSchema)]
 pub struct Permission {
     pub resource: Resource,
     pub actions: Actions,
@@ -50,7 +52,16 @@ pub struct Permission {
 
 #[repr(transparent)]
 #[derive(
-    Clone, Copy, Debug, Deserialize, Default, From, Into, PartialEq, Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    From,
+    Into,
+    PartialEq,
+    JsonSchema,
+    Deserialize,
+    Serialize,
 )]
 pub struct Actions(i32);
 

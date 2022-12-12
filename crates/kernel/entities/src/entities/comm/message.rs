@@ -1,23 +1,23 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 
 use crate::traits::{Entity, Key};
 
 use super::{attachment::Attachment, chat::Chat};
 
-#[derive(Clone, Debug)]
-
+#[derive(Clone, Debug, JsonSchema)]
 pub enum MessageModicationKind {
     Edit(String),
     Delete,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, JsonSchema)]
 pub struct MessageModification {
     pub kind: MessageModicationKind,
     pub made_at: DateTime<Utc>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, JsonSchema)]
 pub struct Message {
     pub id: Key<Message>,
     pub text: Option<String>,

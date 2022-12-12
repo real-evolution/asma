@@ -1,17 +1,18 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 
 use crate::entities::link::{Instance, Peer};
 use crate::traits::Entity;
 use crate::{entities::auth::User, traits::Key};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, JsonSchema)]
 pub enum ChatState {
     Active,
     Archived,
     Closed,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, JsonSchema)]
 pub struct Chat {
     pub id: Key<Chat>,
     pub label: Option<String>,
