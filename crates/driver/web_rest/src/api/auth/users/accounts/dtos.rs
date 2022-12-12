@@ -18,7 +18,6 @@ pub struct AccountDto {
     pub id: Key<Account>,
     pub account_name: String,
     pub holder_name: Option<String>,
-    pub password_hash: String,
     pub state: AccountState,
     pub user_id: Key<User>,
     pub created_at: DateTime<Utc>,
