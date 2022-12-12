@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use axum::extract::{ConnectInfo, State};
-use axum::{headers::UserAgent, Json, TypedHeader};
+use axum::Json;
 use driver_web_common::state::AppState;
 use kernel_services::auth::models::DeviceInfo;
 
@@ -12,20 +12,23 @@ use crate::extractors::validated_json::ValidatedJson;
 use crate::util::claims::Claims;
 
 pub async fn signin(
+    // TypedHeader(agent): TypedHeader<UserAgent>,
     ConnectInfo(ip): ConnectInfo<SocketAddr>,
-    TypedHeader(agent): TypedHeader<UserAgent>,
     state: State<AppState>,
     config: ApiConfig,
     ValidatedJson(form): ValidatedJson<UserCredentials>,
 ) -> ApiResult<Json<TokenPair>> {
+    // TODO:
+    // Re-enable agent usage
+
     info!(
-        "user `{}@{}` signin-in from `{ip}` with agent `{agent}`",
+        "user `{}@{}` signin-in from `{ip}` with agent `{{agent}}`",
         form.account_name, form.username
     );
 
     let device_info = DeviceInfo {
         device_identifier: form.device_identifier,
-        agent: agent.to_string(),
+        agent: "<unknown>".to_owned(), // agent.to_string(),
         last_address: ip.to_string(),
     };
 

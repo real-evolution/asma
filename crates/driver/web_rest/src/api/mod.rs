@@ -6,14 +6,14 @@ pub mod roles;
 pub mod setup;
 pub mod users;
 
-use axum::Router;
+use aide::axum::ApiRouter;
 use driver_web_common::state::AppState;
 use kernel_services::error::AppResult;
 
-pub fn api_routes() -> AppResult<Router<AppState>> {
+pub fn api_routes() -> AppResult<ApiRouter<AppState>> {
     debug!("creating api router");
 
-    Ok(Router::<AppState>::new()
+    Ok(ApiRouter::<AppState>::new()
         .nest("/diag", diag::routes())
         .nest("/setup", setup::routes())
         .nest("/auth", auth::routes())

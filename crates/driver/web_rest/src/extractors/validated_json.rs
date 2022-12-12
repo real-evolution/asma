@@ -1,13 +1,17 @@
-use axum::body::HttpBody;
-use axum::extract::{FromRequest, Json};
-use axum::http::Request;
-use axum::BoxError;
+use aide::OperationIo;
+use axum::{
+    body::HttpBody,
+    extract::{FromRequest, Json},
+    http::Request,
+    BoxError,
+};
 use serde::de::DeserializeOwned;
 use validator::Validate;
 
 use crate::error::{ApiError, ApiResult};
 
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, OperationIo)]
+#[aide(input)]
 pub struct ValidatedJson<T>(pub T);
 
 #[async_trait::async_trait]

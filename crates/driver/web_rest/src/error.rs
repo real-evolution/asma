@@ -1,8 +1,6 @@
+use aide::operation::OperationIo;
 use axum::{
-    extract::rejection::{JsonRejection, QueryRejection},
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
+    extract::rejection::*, http::StatusCode, response::IntoResponse, Json,
 };
 use kernel_repositories::error::RepoError;
 use kernel_services::error::AppError;
@@ -11,7 +9,7 @@ use thiserror::Error;
 
 pub type ApiResult<T> = Result<T, ApiError>;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, OperationIo)]
 pub enum ApiError {
     #[error("internal error occured")]
     Internal(#[from] anyhow::Error),

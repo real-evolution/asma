@@ -1,13 +1,16 @@
+use aide::OperationIo;
 use chrono::{DateTime, Utc};
 use common_macros::into_fn;
+use schemars::JsonSchema;
 use serde::Deserialize;
 use validator::Validate;
 
 into_fn!(default_before_timestamp: DateTime<Utc> =>  Utc::now());
 into_fn!(default_page_size: usize =>  32usize);
 
-#[derive(Deserialize, Validate)]
+#[derive(Deserialize, Validate, JsonSchema, OperationIo)]
 #[serde(rename_all = "camelCase")]
+#[aide(input)]
 pub struct Pagination {
     #[serde(default = "default_before_timestamp")]
     pub before: DateTime<Utc>,

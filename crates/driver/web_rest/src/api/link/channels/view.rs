@@ -1,14 +1,20 @@
-use axum::extract::{Query, State};
-use axum::{extract::Path, Json};
+use axum::{
+    extract::{Path, Query, State},
+    Json,
+};
 use driver_web_common::state::AppState;
 use itertools::Itertools;
-use kernel_entities::entities::{auth::*, link::Channel};
-use kernel_entities::traits::Key;
+use kernel_entities::{
+    entities::{auth::*, link::Channel},
+    traits::Key,
+};
 
 use super::dtos::ChannelDto;
 use crate::{
-    api::dtos::pagination::Pagination, error::ApiResult,
-    extractors::validated_query::ValidatedQuery, util::claims::Claims,
+    api::dtos::pagination::Pagination,
+    error::ApiResult,
+    extractors::validated_query::ValidatedQuery,
+    util::claims::Claims,
 };
 
 pub async fn get_all(
@@ -20,7 +26,7 @@ pub async fn get_all(
     claims.can(&[(Resource::Channels, Action::View)])?;
 
     let channels = match user_id {
-        Some(user_id) => {
+        | Some(user_id) => {
             claims.of(&user_id)?;
 
             state
@@ -35,7 +41,7 @@ pub async fn get_all(
                 .await?
         }
 
-        None => {
+        | None => {
             claims.in_role(KnownRoles::Admin)?;
 
             state
@@ -50,7 +56,7 @@ pub async fn get_all(
     Ok(Json(
         channels
             .into_iter()
-            .map(|c| ChannelDto::new(c))
+            .map(|channel| ChannelDto { channel })
             .collect_vec(),
     ))
 }
@@ -64,7 +70,7 @@ pub async fn get_by_id(
     claims.can(&[(Resource::Channels, Action::View)])?;
 
     let channel = match user_id {
-        Some(user_id) => {
+        | Some(user_id) => {
             claims.of(&user_id)?;
 
             state
@@ -75,12 +81,12 @@ pub async fn get_by_id(
                 .await?
         }
 
-        None => {
+        | None => {
             claims.in_role(KnownRoles::Admin)?;
 
             state.data.link().channels().get(&channel_id).await?
         }
     };
 
-    Ok(Json(ChannelDto::new(channel)))
+    Ok(Json(ChannelDto { channel }))
 }

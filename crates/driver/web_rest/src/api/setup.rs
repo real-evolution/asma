@@ -1,6 +1,7 @@
 use std::net::SocketAddr;
 
-use axum::{extract::*, routing::post, Router};
+use aide::axum::{routing::post, ApiRouter};
+use axum::extract::{ConnectInfo, State};
 use chrono::Utc;
 use driver_web_common::state::AppState;
 
@@ -19,16 +20,19 @@ pub async fn setup(
     Ok(())
 }
 
-pub fn routes() -> Router<AppState> {
-    Router::new().route("/", post(setup))
+pub fn routes() -> ApiRouter<AppState> {
+    ApiRouter::new().api_route("/", post(setup))
 }
 
 pub mod dtos {
+    use aide::OperationIo;
+    use schemars::JsonSchema;
     use serde::Deserialize;
     use validator::Validate;
 
-    #[derive(Clone, Debug, Deserialize, Validate)]
+    #[derive(Clone, Debug, Deserialize, Validate, JsonSchema, OperationIo)]
     #[serde(rename_all = "camelCase")]
+    #[aide(input)]
     pub struct RootAccountDetails {
         #[validate(length(min = 4))]
         pub holder_name: Option<String>,

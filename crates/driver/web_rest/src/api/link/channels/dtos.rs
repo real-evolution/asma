@@ -1,6 +1,6 @@
+use aide::OperationIo;
 use chrono::{DateTime, Utc};
 use common_validation::*;
-use derive_more::Constructor;
 use kernel_entities::{
     entities::{
         auth::User,
@@ -8,18 +8,21 @@ use kernel_entities::{
     },
     traits::Key,
 };
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Constructor, Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, JsonSchema, OperationIo)]
 #[serde(rename_all = "camelCase")]
+#[aide(output)]
 pub struct ChannelDto {
     #[serde(flatten)]
     pub channel: Channel,
 }
 
-#[derive(Constructor, Debug, Deserialize, Serialize, Validate)]
+#[derive(Debug, Deserialize, Serialize, Validate, JsonSchema, OperationIo)]
 #[serde(rename_all = "camelCase")]
+#[aide(input)]
 pub struct AddChannelDto {
     pub user_id: Key<User>,
     #[validate(length(min = 4, max = 32))]

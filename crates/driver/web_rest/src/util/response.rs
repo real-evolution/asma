@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use aide::OperationIo;
 use axum::{
     http::{header, StatusCode},
     response::IntoResponse,
@@ -7,6 +8,8 @@ use axum::{
 use kernel_entities::traits::{Entity, Key};
 use serde::Serialize;
 
+#[derive(OperationIo)]
+#[aide(output)]
 pub struct Created<K, D, P = String>(pub P, pub K, pub D);
 
 impl<K: Display, D: Serialize, P: Display> IntoResponse for Created<K, D, P> {

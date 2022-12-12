@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::{cmp::min, collections::HashMap};
 
+use aide::OperationIo;
 use chrono::Utc;
 use itertools::Itertools;
 use jsonwebtoken::{EncodingKey, Header};
@@ -11,7 +12,8 @@ use serde::{Deserialize, Serialize};
 use crate::config::ApiConfig;
 use crate::error::{ApiError, ApiResult};
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, OperationIo)]
+#[aide(input)]
 pub struct Claims {
     pub sub: Key<Session>,
     pub exp: i64,

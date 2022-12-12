@@ -6,11 +6,12 @@ use driver_web_common::state::AppState;
 use itertools::Itertools;
 use kernel_entities::{entities::auth::*, traits::Key};
 
-use crate::{
-    api::dtos::pagination::Pagination, error::ApiResult, util::claims::Claims,
-};
-
 use super::dtos::AccountDto;
+use crate::{
+    api::dtos::pagination::Pagination,
+    error::ApiResult,
+    util::claims::Claims,
+};
 
 pub async fn get_all(
     claims: Claims,

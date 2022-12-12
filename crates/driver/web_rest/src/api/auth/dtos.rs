@@ -1,9 +1,12 @@
+use aide::OperationIo;
 use common_validation::*;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Validate, Deserialize)]
+#[derive(Validate, Deserialize, JsonSchema, OperationIo)]
 #[serde(rename_all = "camelCase")]
+#[aide(input)]
 pub struct UserCredentials {
     #[validate(custom = "username")]
     pub account_name: String,
@@ -13,8 +16,9 @@ pub struct UserCredentials {
     pub password: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, JsonSchema, OperationIo)]
 #[serde(rename_all = "camelCase")]
+#[aide(output)]
 pub struct TokenPair {
     pub access_token: String,
     pub refresh_token: String,

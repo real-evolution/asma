@@ -1,11 +1,9 @@
 use axum::{extract::*, Json};
 use driver_web_common::state::AppState;
-use kernel_entities::entities::auth::*;
-use kernel_entities::traits::Key;
-
-use crate::{error::ApiResult, util::claims::Claims};
+use kernel_entities::{entities::auth::*, traits::Key};
 
 use super::dtos::RemoveAccountFromRoleDto;
+use crate::{error::ApiResult, util::claims::Claims};
 
 pub async fn remove(
     claims: Claims,

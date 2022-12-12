@@ -7,11 +7,14 @@ authors.workspace = true
 
 [dependencies]
 # crate dependencies
+aide = { version = "0", features = ["axum", "axum-extra", "http", "macros"] }
 axum = { version = "0", features = ["macros", "headers"] }
 axum-auth = "0"
 axum-client-ip = "0"
+cached = "0"
 jsonwebtoken = "8"
 mapper = { git = "https://github.com/kumarmo2/mapper.git", branch = "v0.1" }
+schemars = { version = "0", features = ["chrono", "uuid"] }
 
 # project dependencies
 common_macros = { path = "../../common/macros" }

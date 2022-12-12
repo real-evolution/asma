@@ -3,6 +3,7 @@ use driver_web_common::state::AppState;
 use kernel_entities::entities::{auth::*, link::Channel};
 use kernel_repositories::link::InsertChannel;
 
+use super::dtos::AddChannelDto;
 use crate::{
     error::ApiResult,
     extractors::validated_json::ValidatedJson,
@@ -11,8 +12,6 @@ use crate::{
         response::{Created, EntityCreated},
     },
 };
-
-use super::dtos::AddChannelDto;
 
 pub async fn add(
     claims: Claims,

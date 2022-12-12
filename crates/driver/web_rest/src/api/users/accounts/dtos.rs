@@ -1,17 +1,19 @@
+use aide::OperationIo;
 use chrono::{DateTime, Utc};
 use common_validation::*;
-use derive_more::Constructor;
 use kernel_entities::{
     entities::auth::{Account, AccountState, User},
     traits::Key,
 };
 use mapper::Mapper;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Constructor, Debug, Deserialize, Mapper, Serialize)]
+#[derive(Debug, Deserialize, Mapper, Serialize, JsonSchema, OperationIo)]
 #[serde(rename_all = "camelCase")]
 #[from(Account)]
+#[aide(output)]
 pub struct AccountDto {
     pub id: Key<Account>,
     pub account_name: String,
@@ -23,8 +25,9 @@ pub struct AccountDto {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Constructor, Debug, Deserialize, Serialize, Validate)]
+#[derive(Debug, Deserialize, Serialize, JsonSchema, Validate, OperationIo)]
 #[serde(rename_all = "camelCase")]
+#[aide(input)]
 pub struct AddAccountDto {
     #[validate(custom = "username")]
     pub account_name: String,
@@ -34,8 +37,9 @@ pub struct AddAccountDto {
     pub is_active: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize, Validate)]
+#[derive(Debug, Deserialize, Serialize, JsonSchema, OperationIo, Validate)]
 #[serde(rename_all = "camelCase")]
+#[aide(input)]
 pub struct UpdateAccountPasswordDto {
     pub old_password: String,
     #[validate(length(min = 8, max = 64))]

@@ -1,3 +1,4 @@
+use aide::OperationIo;
 use common_macros::into_fn;
 use rand::distributions::{Alphanumeric, DistString};
 use serde::Deserialize;
@@ -13,7 +14,8 @@ fn default_signing_key() -> String {
     Alphanumeric.sample_string(&mut rand::thread_rng(), 128)
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Validate)]
+#[derive(Clone, Debug, Default, Deserialize, Validate, OperationIo)]
+#[aide(input)]
 pub struct ApiConfig {
     #[serde(default)]
     pub token: ApiTokenConfig,
