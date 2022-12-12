@@ -1,15 +1,17 @@
-use axum::extract::FromRequestParts;
-use axum::headers::authorization::Bearer;
-use axum::headers::Authorization;
-use axum::http::request::Parts;
-use axum::TypedHeader;
+use axum::{
+    extract::{rejection::TypedHeaderRejectionReason, FromRequestParts},
+    headers::{authorization::Bearer, Authorization},
+    http::request::Parts,
+    TypedHeader,
+};
 use driver_web_common::state::AppState;
-use jsonwebtoken::errors::{Error, ErrorKind};
 use jsonwebtoken::{DecodingKey, Validation};
 
-use crate::config::ApiConfig;
-use crate::error::{ApiError, ApiResult};
-use crate::util::claims::Claims;
+use crate::{
+    config::ApiConfig,
+    error::{ApiError, ApiResult},
+    util::claims::Claims,
+};
 
 #[async_trait::async_trait]
 impl FromRequestParts<AppState> for Claims {
@@ -25,7 +27,22 @@ impl FromRequestParts<AppState> for Claims {
         .await
         .map_err(|err| {
             warn!("client sent a bad token: {err:?}");
-            Error::from(ErrorKind::InvalidToken)
+
+            match err.reason() {
+                | TypedHeaderRejectionReason::Missing => {
+                    warn!("client did not send a token: {err:?}");
+                    ApiError::Authorization("missing token".into())
+                }
+                | TypedHeaderRejectionReason::Error(inner) => {
+                    warn!("client sent an invalid token: {err:?}, {inner:?}");
+                    ApiError::Authorization("invalid token".into())
+                }
+
+                | _ => {
+                    warn!("unknown token error occured: {err:?}");
+                    ApiError::Internal(err.into())
+                }
+            }
         })?;
 
         let config = ApiConfig::from_request_parts(parts, state).await?;
