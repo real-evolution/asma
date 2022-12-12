@@ -8,16 +8,26 @@ use kernel_entities::{
     },
     traits::Key,
 };
+use mapper::Mapper;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Debug, Deserialize, Serialize, JsonSchema, OperationIo)]
+#[derive(Debug, Deserialize, Mapper, Serialize, JsonSchema, OperationIo)]
 #[serde(rename_all = "camelCase")]
+#[from(Channel)]
 #[aide(output)]
 pub struct ChannelDto {
-    #[serde(flatten)]
-    pub channel: Channel,
+    pub id: Key<Channel>,
+    pub name: String,
+    pub platform: ChannelPlatform,
+    pub api_key: String,
+    pub valid_until: Option<DateTime<Utc>>,
+    pub is_active: bool,
+    pub max_instances: Option<i64>,
+    pub user_id: Key<User>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate, JsonSchema, OperationIo)]

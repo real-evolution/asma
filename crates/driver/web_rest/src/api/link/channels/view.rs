@@ -53,12 +53,7 @@ pub async fn get_all(
         }
     };
 
-    Ok(Json(
-        channels
-            .into_iter()
-            .map(|channel| ChannelDto { channel })
-            .collect_vec(),
-    ))
+    Ok(Json(channels.into_iter().map(|c| c.into()).collect_vec()))
 }
 
 pub async fn get_by_id(
@@ -88,5 +83,5 @@ pub async fn get_by_id(
         }
     };
 
-    Ok(Json(ChannelDto { channel }))
+    Ok(Json(channel.into()))
 }
