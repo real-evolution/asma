@@ -10,7 +10,7 @@ pub enum RepoError {
     #[error("data error: {0}")]
     Data(anyhow::Error),
 
-    #[error("not items were found")]
+    #[error("no items were found")]
     NotFound,
 
     #[error("an item with the same unique values already exists")]
