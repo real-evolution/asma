@@ -42,8 +42,7 @@ pub async fn get_all(
 
 pub async fn get_by_id(
     claims: Claims,
-    user_id: Path<Key<User>>,
-    account_id: Path<Key<Account>>,
+    Path((user_id, account_id)): Path<(Key<User>, Key<Account>)>,
     state: State<AppState>,
 ) -> ApiResult<Json<AccountDto>> {
     claims
