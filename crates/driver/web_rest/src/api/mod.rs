@@ -3,7 +3,6 @@ pub mod diag;
 pub mod dtos;
 pub mod link;
 pub mod setup;
-pub mod users;
 
 use aide::axum::ApiRouter;
 use driver_web_common::state::AppState;
@@ -16,6 +15,5 @@ pub fn api_routes() -> AppResult<ApiRouter<AppState>> {
         .nest("/diag", diag::routes())
         .nest("/setup", setup::routes())
         .nest("/auth", auth::routes())
-        .nest("/users", users::routes())
         .nest("/link", link::routes()))
 }

@@ -33,7 +33,7 @@ pub async fn add(
         .into();
 
     Ok(Created(
-        format!("/api/users/{}/accounts", user_id.value_ref()),
+        format!("/api/auth/users/{}/accounts", user_id.value_ref()),
         account.id.clone(),
         account,
     ))

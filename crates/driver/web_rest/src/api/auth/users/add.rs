@@ -33,5 +33,5 @@ pub async fn add(
         ))
         .await?;
 
-    Ok(Created::new("/api/users", user).into())
+    Ok(Created::new("/api/auth/users", user).into())
 }
