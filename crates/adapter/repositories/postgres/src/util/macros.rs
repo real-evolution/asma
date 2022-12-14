@@ -39,3 +39,16 @@ macro_rules! sqlx_vec_ok {
             .collect())
     };
 }
+
+#[macro_export]
+macro_rules! sqlx_stream_ok {
+    ($e:expr) => {
+        Box::pin(stream! {
+            let mut cursor = $e;
+
+            while let Some(item) = cursor.try_next().await.map_err(map_sqlx_error)? {
+                yield Ok(item.into());
+            }
+        })
+    };
+}

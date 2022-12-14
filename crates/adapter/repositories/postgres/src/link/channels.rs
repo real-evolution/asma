@@ -1,4 +1,6 @@
+use async_stream::stream;
 use chrono::{DateTime, Utc};
+use futures::{stream::BoxStream, TryStreamExt};
 use kernel_entities::{
     entities::{auth::User, link::*},
     traits::Key,
@@ -8,7 +10,11 @@ use ormx::{Delete, Table};
 use proc_macros::Repo;
 
 use crate::{
-    database::SqlxPool, sqlx_ok, sqlx_vec_ok, util::error::map_sqlx_error,
+    database::SqlxPool,
+    sqlx_ok,
+    sqlx_stream_ok,
+    sqlx_vec_ok,
+    util::error::map_sqlx_error,
 };
 
 #[derive(Repo)]
@@ -20,7 +26,21 @@ use crate::{
 pub(crate) struct SqlxChannelsRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
-impl ChannelsRepo for SqlxChannelsRepo {}
+impl ChannelsRepo for SqlxChannelsRepo {
+    async fn stream_active<'a>(&'a self) -> BoxStream<'a, RepoResult<Channel>> {
+        sqlx_stream_ok!(
+         sqlx::query_as!(
+                models::ChannelModel,
+                r#"
+                SELECT * FROM channels
+                WHERE is_active = TRUE AND
+                      valid_until != NULL AND
+                      valid_until > now()
+                ORDER BY created_at
+                "#
+            ).fetch(self.0.get()))
+    }
+}
 
 #[async_trait::async_trait]
 impl ChildRepo<User> for SqlxChannelsRepo {

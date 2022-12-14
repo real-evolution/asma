@@ -1,11 +1,12 @@
 use chrono::{DateTime, Utc};
 use derive_more::Constructor;
+use futures::stream::BoxStream;
 use kernel_entities::{
     entities::{auth::User, link::*},
     traits::Key,
 };
 
-use crate::traits::*;
+use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait ChannelsRepo:
@@ -15,6 +16,7 @@ pub trait ChannelsRepo:
     + Send
     + Sync
 {
+    async fn stream_active<'a>(&'a self) -> BoxStream<'a, RepoResult<Channel>>;
 }
 
 #[derive(Constructor)]
