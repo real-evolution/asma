@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use futures::stream::BoxStream;
 use kernel_entities::{
     entities::{auth::User, link::Channel},
@@ -16,11 +14,10 @@ pub trait ChannelsService: Send + Sync {
         id: &Key<Channel>,
     ) -> AppResult<Option<ChannelStatus>>;
 
-    async fn status_of(
-        &self,
-        user_id: &Key<User>,
-    ) -> AppResult<HashMap<Key<Channel>, ChannelStatus>>;
-
+    async fn status_of<'a>(
+        &'a self,
+        user_id: &'a Key<User>,
+    ) -> AppResult<BoxStream<'a, (Key<Channel>, ChannelStatus)>>;
 
     async fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
     async fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
