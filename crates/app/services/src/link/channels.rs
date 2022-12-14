@@ -39,6 +39,12 @@ impl ChannelsService for AppChannelsService {
     }
 
     async fn start_channels(&self) {
+    async fn is_running(&self, id: &Key<Channel>) -> AppResult<bool> {
+        Ok(self
+            .active_channels
+            .iter()
+            .any(|(_, chs)| chs.contains_key(id)))
+    }
         todo!()
     }
 

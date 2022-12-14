@@ -22,4 +22,5 @@ pub trait ChannelsService: Send + Sync {
 
     async fn start_channels(&self);
     async fn stop_channels(&self);
+    async fn is_running(&self, id: &Key<Channel>) -> AppResult<bool>;
 }
