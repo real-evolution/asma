@@ -18,14 +18,24 @@ pub struct MessageModification {
 }
 
 #[derive(Clone, Debug, JsonSchema)]
+pub enum MessageDirection {
+    Incoming,
+    Outgoing,
+}
+
+#[derive(Clone, Debug, JsonSchema)]
 pub struct Message {
     pub id: Key<Message>,
+
     pub text: Option<String>,
-    pub modifications: Option<Vec<MessageModification>>,
+    pub changes: Option<Vec<MessageModification>>,
     pub attachments: Option<Vec<Attachment>>,
+    pub direction: MessageDirection,
+
     pub sent_at: DateTime<Utc>,
     pub delivered_at: Option<DateTime<Utc>>,
     pub seen_at: Option<DateTime<Utc>>,
+
     pub chat_id: Key<Chat>,
 }
 
