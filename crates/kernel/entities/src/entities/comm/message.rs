@@ -6,14 +6,14 @@ use crate::traits::{Entity, Key};
 use super::{attachment::Attachment, chat::Chat};
 
 #[derive(Clone, Debug, JsonSchema)]
-pub enum MessageModicationKind {
+pub enum MessageModificationKind {
     Edit(String),
     Delete,
 }
 
 #[derive(Clone, Debug, JsonSchema)]
 pub struct MessageModification {
-    pub kind: MessageModicationKind,
+    pub kind: MessageModificationKind,
     pub made_at: DateTime<Utc>,
 }
 
