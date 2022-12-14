@@ -6,6 +6,10 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# crate dependencies
+async-stream = "0"
+futures = "0"
+
 # project dependencies
 common_validation = { path = "../../common/validation" }
 common_macros = { path = "../../common/macros" }
@@ -18,5 +22,6 @@ async-trait = { workspace = true}
 derive_more = { workspace = true}
 chrono = { workspace = true }
 serde = { workspace = true }
+tokio = { workspace = true }
 tracing = { workspace = true }
 validator = { workspace = true }

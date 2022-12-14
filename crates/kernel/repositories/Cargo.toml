@@ -6,6 +6,9 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# crate dependencies
+futures = "0"
+
 # project dependencies
 kernel_entities = { path = "../entities" }
 
