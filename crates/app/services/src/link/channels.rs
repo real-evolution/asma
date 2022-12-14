@@ -1,5 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
+use async_stream::stream;
+use futures::stream::BoxStream;
 use kernel_entities::{
     entities::{auth::User, link::Channel},
     traits::Key,
@@ -9,6 +11,7 @@ use kernel_services::{
     error::AppResult,
     link::{channels::ChannelsService, models::ChannelStatus},
 };
+use tokio::task::JoinHandle;
 
 pub struct AppChannelsService {
     _data: Arc<dyn DataStore>,
@@ -38,17 +41,17 @@ impl ChannelsService for AppChannelsService {
             .unwrap_or(Default::default()))
     }
 
-    async fn start_channels(&self) {
     async fn is_running(&self, id: &Key<Channel>) -> AppResult<bool> {
         Ok(self
             .active_channels
             .iter()
             .any(|(_, chs)| chs.contains_key(id)))
     }
+    async fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>> {
         todo!()
     }
 
-    async fn stop_channels(&self) {
+    async fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>> {
         todo!()
     }
 }

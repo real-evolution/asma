@@ -7,8 +7,9 @@ authors.workspace = true
 
 [dependencies]
 # crate dependencies
-enumflags2 = "0"
 convert_case = "0"
+enumflags2 = "0"
+futures = "0"
 
 # project dependencies
 kernel_entities = { path = "../entities" }
