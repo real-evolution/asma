@@ -21,7 +21,6 @@ pub trait ChannelsService: Send + Sync {
         user_id: &Key<User>,
     ) -> AppResult<HashMap<Key<Channel>, ChannelStatus>>;
 
-    async fn is_running(&self, id: &Key<Channel>) -> AppResult<bool>;
 
     async fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
     async fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
