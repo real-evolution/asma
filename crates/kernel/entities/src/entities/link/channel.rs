@@ -11,7 +11,7 @@ use crate::{entities::auth::User, traits::*};
 #[derive(Clone, Copy, Debug, JsonSchema_repr, Deserialize, Serialize)]
 pub enum ChannelPlatform {
     Telegram = 0,
-    WhatsApp = 1,
+    // WhatsApp = 1,
 }
 
 #[entity]
