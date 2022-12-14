@@ -64,8 +64,3 @@ impl ChannelsService for AppChannelsService {
         }))
     }
 }
-
-#[derive(Clone)]
-struct ChannelState {
-    handler: Arc<dyn ChannelHandler>,
-}
