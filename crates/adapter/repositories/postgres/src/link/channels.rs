@@ -34,8 +34,7 @@ impl ChannelsRepo for SqlxChannelsRepo {
             r#"
                 SELECT * FROM channels
                 WHERE is_active = TRUE AND
-                      valid_until != NULL AND
-                      valid_until > now()
+                      COALESCE(valid_until, 'infinity') > now()
                 ORDER BY created_at
                 "#
         )
@@ -52,8 +51,7 @@ impl ChannelsRepo for SqlxChannelsRepo {
                 SELECT * FROM channels
                 WHERE user_id = $1 AND
                       is_active = TRUE AND
-                      valid_until != NULL AND
-                      valid_until > now()
+                      COALESCE(valid_until, 'infinity') > now()
                 ORDER BY created_at
                 "#,
             user_id.value(),
