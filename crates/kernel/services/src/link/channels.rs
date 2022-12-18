@@ -21,4 +21,14 @@ pub trait ChannelsService: Send + Sync {
 
     async fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
     async fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
+
+    async fn start_channels_of<'a>(
+        &'a self,
+        user_id: Key<User>,
+    ) -> BoxStream<'a, AppResult<()>>;
+
+    async fn stop_channels_of<'a>(
+        &'a self,
+        user_id: Key<User>,
+    ) -> BoxStream<'a, AppResult<()>>;
 }

@@ -8,7 +8,6 @@ use kernel_services::{
     error::AppResult,
     setup::{error::SetupError, SetupService},
 };
-
 const SYSTEM_USER_USERNAME: &str = "system";
 const SYSTEM_USER_DISPLAY_NAME: &str = "System User";
 const ROOT_ACCOUNT_NAME: &str = "root";
@@ -92,9 +91,9 @@ impl SetupService for AppSetupService {
             .get_by_username(SYSTEM_USER_USERNAME)
             .await
         {
-            Ok(_) => Ok(true),
-            Err(RepoError::NotFound) => return Ok(false),
-            Err(err) => return Err(err.into()),
+            | Ok(_) => Ok(true),
+            | Err(RepoError::NotFound) => return Ok(false),
+            | Err(err) => return Err(err.into()),
         }
     }
 
