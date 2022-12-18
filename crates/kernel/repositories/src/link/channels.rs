@@ -17,6 +17,11 @@ pub trait ChannelsRepo:
     + Sync
 {
     async fn stream_active<'a>(&'a self) -> BoxStream<'a, RepoResult<Channel>>;
+
+    async fn stream_active_of<'a>(
+        &'a self,
+        user_id: Key<User>,
+    ) -> BoxStream<'a, RepoResult<Channel>>;
 }
 
 #[derive(Constructor)]
