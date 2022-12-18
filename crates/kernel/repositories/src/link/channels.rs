@@ -8,7 +8,6 @@ use kernel_entities::{
 
 use crate::{error::RepoResult, traits::*};
 
-#[async_trait::async_trait]
 pub trait ChannelsRepo:
     Repo<Entity = Channel>
     + InsertRepo<InsertChannel>
@@ -16,9 +15,8 @@ pub trait ChannelsRepo:
     + Send
     + Sync
 {
-    async fn stream_active<'a>(&'a self) -> BoxStream<'a, RepoResult<Channel>>;
-
-    async fn stream_active_of<'a>(
+    fn stream_active<'a>(&'a self) -> BoxStream<'a, RepoResult<Channel>>;
+    fn stream_active_of<'a>(
         &'a self,
         user_id: Key<User>,
     ) -> BoxStream<'a, RepoResult<Channel>>;

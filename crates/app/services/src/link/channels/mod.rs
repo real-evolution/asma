@@ -28,31 +28,69 @@ pub struct AppChannelsService {
 
 #[async_trait::async_trait]
 impl ChannelsService for AppChannelsService {
-    async fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>> {
-        self.start_channels_stream(
-            self.data.link().channels().stream_active().await,
-        )
+    async fn status(
+        &self,
+        id: &Key<Channel>,
+    ) -> AppResult<Option<ChannelStatus>> {
+        Ok(self.states.read().await.values().find_map(|chs| {
+            chs.get(id).map(|s| ChannelStatus {
+                started_at: s.started_at(),
+            })
+        }))
     }
 
-    async fn start_channels_of<'a>(
+    fn status_of<'a>(
         &'a self,
-        user_id: Key<User>,
-    ) -> BoxStream<'a, AppResult<()>> {
-        self.start_channels_stream(
-            self.data.link().channels().stream_active_of(user_id).await,
-        )
+        user_id: &'a Key<User>,
+    ) -> BoxStream<'a, (Key<Channel>, ChannelStatus)> {
+        return async_stream::stream! {
+            let locked_states = self.states.read().await;
+            let states = locked_states.get(user_id);
+
+            match states {
+                | Some(states) => {
+                    for (channel_id, state) in states {
+                        yield (channel_id.clone(), state.into());
+                    }
+                }
+                | None => return ()
+            }
+        }
+        .boxed();
     }
 
-    async fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>> {
-        let states = self.states.read().await;
+    fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>> {
+
+        async_stream::stream! {
+            let mut channels = self.data.link().channels().stream_active();
+
+            while let Some(Ok(c)) = channels.next().await {
+                error!("CH: {c:#?}");
+            }
+        };
+
+        self.start_channels_stream(self.data.link().channels().stream_active())
+    }
+
+    fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>> {
+        let states = self.states.blocking_read();
 
         stream::iter(states.keys().map(|i| i.clone()).collect::<Vec<_>>())
-            .then(|user_id| async { self.stop_channels_of(user_id).await })
+            .map(|user_id| self.stop_channels_of(user_id))
             .flatten()
             .boxed()
     }
 
-    async fn stop_channels_of<'a>(
+    fn start_channels_of<'a>(
+        &'a self,
+        user_id: Key<User>,
+    ) -> BoxStream<'a, AppResult<()>> {
+        self.start_channels_stream(
+            self.data.link().channels().stream_active_of(user_id),
+        )
+    }
+
+    fn stop_channels_of<'a>(
         &'a self,
         user_id: Key<User>,
     ) -> BoxStream<'a, AppResult<()>> {
@@ -86,38 +124,16 @@ impl ChannelsService for AppChannelsService {
         }
         .boxed()
     }
-
-    async fn status(
-        &self,
-        id: &Key<Channel>,
-    ) -> AppResult<Option<ChannelStatus>> {
-        Ok(self.states.read().await.values().find_map(|chs| {
-            chs.get(id).map(|s| ChannelStatus {
-                started_at: s.started_at(),
-            })
-        }))
-    }
-
-    async fn status_of<'a>(
-        &'a self,
-        user_id: &'a Key<User>,
-    ) -> AppResult<BoxStream<'_, (Key<Channel>, ChannelStatus)>> {
-        let states: HashMap<Key<Channel>, ChannelStatus> =
-            match self.states.read().await.get(user_id) {
-                | Some(states) => states
-                    .iter()
-                    .map(|(channel_id, state)| {
-                        (channel_id.clone(), state.into())
-                    })
-                    .collect(),
-                | None => return Ok(Box::pin(stream::empty())),
-            };
-
-        Ok(Box::pin(tokio_stream::iter(states.into_iter())))
-    }
 }
 
 impl AppChannelsService {
+    pub fn new(data: Arc<dyn DataStore>) -> Self {
+        Self {
+            data,
+            states: Default::default(),
+        }
+    }
+
     fn start_channels_stream<'a, S>(
         &'a self,
         channels: S,

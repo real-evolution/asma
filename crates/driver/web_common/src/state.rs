@@ -6,6 +6,7 @@ use adapter_services::crypto::hash::Argon2CryptoHashService;
 use adapter_services::entropy::SecureEntropyService;
 use app_services::auth::config::{AuthConfig, AUTH_CONFIG_SECTION};
 use app_services::auth::AppAuthService;
+use app_services::link::channels::AppChannelsService;
 use app_services::setup::AppSetupService;
 use kernel_repositories::DataStore;
 use kernel_services::auth::AuthService;
@@ -13,6 +14,7 @@ use kernel_services::config::ConfigService;
 use kernel_services::crypto::hash::CryptoHashService;
 use kernel_services::entropy::EntropyService;
 use kernel_services::get_config;
+use kernel_services::link::channels::ChannelsService;
 use kernel_services::setup::SetupService;
 
 pub type AppState = Arc<AppStateImpl>;
@@ -28,6 +30,7 @@ pub struct AppStateImpl {
     // services
     pub auth: Arc<dyn AuthService>,
     pub setup: Arc<dyn SetupService>,
+    pub channels: Arc<dyn ChannelsService>,
 }
 
 pub async fn create_state() -> anyhow::Result<AppState> {
@@ -58,6 +61,8 @@ pub async fn create_state() -> anyhow::Result<AppState> {
     ));
     // setup
     let setup = Arc::new(AppSetupService::new(data.clone(), auth.clone()));
+    // channels
+    let channels = Arc::new(AppChannelsService::new(data.clone()));
 
     debug!("building application state");
     Ok(Arc::new(AppStateImpl {
@@ -67,5 +72,6 @@ pub async fn create_state() -> anyhow::Result<AppState> {
         hash,
         auth,
         setup,
+        channels,
     }))
 }

@@ -14,20 +14,20 @@ pub trait ChannelsService: Send + Sync {
         id: &Key<Channel>,
     ) -> AppResult<Option<ChannelStatus>>;
 
-    async fn status_of<'a>(
+    fn status_of<'a>(
         &'a self,
         user_id: &'a Key<User>,
-    ) -> AppResult<BoxStream<'a, (Key<Channel>, ChannelStatus)>>;
+    ) -> BoxStream<'a, (Key<Channel>, ChannelStatus)>;
 
-    async fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
-    async fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
+    fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
+    fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
 
-    async fn start_channels_of<'a>(
+    fn start_channels_of<'a>(
         &'a self,
         user_id: Key<User>,
     ) -> BoxStream<'a, AppResult<()>>;
 
-    async fn stop_channels_of<'a>(
+    fn stop_channels_of<'a>(
         &'a self,
         user_id: Key<User>,
     ) -> BoxStream<'a, AppResult<()>>;

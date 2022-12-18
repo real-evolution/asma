@@ -25,9 +25,8 @@ use crate::{
 )]
 pub(crate) struct SqlxChannelsRepo(pub SqlxPool);
 
-#[async_trait::async_trait]
 impl ChannelsRepo for SqlxChannelsRepo {
-    async fn stream_active<'a>(&'a self) -> BoxStream<'a, RepoResult<Channel>> {
+    fn stream_active<'a>(&'a self) -> BoxStream<'a, RepoResult<Channel>> {
         
         sqlx_stream_ok!(sqlx::query_as!(
             models::ChannelModel,
@@ -41,7 +40,7 @@ impl ChannelsRepo for SqlxChannelsRepo {
         .fetch(self.0.get()))
     }
 
-    async fn stream_active_of<'a>(
+    fn stream_active_of<'a>(
         &'a self,
         user_id: Key<User>,
     ) -> BoxStream<'a, RepoResult<Channel>> {
