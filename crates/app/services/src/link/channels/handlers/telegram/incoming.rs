@@ -9,6 +9,7 @@ use teloxide::{
     Bot,
 };
 
+use super::util::map_request_error;
 use crate::link::channels::handlers::updates::*;
 
 impl IncomingHandlerUpdate {
@@ -23,10 +24,10 @@ impl IncomingHandlerUpdate {
 
             req.offset = Some(i);
 
-            for update in req.await.unwrap() {
+            for update in req.await.map_err(map_request_error)? {
                 i = update.id + 1;
 
-                 yield update.try_into();
+                yield update.try_into();
             }
         }
         })
