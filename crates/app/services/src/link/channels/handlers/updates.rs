@@ -3,6 +3,7 @@ use chrono::{DateTime, Utc};
 pub(crate) type IncomingHandlerUpdate = HandlerUpdate<IncomingMessageUpdate>;
 pub(crate) type OutgoingHandlerUpdate = HandlerUpdate<OutgoingMessageUpdate>;
 
+#[derive(Debug)]
 pub(crate) enum IncomingMessageUpdateKind {
     New {
         message_id: String,
@@ -15,6 +16,7 @@ pub(crate) enum IncomingMessageUpdateKind {
     },
 }
 
+#[derive(Debug)]
 pub(crate) enum OutgoingMessageUpdateKind {
     New {
         content: String,
@@ -30,6 +32,7 @@ pub(crate) enum OutgoingMessageUpdateKind {
     },
 }
 
+#[derive(Debug)]
 pub(crate) struct IncomingMessageUpdate {
     pub chat_id: String,
     pub by_id: String,
@@ -37,11 +40,13 @@ pub(crate) struct IncomingMessageUpdate {
     pub sent_at: DateTime<Utc>,
 }
 
+#[derive(Debug)]
 pub(crate) struct OutgoingMessageUpdate {
     pub chat_id: String,
     pub kind: OutgoingMessageUpdateKind,
 }
 
+#[derive(Debug)]
 pub(crate) enum HandlerUpdate<Message> {
     Message(Message),
 }

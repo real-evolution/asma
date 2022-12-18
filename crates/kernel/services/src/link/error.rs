@@ -13,4 +13,7 @@ pub enum LinkError {
 
     #[error("invalid params: {0}")]
     InvalidParams(String),
+
+    #[error("invalid channel state: {0}")]
+    InvalidChannelState(String),
 }
