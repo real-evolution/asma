@@ -7,6 +7,7 @@ authors.workspace = true
 
 [dependencies]
 # crate dependencies
+async-stream = "0"
 axum = "0"
 axum_tonic = "0"
 serde-enum-str = "0"
@@ -28,5 +29,7 @@ erased-serde = { workspace = true }
 lazy_static = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }
+tokio-stream = { workspace = true }
+tokio-util = { workspace = true }
 tracing = { workspace = true }
 validator = { workspace = true }
