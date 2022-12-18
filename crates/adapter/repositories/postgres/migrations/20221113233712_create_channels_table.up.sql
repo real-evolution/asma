@@ -18,4 +18,5 @@ CREATE TABLE channels
                        ON DELETE CASCADE
 );
 
-CREATE INDEX channels_created_at_idx ON channels USING btree (created_at);
+CREATE INDEX channels_created_at_idx ON  channels USING btree (created_at);
+CREATE INDEX ON channels ((COALESCE(valid_until, 'infinity')) );
