@@ -43,7 +43,7 @@ impl ChannelsService for AppChannelsService {
         &'a self,
         user_id: &'a Key<User>,
     ) -> BoxStream<'a, (Key<Channel>, ChannelStatus)> {
-        return async_stream::stream! {
+        async_stream::stream! {
             let locked_states = self.states.read().await;
             let states = locked_states.get(user_id);
 
@@ -56,19 +56,10 @@ impl ChannelsService for AppChannelsService {
                 | None => return ()
             }
         }
-        .boxed();
+        .boxed()
     }
 
     fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>> {
-
-        async_stream::stream! {
-            let mut channels = self.data.link().channels().stream_active();
-
-            while let Some(Ok(c)) = channels.next().await {
-                error!("CH: {c:#?}");
-            }
-        };
-
         self.start_channels_stream(self.data.link().channels().stream_active())
     }
 
