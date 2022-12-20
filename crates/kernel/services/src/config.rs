@@ -14,6 +14,9 @@ pub use get_config;
 use crate::{error::AppResult, Service};
 
 #[async_trait::async_trait]
+pub trait ConfigService: Service + Send + Sync {
+    async fn reload(&self) -> AppResult<()>;
+
     fn get_section<'de>(&self, section: &str) -> AppResult<ConfigObject<'de>>;
     fn get(&self, key: &str) -> AppResult<ConfigValue>;
     fn get_bool(&self, key: &str) -> AppResult<bool>;

@@ -1,25 +1,54 @@
-use derive_more::Constructor;
-use kernel_services::config::*;
+use std::{
+    collections::HashMap,
+    env,
+    io,
+    sync::{Arc, Mutex, MutexGuard},
+};
 
 use config::{Config, File, FileFormat, Value, ValueKind};
+use derive_more::Constructor;
 use erased_serde::*;
-use kernel_services::error::{AppResult, ConfigError};
-
-use std::collections::HashMap;
-use std::{env, io};
+use kernel_services::{
+    config::*,
+    error::{AppResult, ConfigError},
+    Service,
+};
 
 const QUALIFIER: &str = "com";
 const ORGANIZATION: &str = "SGSTel";
 const APPLICATION: &str = "asma";
 
-#[derive(Constructor)]
-pub struct TomlConfigService(Config);
+#[derive(Constructor, Default)]
+pub struct TomlConfigService(Arc<Mutex<Config>>);
 
+#[async_trait::async_trait]
 impl ConfigService for TomlConfigService {
+    async fn reload(&self) -> AppResult<()> {
+        debug!(
+            "loading config from toml files: {:?}",
+            TomlConfigService::get_config_files()?
+        );
+
+        let sources: Vec<_> = Self::get_config_files()?
+            .into_iter()
+            .map(|s| File::new(&s, FileFormat::Toml))
+            .collect();
+
+        *self.inner()? = Config::builder()
+            .add_source(sources)
+            .build()
+            .map_err(anyhow::Error::new)?;
+
+        Ok(())
+    }
+
     fn get_section<'de>(&self, section: &str) -> AppResult<ConfigObject<'de>> {
         debug!("reading configuration section `{section}`");
 
-        let val = self.0.get::<Value>(section).map_err(map_config_error)?;
+        let val = self
+            .inner()?
+            .get::<Value>(section)
+            .map_err(map_config_error)?;
 
         Ok(ConfigObject::new(Box::new(<dyn Deserializer>::erase(val))))
     }
@@ -27,7 +56,7 @@ impl ConfigService for TomlConfigService {
     fn get(&self, key: &str) -> AppResult<ConfigValue> {
         debug!("reading a configuration object with key `{key}`");
 
-        let val = self.0.get::<Value>(key).map_err(map_config_error)?;
+        let val = self.inner()?.get::<Value>(key).map_err(map_config_error)?;
 
         Ok(map_config_value(val.kind))
     }
@@ -35,32 +64,32 @@ impl ConfigService for TomlConfigService {
     fn get_bool(&self, key: &str) -> AppResult<bool> {
         debug!("reading a configuration boolean with key `{key}`");
 
-        Ok(self.0.get_bool(key).map_err(map_config_error)?)
+        Ok(self.inner()?.get_bool(key).map_err(map_config_error)?)
     }
 
     fn get_int(&self, key: &str) -> AppResult<i64> {
         debug!("reading a configuration integer with key `{key}`");
 
-        Ok(self.0.get_int(key).map_err(map_config_error)?)
+        Ok(self.inner()?.get_int(key).map_err(map_config_error)?)
     }
 
     fn get_float(&self, key: &str) -> AppResult<f64> {
         debug!("reading a configuration float with key `{key}`");
 
-        Ok(self.0.get_float(key).map_err(map_config_error)?)
+        Ok(self.inner()?.get_float(key).map_err(map_config_error)?)
     }
 
     fn get_string(&self, key: &str) -> AppResult<String> {
         debug!("reading a configuration string with key `{key}`");
 
-        Ok(self.0.get_string(key).map_err(map_config_error)?)
+        Ok(self.inner()?.get_string(key).map_err(map_config_error)?)
     }
 
     fn get_array(&self, key: &str) -> AppResult<Vec<ConfigValue>> {
         debug!("reading a configuration array with key `{key}`");
 
         Ok(map_config_array(
-            self.0.get_array(key).map_err(map_config_error)?,
+            self.inner()?.get_array(key).map_err(map_config_error)?,
         ))
     }
 
@@ -68,37 +97,29 @@ impl ConfigService for TomlConfigService {
         debug!("reading a configuration map with key `{key}`");
 
         Ok(map_config_table(
-            self.0.get_table(key).map_err(map_config_error)?,
+            self.inner()?.get_table(key).map_err(map_config_error)?,
         ))
     }
 }
 
+#[async_trait::async_trait]
+impl Service for TomlConfigService {
+    async fn initialize(&self) -> AppResult<()> {
+        self.reload().await
+    }
+}
+
 impl TomlConfigService {
-    pub fn from_strs(strs: &[&str]) -> anyhow::Result<Self> {
-        let sources: Vec<_> = strs
-            .into_iter()
-            .map(|s| File::from_str(*s, FileFormat::Toml))
-            .collect();
+    fn inner<'a>(&'a self) -> AppResult<MutexGuard<'a, Config>> {
+        let lck = self
+            .0
+            .lock()
+            .map_err(|err| anyhow::anyhow!(err.to_string()))?;
 
-        Ok(Self::new(Config::builder().add_source(sources).build()?))
+        Ok(lck)
     }
 
-    pub fn from_files(paths: &Vec<String>) -> anyhow::Result<Self> {
-        let sources: Vec<_> = paths
-            .into_iter()
-            .map(|s| File::new(&s, FileFormat::Toml))
-            .collect();
-
-        Ok(Self::new(Config::builder().add_source(sources).build()?))
-    }
-
-    pub fn load() -> anyhow::Result<Self> {
-        let paths = Self::get_config_files()?;
-
-        Self::from_files(&paths)
-    }
-
-    pub fn get_config_files() -> anyhow::Result<Vec<String>> {
+    fn get_config_files() -> anyhow::Result<Vec<String>> {
         let mut config_dir = directories::ProjectDirs::from(
             QUALIFIER,
             ORGANIZATION,
@@ -131,16 +152,16 @@ impl TomlConfigService {
 
 fn map_config_value(val: ValueKind) -> ConfigValue {
     match val {
-        ValueKind::Nil => ConfigValue::None,
-        ValueKind::Boolean(v) => ConfigValue::Boolean(v),
-        ValueKind::I64(v) => ConfigValue::Integer(v),
-        ValueKind::I128(v) => ConfigValue::Integer(v as i64),
-        ValueKind::U64(v) => ConfigValue::Integer(v as i64),
-        ValueKind::U128(v) => ConfigValue::Integer(v as i64),
-        ValueKind::Float(v) => ConfigValue::Float(v),
-        ValueKind::String(v) => ConfigValue::String(v),
-        ValueKind::Table(v) => ConfigValue::Map(map_config_table(v)),
-        ValueKind::Array(v) => ConfigValue::Array(map_config_array(v)),
+        | ValueKind::Nil => ConfigValue::None,
+        | ValueKind::Boolean(v) => ConfigValue::Boolean(v),
+        | ValueKind::I64(v) => ConfigValue::Integer(v),
+        | ValueKind::I128(v) => ConfigValue::Integer(v as i64),
+        | ValueKind::U64(v) => ConfigValue::Integer(v as i64),
+        | ValueKind::U128(v) => ConfigValue::Integer(v as i64),
+        | ValueKind::Float(v) => ConfigValue::Float(v),
+        | ValueKind::String(v) => ConfigValue::String(v),
+        | ValueKind::Table(v) => ConfigValue::Map(map_config_table(v)),
+        | ValueKind::Array(v) => ConfigValue::Array(map_config_array(v)),
     }
 }
 
@@ -158,25 +179,25 @@ fn map_config_array(val: Vec<Value>) -> Vec<ConfigValue> {
 
 fn map_config_error(err: config::ConfigError) -> ConfigError {
     match err {
-        config::ConfigError::NotFound(key) => ConfigError::NotFound(key),
-        config::ConfigError::Message(msg) => ConfigError::Other(msg),
+        | config::ConfigError::NotFound(key) => ConfigError::NotFound(key),
+        | config::ConfigError::Message(msg) => ConfigError::Other(msg),
 
-        config::ConfigError::Frozen => {
+        | config::ConfigError::Frozen => {
             ConfigError::Other("config is frozen".into())
         }
 
-        config::ConfigError::PathParse(kind) => {
+        | config::ConfigError::PathParse(kind) => {
             ConfigError::PathParse(kind.description().into())
         }
 
-        config::ConfigError::FileParse { uri, cause } => {
+        | config::ConfigError::FileParse { uri, cause } => {
             ConfigError::FileParse {
                 uri: uri.unwrap_or("<unknown>".into()),
                 error: cause.to_string(),
             }
         }
 
-        config::ConfigError::Type {
+        | config::ConfigError::Type {
             origin,
             unexpected,
             expected,
@@ -186,7 +207,7 @@ fn map_config_error(err: config::ConfigError) -> ConfigError {
             key, origin, expected, unexpected
         )),
 
-        config::ConfigError::Foreign(err) => {
+        | config::ConfigError::Foreign(err) => {
             ConfigError::Other(err.to_string())
         }
     }
