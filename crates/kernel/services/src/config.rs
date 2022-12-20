@@ -11,9 +11,9 @@ macro_rules! get_config {
 }
 pub use get_config;
 
-use crate::error::AppResult;
+use crate::{error::AppResult, Service};
 
-pub trait ConfigService: Send + Sync {
+#[async_trait::async_trait]
     fn get_section<'de>(&self, section: &str) -> AppResult<ConfigObject<'de>>;
     fn get(&self, key: &str) -> AppResult<ConfigValue>;
     fn get_bool(&self, key: &str) -> AppResult<bool>;

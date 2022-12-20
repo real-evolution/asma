@@ -1,6 +1,6 @@
-use crate::error::AppResult;
+use crate::{error::AppResult, Service};
 
-pub trait EntropyService: Send + Sync {
+pub trait EntropyService: Service + Send + Sync {
     fn next_bool(&self) -> AppResult<bool>;
     fn next_u8(&self) -> AppResult<u8>;
     fn next_u16(&self) -> AppResult<u16>;
