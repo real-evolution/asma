@@ -1,9 +1,10 @@
-use std::sync::{RwLock, RwLockWriteGuard};
+use std::sync::{Arc, Mutex, MutexGuard};
 
-use kernel_services::entropy::{
-    CharacterCase, EntropyService, RandomStringOptions,
+use kernel_services::{
+    entropy::{CharacterCase, EntropyService, RandomStringOptions},
+    error::{AppError, AppResult},
+    Service,
 };
-use kernel_services::error::{AppError, AppResult};
 use rand::{Rng, RngCore};
 
 const UPPER_ALPHA: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -17,64 +18,63 @@ pub type BasicEntropyService = EntropyServiceImpl<rand::rngs::SmallRng>;
 pub type SecureEntropyService = EntropyServiceImpl<rand::rngs::OsRng>;
 
 #[derive(Default)]
-pub struct EntropyServiceImpl<R: RngCore + Send + Sync + 'static>(WriteLock<R>);
+pub struct EntropyServiceImpl<R>(Arc<Mutex<R>>);
 
 impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
     fn next_bool(&self) -> AppResult<bool> {
-        Ok(self.0.lock()?.gen())
+        Ok(self.inner()?.gen())
     }
 
     fn next_u8(&self) -> AppResult<u8> {
-        Ok(self.0.lock()?.gen())
+        Ok(self.inner()?.gen())
     }
 
     fn next_u16(&self) -> AppResult<u16> {
-        Ok(self.0.lock()?.gen())
+        Ok(self.inner()?.gen())
     }
 
     fn next_u32(&self) -> AppResult<u32> {
-        Ok(self.0.lock()?.gen())
+        Ok(self.inner()?.gen())
     }
 
     fn next_u64(&self) -> AppResult<u64> {
-        Ok(self.0.lock()?.gen())
+        Ok(self.inner()?.gen())
     }
 
     fn next_u128(&self) -> AppResult<u128> {
-        Ok(self.0.lock()?.gen())
+        Ok(self.inner()?.gen())
     }
 
     fn next_usize(&self) -> AppResult<usize> {
-        Ok(self.0.lock()?.gen())
+        Ok(self.inner()?.gen())
     }
 
     fn next_u8_ranged(&self, min: u8, max: u8) -> AppResult<u8> {
-        Ok(self.0.lock()?.gen_range(min..max))
+        Ok(self.inner()?.gen_range(min..max))
     }
 
     fn next_u16_ranged(&self, min: u16, max: u16) -> AppResult<u16> {
-        Ok(self.0.lock()?.gen_range(min..max))
+        Ok(self.inner()?.gen_range(min..max))
     }
 
     fn next_u32_ranged(&self, min: u32, max: u32) -> AppResult<u32> {
-        Ok(self.0.lock()?.gen_range(min..max))
+        Ok(self.inner()?.gen_range(min..max))
     }
 
     fn next_u64_ranged(&self, min: u64, max: u64) -> AppResult<u64> {
-        Ok(self.0.lock()?.gen_range(min..max))
+        Ok(self.inner()?.gen_range(min..max))
     }
 
     fn next_u128_ranged(&self, min: u128, max: u128) -> AppResult<u128> {
-        Ok(self.0.lock()?.gen_range(min..max))
+        Ok(self.inner()?.gen_range(min..max))
     }
 
     fn next_usize_ranged(&self, min: usize, max: usize) -> AppResult<usize> {
-        Ok(self.0.lock()?.gen_range(min..max))
+        Ok(self.inner()?.gen_range(min..max))
     }
 
     fn next_bytes_inplace(&self, buf: &mut [u8]) -> AppResult<()> {
-        self.0
-            .lock()?
+        self.inner()?
             .try_fill_bytes(buf)
             .map_err(|err| AppError::Unknown(err.into()))?;
 
@@ -102,9 +102,9 @@ impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
 
         if let Some(ctype) = opts.alpha {
             pool.push_str(&match ctype {
-                CharacterCase::Lower => LOWER_ALPHA,
-                CharacterCase::Upper => UPPER_ALPHA,
-                CharacterCase::Mixed => MIXED_ALPHA,
+                | CharacterCase::Lower => LOWER_ALPHA,
+                | CharacterCase::Upper => UPPER_ALPHA,
+                | CharacterCase::Mixed => MIXED_ALPHA,
             });
         }
 
@@ -130,25 +130,15 @@ impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
     }
 }
 
-pub struct WriteLock<T> {
-    inner: RwLock<T>,
-}
+impl<R> EntropyServiceImpl<R> {
+    fn inner<'a>(&'a self) -> AppResult<MutexGuard<'a, R>> {
+        let lck = self
+            .0
+            .lock()
+            .map_err(|err| anyhow::anyhow!(err.to_string()))?;
 
-impl<T: Send + Sync> WriteLock<T> {
-    fn lock(&self) -> AppResult<RwLockWriteGuard<T>> {
-        match self.inner.try_write() {
-            Ok(inner) => Ok(inner),
-            Err(err) => {
-                Err(AppError::Unknown(anyhow::anyhow!(err.to_string())))
-            }
-        }
+        Ok(lck)
     }
 }
 
-impl<T: Default> Default for WriteLock<T> {
-    fn default() -> Self {
-        Self {
-            inner: Default::default(),
-        }
-    }
-}
+impl<R: RngCore + Send + Sync> Service for EntropyServiceImpl<R> {}

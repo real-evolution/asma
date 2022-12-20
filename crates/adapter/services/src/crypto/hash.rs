@@ -1,7 +1,14 @@
-use argon2::password_hash::{Error, SaltString};
-use argon2::{PasswordHash, PasswordHasher, PasswordVerifier};
-use kernel_services::crypto::hash::CryptoHashService;
-use kernel_services::error::{AppResult, CryptoError};
+use argon2::{
+    password_hash::{Error, SaltString},
+    PasswordHash,
+    PasswordHasher,
+    PasswordVerifier,
+};
+use kernel_services::{
+    crypto::hash::CryptoHashService,
+    error::{AppResult, CryptoError},
+    Service,
+};
 use rand::rngs::OsRng;
 
 pub type Argon2CryptoHashService<'a> =
@@ -13,9 +20,7 @@ impl<'a> Argon2CryptoHashService<'a> {
     }
 }
 
-pub struct CryptoHashServiceImpl<H>(H)
-where
-    H: PasswordHasher + PasswordVerifier + Sync + Send + 'static;
+pub struct CryptoHashServiceImpl<H>(H);
 
 impl<H> CryptoHashService for CryptoHashServiceImpl<H>
 where
@@ -41,25 +46,27 @@ where
     }
 }
 
+impl<H> Service for CryptoHashServiceImpl<H> {}
+
 fn map_hash_error(err: Error) -> CryptoError {
     match err {
-        Error::Algorithm | Error::Version => CryptoError::Unsupported,
-        Error::B64Encoding(err) => CryptoError::Encoding(err.to_string()),
-        Error::Crypto => CryptoError::Format("crypto error".into()),
-        Error::OutputTooShort => CryptoError::InputTooShort,
-        Error::OutputTooLong => CryptoError::InputTooLong,
-        Error::ParamNameDuplicated
+        | Error::Algorithm | Error::Version => CryptoError::Unsupported,
+        | Error::B64Encoding(err) => CryptoError::Encoding(err.to_string()),
+        | Error::Crypto => CryptoError::Format("crypto error".into()),
+        | Error::OutputTooShort => CryptoError::InputTooShort,
+        | Error::OutputTooLong => CryptoError::InputTooLong,
+        | Error::ParamNameDuplicated
         | Error::ParamNameInvalid
         | Error::ParamValueInvalid(_)
         | Error::PhcStringInvalid
         | Error::PhcStringTooShort
         | Error::PhcStringTooLong
         | Error::ParamsMaxExceeded => CryptoError::InvalidInput,
-        Error::Password => CryptoError::Verification(
+        | Error::Password => CryptoError::Verification(
             "hash does not corrospond to the input".into(),
         ),
-        Error::SaltInvalid(err) => CryptoError::Salt(err.to_string()),
+        | Error::SaltInvalid(err) => CryptoError::Salt(err.to_string()),
 
-        _ => CryptoError::Hash("unknown error".into()),
+        | _ => CryptoError::Hash("unknown error".into()),
     }
 }

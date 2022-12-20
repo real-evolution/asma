@@ -18,9 +18,12 @@ kernel_proc_macros = { path = "../../kernel/proc_macros" }
 
 # workspace dependencies
 anyhow = { workspace = true }
+async-trait = { workspace = true }
 derive_more = { workspace = true }
 erased-serde = { workspace = true }
 rand = { workspace = true }
 serde = { workspace = true }
+tokio = { workspace = true }
 tracing = { workspace = true }
+uuid = { workspace = true }
 validator = { workspace = true }

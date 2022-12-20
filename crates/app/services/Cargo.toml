@@ -9,6 +9,7 @@ authors.workspace = true
 # crate dependencies
 async-rwlock = "1"
 async-stream = "0"
+derive-new = "0"
 futures = "0"
 teloxide = { version = "0.11", features = ["macros"] }
 

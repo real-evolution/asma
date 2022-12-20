@@ -2,26 +2,35 @@ pub mod config;
 
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use chrono::{Duration, Utc};
-use derive_more::Constructor;
-use kernel_entities::entities::auth::*;
-use kernel_entities::traits::Key;
-use kernel_repositories::error::RepoError;
-use kernel_repositories::{auth::*, DataStore};
-use kernel_services::auth::{models::DeviceInfo, AuthService};
-use kernel_services::crypto::hash::CryptoHashService;
-use kernel_services::entropy::EntropyService;
-use kernel_services::error::{AppResult, AuthError};
+use derive_new::new;
+use kernel_entities::{entities::auth::*, traits::Key};
+use kernel_repositories::{auth::*, error::RepoError, DataStore};
+use kernel_services::{
+    auth::{models::DeviceInfo, AuthService},
+    config::ConfigService,
+    crypto::hash::CryptoHashService,
+    entropy::EntropyService,
+    error::{AppResult, AuthError},
+    get_config,
+    Service,
+};
+use tokio::sync::RwLock;
 
-#[derive(Constructor)]
+use self::config::{AuthConfig, AUTH_CONFIG_SECTION};
+
+#[derive(new)]
 pub struct AppAuthService {
-    config: config::AuthConfig,
     data: Arc<dyn DataStore>,
+    #[new(default)]
+    config: RwLock<config::AuthConfig>,
+    config_svc: Arc<dyn ConfigService>,
     hash_svc: Arc<dyn CryptoHashService>,
     entropy_svc: Arc<dyn EntropyService>,
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl AuthService for AppAuthService {
     async fn signin(
         &self,
@@ -57,9 +66,19 @@ impl AuthService for AppAuthService {
 
         if let Err(err) = self.hash_svc.verify(password, &account.password_hash)
         {
-            warn!("could not verify password of `{account_name}@{username}`: {err}");
+            warn!(
+                "could not verify password of `{account_name}@{username}`: \
+                 {err}"
+            );
             return Err(AuthError::InvalidCredentials.into());
         }
+
+        let AuthConfig {
+            max_sessions_count,
+            refresh_token_length,
+            refresh_validity_seconds,
+            signin_validity_seconds,
+        } = self.config.read().await.clone();
 
         if let Ok(session) = self
             .data
@@ -75,7 +94,7 @@ impl AuthService for AppAuthService {
                     &session.id,
                     &device_info.last_address,
                     &device_info.agent,
-                    Duration::seconds(self.config.refresh_validity_seconds),
+                    Duration::seconds(refresh_validity_seconds),
                 )
                 .await?;
 
@@ -93,17 +112,16 @@ impl AuthService for AppAuthService {
             .sessions()
             .get_active_count_for(&account.id)
             .await?
-            >= self.config.max_sessions_count
+            >= max_sessions_count
         {
             warn!(
                 "`{}@{}` has reached maximum sessions acount of {}",
-                account_name, username, self.config.max_sessions_count
+                account_name, username, max_sessions_count
             );
 
-            return Err(AuthError::MaxSessionsCountReached(
-                self.config.max_sessions_count,
-            )
-            .into());
+            return Err(
+                AuthError::MaxSessionsCountReached(max_sessions_count).into()
+            );
         }
 
         let session = self
@@ -116,14 +134,11 @@ impl AuthService for AppAuthService {
                 agent: device_info.agent,
                 address: device_info.last_address,
                 expires_at: Some(
-                    Utc::now()
-                        + Duration::seconds(
-                            self.config.signin_validity_seconds,
-                        ),
+                    Utc::now() + Duration::seconds(signin_validity_seconds),
                 ),
                 refresh_token: self
                     .entropy_svc
-                    .next_string(self.config.refresh_token_length)?,
+                    .next_string(refresh_token_length)?,
             })
             .await?;
 
@@ -135,6 +150,9 @@ impl AuthService for AppAuthService {
         refresh_token: &str,
         device_info: DeviceInfo,
     ) -> AppResult<Session> {
+        let refresh_validity_seconds =
+            self.config.read().await.refresh_validity_seconds;
+
         let session = self
             .get_session_by_token(refresh_token, &device_info.device_identifier)
             .await?;
@@ -146,7 +164,7 @@ impl AuthService for AppAuthService {
                 &session.id,
                 &device_info.last_address,
                 &device_info.agent,
-                Duration::seconds(self.config.refresh_validity_seconds),
+                Duration::seconds(refresh_validity_seconds),
             )
             .await?;
 
@@ -225,6 +243,18 @@ impl AuthService for AppAuthService {
     }
 }
 
+#[async_trait]
+impl Service for AppAuthService {
+    async fn initialize(&self) -> AppResult<()> {
+        let conf =
+            get_config!(self.config_svc, AUTH_CONFIG_SECTION => AuthConfig)?;
+
+        *self.config.write().await = conf;
+
+        Ok(())
+    }
+}
+
 impl AppAuthService {
     async fn get_session_by_token(
         &self,
@@ -238,9 +268,11 @@ impl AppAuthService {
             .get_active_by_token(refresh_token, device_identifier)
             .await
         {
-            Ok(session) => Ok(session),
-            Err(RepoError::NotFound) => Err(AuthError::NotAuthenticated.into()),
-            Err(err) => return Err(err.into()),
+            | Ok(session) => Ok(session),
+            | Err(RepoError::NotFound) => {
+                Err(AuthError::NotAuthenticated.into())
+            }
+            | Err(err) => return Err(err.into()),
         }
     }
 }

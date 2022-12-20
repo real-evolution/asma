@@ -7,6 +7,7 @@ use kernel_services::{
     auth::AuthService,
     error::AppResult,
     setup::{error::SetupError, SetupService},
+    Service,
 };
 const SYSTEM_USER_USERNAME: &str = "system";
 const SYSTEM_USER_DISPLAY_NAME: &str = "System User";
@@ -18,6 +19,53 @@ pub struct AppSetupService {
     data: Arc<dyn DataStore>,
     auth_svc: Arc<dyn AuthService>,
 }
+
+#[async_trait::async_trait]
+impl SetupService for AppSetupService {
+    async fn is_setup(&self) -> AppResult<bool> {
+        match self
+            .data
+            .auth()
+            .users()
+            .get_by_username(SYSTEM_USER_USERNAME)
+            .await
+        {
+            | Ok(_) => Ok(true),
+            | Err(RepoError::NotFound) => return Ok(false),
+            | Err(err) => return Err(err.into()),
+        }
+    }
+
+    async fn setup(
+        &self,
+        root_holder_name: Option<String>,
+        root_password: String,
+    ) -> AppResult<()> {
+        if self.is_setup().await? {
+            return Err(SetupError::AlreadySetup.into());
+        }
+
+        let tx = self.data.tx().begin().await?;
+
+        {
+            let system_user = self.create_system_user().await?;
+            let root_account = self
+                .create_root_account(
+                    system_user.id,
+                    root_holder_name,
+                    root_password,
+                )
+                .await?;
+            self.setup_roles(&root_account.id).await?;
+        }
+
+        tx.commit().await?;
+
+        Ok(())
+    }
+}
+
+impl Service for AppSetupService {}
 
 impl AppSetupService {
     async fn create_system_user(&self) -> AppResult<User> {
@@ -76,51 +124,6 @@ impl AppSetupService {
             .roles()
             .add_to(root_account_id, &role.id)
             .await?;
-
-        Ok(())
-    }
-}
-
-#[async_trait::async_trait]
-impl SetupService for AppSetupService {
-    async fn is_setup(&self) -> AppResult<bool> {
-        match self
-            .data
-            .auth()
-            .users()
-            .get_by_username(SYSTEM_USER_USERNAME)
-            .await
-        {
-            | Ok(_) => Ok(true),
-            | Err(RepoError::NotFound) => return Ok(false),
-            | Err(err) => return Err(err.into()),
-        }
-    }
-
-    async fn setup(
-        &self,
-        root_holder_name: Option<String>,
-        root_password: String,
-    ) -> AppResult<()> {
-        if self.is_setup().await? {
-            return Err(SetupError::AlreadySetup.into());
-        }
-
-        let tx = self.data.tx().begin().await?;
-
-        {
-            let system_user = self.create_system_user().await?;
-            let root_account = self
-                .create_root_account(
-                    system_user.id,
-                    root_holder_name,
-                    root_password,
-                )
-                .await?;
-            self.setup_roles(&root_account.id).await?;
-        }
-
-        tx.commit().await?;
 
         Ok(())
     }

@@ -16,6 +16,7 @@ use kernel_repositories::{error::RepoResult, DataStore};
 use kernel_services::{
     error::AppResult,
     link::{channels::ChannelsService, models::ChannelStatus},
+    Service,
 };
 use tokio::sync::RwLock;
 
@@ -116,6 +117,8 @@ impl ChannelsService for AppChannelsService {
         .boxed()
     }
 }
+
+impl Service for AppChannelsService {}
 
 impl AppChannelsService {
     pub fn new(data: Arc<dyn DataStore>) -> Self {
