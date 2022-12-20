@@ -4,6 +4,7 @@ use aide::axum::{routing::post, ApiRouter};
 use axum::extract::{ConnectInfo, State};
 use chrono::Utc;
 use driver_web_common::state::AppState;
+use kernel_services::setup::SetupService;
 
 use crate::{error::ApiResult, extractors::validated_json::ValidatedJson};
 

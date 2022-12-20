@@ -20,7 +20,6 @@ anyhow = { workspace = true }
 async-trait = { workspace = true }
 chrono = { workspace = true }
 derive_more = { workspace = true }
-erased-serde = { workspace = true }
 itertools = { workspace = true }
 lazy_static = { workspace = true }
 serde = { workspace = true }

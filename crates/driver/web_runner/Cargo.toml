@@ -25,7 +25,6 @@ driver_web_grpc = { path = "../web_grpc" }
 # workspace dependencies
 anyhow = { workspace = true }
 derive_more = { workspace = true }
-erased-serde = { workspace = true }
 lazy_static = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }

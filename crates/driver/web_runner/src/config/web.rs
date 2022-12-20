@@ -1,11 +1,10 @@
-use common_validation::*;
-use kernel_services::config::{get_config, ConfigService};
+use std::net::SocketAddr;
 
 use anyhow::Result;
+use common_validation::*;
+use kernel_services::config::ConfigService;
 use serde::Deserialize;
 use validator::Validate;
-
-use std::net::SocketAddr;
 
 const CONFIG_SECTION: &str = "web";
 
@@ -26,7 +25,7 @@ struct LanuchConfig {
 pub fn get_bind_address<'a, C: ConfigService + ?Sized>(
     svc: &'a C,
 ) -> Result<SocketAddr> {
-    let conf = get_config!(svc, CONFIG_SECTION => LanuchConfig)?;
+    let conf: LanuchConfig = svc.get_section(CONFIG_SECTION)?;
 
     Ok(SocketAddr::new(
         IpAddress::parse_str(conf.listen_address)?.0,

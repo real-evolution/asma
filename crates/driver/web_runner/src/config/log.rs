@@ -1,11 +1,9 @@
-use derive_more::Display;
-use kernel_services::{config::ConfigService, get_config};
-
 use anyhow::Result;
+use derive_more::Display;
+use kernel_services::config::ConfigService;
 use serde::Deserialize;
 use serde_enum_str::Deserialize_enum_str;
-use tracing::metadata::LevelFilter;
-use tracing::subscriber::set_global_default;
+use tracing::{metadata::LevelFilter, subscriber::set_global_default};
 use tracing_subscriber::EnvFilter;
 use validator::Validate;
 
@@ -91,12 +89,12 @@ enum LogLevel {
 impl Into<LevelFilter> for LogLevel {
     fn into(self) -> LevelFilter {
         match self {
-            LogLevel::Trace => LevelFilter::TRACE,
-            LogLevel::Debug => LevelFilter::DEBUG,
-            LogLevel::Info => LevelFilter::INFO,
-            LogLevel::Warn => LevelFilter::WARN,
-            LogLevel::Critical => LevelFilter::ERROR,
-            LogLevel::Off => LevelFilter::OFF,
+            | LogLevel::Trace => LevelFilter::TRACE,
+            | LogLevel::Debug => LevelFilter::DEBUG,
+            | LogLevel::Info => LevelFilter::INFO,
+            | LogLevel::Warn => LevelFilter::WARN,
+            | LogLevel::Critical => LevelFilter::ERROR,
+            | LogLevel::Off => LevelFilter::OFF,
         }
     }
 }
@@ -106,11 +104,10 @@ pub fn configure_logger_with<'a, C: ConfigService + ?Sized>(
 ) -> Result<()> {
     let mut result = Ok(());
 
-    let conf =
-        get_config!(svc, CONFIG_SECTION => LogConfig).unwrap_or_else(|e| {
-            result = Err(e);
-            LogConfig::default()
-        });
+    let conf: LogConfig = svc.get_section(CONFIG_SECTION).unwrap_or_else(|e| {
+        result = Err(e);
+        LogConfig::default()
+    });
 
     if let Err(_) = std::env::var(ENV_LOG_KEY) {
         std::env::set_var(ENV_LOG_KEY, conf.level.to_string());
@@ -128,10 +125,10 @@ pub fn configure_logger_with<'a, C: ConfigService + ?Sized>(
         .with_env_filter(EnvFilter::from_env(ENV_LOG_KEY));
 
     match conf.formatter {
-        LogFormatter::Full => set_global_default(fmt.finish()),
-        LogFormatter::Compact => set_global_default(fmt.compact().finish()),
-        LogFormatter::Pretty => set_global_default(fmt.pretty().finish()),
-        LogFormatter::Json => set_global_default(fmt.json().finish()),
+        | LogFormatter::Full => set_global_default(fmt.finish()),
+        | LogFormatter::Compact => set_global_default(fmt.compact().finish()),
+        | LogFormatter::Pretty => set_global_default(fmt.pretty().finish()),
+        | LogFormatter::Json => set_global_default(fmt.json().finish()),
     }?;
 
     if let Err(err) = result {

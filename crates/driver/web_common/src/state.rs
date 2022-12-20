@@ -17,33 +17,44 @@ use kernel_services::{
     config::ConfigService,
     crypto::hash::CryptoHashService,
     entropy::EntropyService,
-    get_config,
     link::channels::ChannelsService,
     setup::SetupService,
     Service,
 };
 
-pub type AppState = Arc<AppStateImpl>;
+pub type AppState = Arc<
+    AppStateImpl<
+        TomlConfigService,
+        SecureEntropyService,
+        Argon2CryptoHashService<'static>,
+        AppAuthService<TomlConfigService>,
+        AppSetupService,
+        AppChannelsService,
+    >,
+>;
 
-pub struct AppStateImpl {
+pub struct AppStateImpl<
+    Config: ConfigService,
+    Entropy: EntropyService,
+    CryptoHash: CryptoHashService,
+    Auth: AuthService,
+    Setup: SetupService,
+    Channels: ChannelsService,
+> {
     pub data: Arc<dyn DataStore>,
-
-    // base services
-    pub config: Arc<dyn ConfigService>,
-    pub entropy: Arc<dyn EntropyService>,
-    pub hash: Arc<dyn CryptoHashService>,
-
-    // services
-    pub auth: Arc<dyn AuthService>,
-    pub setup: Arc<dyn SetupService>,
-    pub channels: Arc<dyn ChannelsService>,
+    pub config: Arc<Config>,
+    pub entropy: Arc<Entropy>,
+    pub hash: Arc<CryptoHash>,
+    pub auth: Arc<Auth>,
+    pub setup: Arc<Setup>,
+    pub channels: Arc<Channels>,
 }
 
-pub async fn create_state() -> anyhow::Result<AppState> {
+pub async fn create_state<'a>() -> anyhow::Result<AppState> {
     let config = init(TomlConfigService::default()).await?;
 
     debug!("creating datastore");
-    let conf = get_config!(config, DATA_CONFIG_SECTION => DataConfig)?;
+    let conf = config.get_section::<DataConfig>(DATA_CONFIG_SECTION)?;
     let data = create_datastore(conf).await?;
 
     debug!("creating base services");

@@ -1,6 +1,7 @@
 use axum::extract::{Path, State};
 use driver_web_common::state::AppState;
 use kernel_entities::{entities::auth::*, traits::Key};
+use kernel_services::auth::AuthService;
 
 use super::dtos::{AccountDto, AddAccountDto};
 use crate::{

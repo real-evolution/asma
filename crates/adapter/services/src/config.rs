@@ -7,12 +7,12 @@ use std::{
 
 use config::{Config, File, FileFormat, Value, ValueKind};
 use derive_more::Constructor;
-use erased_serde::*;
 use kernel_services::{
     config::*,
     error::{AppResult, ConfigError},
     Service,
 };
+use serde::de::DeserializeOwned;
 
 const QUALIFIER: &str = "com";
 const ORGANIZATION: &str = "SGSTel";
@@ -42,15 +42,20 @@ impl ConfigService for TomlConfigService {
         Ok(())
     }
 
-    fn get_section<'de>(&self, section: &str) -> AppResult<ConfigObject<'de>> {
+    fn get_section<'de, T: DeserializeOwned>(
+        &self,
+        section: &str,
+    ) -> AppResult<T> {
         debug!("reading configuration section `{section}`");
 
         let val = self
             .inner()?
             .get::<Value>(section)
+            .map_err(map_config_error)?
+            .try_deserialize::<T>()
             .map_err(map_config_error)?;
 
-        Ok(ConfigObject::new(Box::new(<dyn Deserializer>::erase(val))))
+        Ok(val)
     }
 
     fn get(&self, key: &str) -> AppResult<ConfigValue> {

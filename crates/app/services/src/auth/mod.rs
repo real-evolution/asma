@@ -13,7 +13,6 @@ use kernel_services::{
     crypto::hash::CryptoHashService,
     entropy::EntropyService,
     error::{AppResult, AuthError},
-    get_config,
     Service,
 };
 use tokio::sync::RwLock;
@@ -21,17 +20,17 @@ use tokio::sync::RwLock;
 use self::config::{AuthConfig, AUTH_CONFIG_SECTION};
 
 #[derive(new)]
-pub struct AppAuthService {
+pub struct AppAuthService<C: ConfigService> {
     data: Arc<dyn DataStore>,
     #[new(default)]
     config: RwLock<config::AuthConfig>,
-    config_svc: Arc<dyn ConfigService>,
+    config_svc: Arc<C>,
     hash_svc: Arc<dyn CryptoHashService>,
     entropy_svc: Arc<dyn EntropyService>,
 }
 
 #[async_trait]
-impl AuthService for AppAuthService {
+impl<C: ConfigService> AuthService for AppAuthService<C> {
     async fn signin(
         &self,
         account_name: &str,
@@ -244,10 +243,11 @@ impl AuthService for AppAuthService {
 }
 
 #[async_trait]
-impl Service for AppAuthService {
+impl<C: ConfigService> Service for AppAuthService<C> {
     async fn initialize(&self) -> AppResult<()> {
-        let conf =
-            get_config!(self.config_svc, AUTH_CONFIG_SECTION => AuthConfig)?;
+        let conf = self
+            .config_svc
+            .get_section::<AuthConfig>(AUTH_CONFIG_SECTION)?;
 
         *self.config.write().await = conf;
 
@@ -255,7 +255,7 @@ impl Service for AppAuthService {
     }
 }
 
-impl AppAuthService {
+impl<C: ConfigService> AppAuthService<C> {
     async fn get_session_by_token(
         &self,
         refresh_token: &str,

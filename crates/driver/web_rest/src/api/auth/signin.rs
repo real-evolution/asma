@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 use axum::extract::{ConnectInfo, State};
 use axum::Json;
 use driver_web_common::state::AppState;
+use kernel_services::auth::AuthService;
 use kernel_services::auth::models::DeviceInfo;
 
 use super::dtos::{TokenPair, UserCredentials};
