@@ -4,52 +4,37 @@ use chrono::{DateTime, Utc};
 use futures::StreamExt;
 use kernel_entities::entities::link::Channel;
 use kernel_services::error::AppResult;
+use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 
-use super::handlers::{self, ChannelHandler};
+use super::handlers::{ChannelHandler, self};
 
-#[derive(Clone)]
 pub(super) struct ChannelState {
     handler: Arc<dyn ChannelHandler>,
     cancellation: CancellationToken,
     started_at: DateTime<Utc>,
     channel: Channel,
+    task: JoinHandle<()>,
 }
 
 impl ChannelState {
-    pub(super) async fn create(channel: Channel) -> AppResult<Self> {
-        let state = Self {
-            cancellation: CancellationToken::new(),
-            handler: handlers::create_handler(&channel),
-            started_at: Utc::now(),
-            channel,
-        };
+    pub(super) async fn spawn(channel: Channel) -> AppResult<Self> {
+        let handler = handlers::create_handler(&channel);
+        let cancellation = CancellationToken::new();
 
-        state.start().await?;
+        let (h, c) = (handler.clone(), cancellation.clone());
 
-        Ok(state)
-    }
+        let task  =tokio::spawn(async move {
+            let mut updates = h.updates().await;
 
-    pub(super) async fn stop(&self) -> AppResult<()> {
-        self.cancellation.cancel();
+            while !c.is_cancelled() {
 
-        Ok(())
-    }
-
-    async fn start(&self) -> AppResult<()> {
-        let handler = self.handler.clone();
-        let cancellation = self.cancellation.clone();
-
-        tokio::spawn(async move {
-            let mut updates = handler.updates().await;
-
-            while !cancellation.is_cancelled() {
                 tokio::select! {
                     Some(update) = updates.next() => {
                         info!("got an update: {update:#?}");
                     }
 
-                _ = cancellation.cancelled() => {
+                _ = c.cancelled() => {
                         debug!("handler stopped due to cancellation");
                         break;
                     }
@@ -61,10 +46,23 @@ impl ChannelState {
                 };
             }
 
-            if !cancellation.is_cancelled() {
-                cancellation.cancel();
+            if !c.is_cancelled() {
+                c.cancel();
             }
         });
+
+        Ok(Self {
+            handler,
+            cancellation,
+            channel,
+            task,
+            started_at: Utc::now(),
+        })
+    }
+
+    pub(super) async fn stop(self) -> AppResult<()> {
+        self.cancellation.cancel();
+        self.task.await.map_err(anyhow::Error::new)?;
 
         Ok(())
     }

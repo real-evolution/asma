@@ -164,7 +164,7 @@ impl AppChannelsService {
                     channel.platform, channel.id, channel.user_id, channel.name,
                 );
 
-                match ChannelState::create(channel).await {
+                match ChannelState::spawn(channel).await {
                     | Ok(state) => {
                         self.append_state(
                             &state.channel().user_id.clone(),
