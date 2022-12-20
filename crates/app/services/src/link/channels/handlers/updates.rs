@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use chrono::{DateTime, Utc};
 
 pub(crate) type IncomingHandlerUpdate = HandlerUpdate<IncomingMessageUpdate>;

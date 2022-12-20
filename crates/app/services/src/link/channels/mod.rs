@@ -122,6 +122,14 @@ impl ChannelsService for AppChannelsService {
 #[async_trait]
 impl Service for AppChannelsService {
     async fn initialize(&self) -> AppResult<()> {
+        let mut channels = self.start_channels();
+
+        while let Some(res) = channels.next().await {
+            if let Err(err) = res {
+                warn!("error starting channel: {err}")
+            }
+        }
+
         Ok(())
     }
 }

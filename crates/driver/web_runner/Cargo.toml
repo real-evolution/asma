@@ -29,7 +29,5 @@ erased-serde = { workspace = true }
 lazy_static = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }
-tokio-stream = { workspace = true }
-tokio-util = { workspace = true }
 tracing = { workspace = true }
 validator = { workspace = true }
