@@ -3,6 +3,7 @@ mod handlers;
 
 use std::{collections::HashMap, sync::Arc};
 
+use async_trait::async_trait;
 use futures::{
     stream::{self, BoxStream},
     Stream,
@@ -27,7 +28,7 @@ pub struct AppChannelsService {
     states: RwLock<HashMap<Key<User>, HashMap<Key<Channel>, ChannelState>>>,
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl ChannelsService for AppChannelsService {
     async fn status(
         &self,
@@ -118,7 +119,12 @@ impl ChannelsService for AppChannelsService {
     }
 }
 
-impl Service for AppChannelsService {}
+#[async_trait]
+impl Service for AppChannelsService {
+    async fn initialize(&self) -> AppResult<()> {
+        Ok(())
+    }
+}
 
 impl AppChannelsService {
     pub fn new(data: Arc<dyn DataStore>) -> Self {

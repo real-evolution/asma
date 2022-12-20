@@ -46,7 +46,12 @@ where
     }
 }
 
-impl<H> Service for CryptoHashServiceImpl<H> {}
+#[async_trait::async_trait]
+impl<H: Send + Sync> Service for CryptoHashServiceImpl<H> {
+    async fn initialize(&self) -> AppResult<()> {
+        Ok(())
+    }
+}
 
 fn map_hash_error(err: Error) -> CryptoError {
     match err {

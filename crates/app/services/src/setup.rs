@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use derive_more::Constructor;
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_repositories::{auth::*, error::RepoError, DataStore};
@@ -20,7 +21,7 @@ pub struct AppSetupService {
     auth_svc: Arc<dyn AuthService>,
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl SetupService for AppSetupService {
     async fn is_setup(&self) -> AppResult<bool> {
         match self
@@ -65,7 +66,12 @@ impl SetupService for AppSetupService {
     }
 }
 
-impl Service for AppSetupService {}
+#[async_trait]
+impl Service for AppSetupService {
+    async fn initialize(&self) -> AppResult<()> {
+        Ok(())
+    }
+}
 
 impl AppSetupService {
     async fn create_system_user(&self) -> AppResult<User> {

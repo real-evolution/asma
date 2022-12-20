@@ -10,7 +10,5 @@ pub mod setup;
 
 #[async_trait::async_trait]
 pub trait Service {
-    async fn initialize(&self) -> AppResult<()> {
-        Ok(())
-    }
+    async fn initialize(&self) -> AppResult<()>;
 }

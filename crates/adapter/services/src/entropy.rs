@@ -141,4 +141,9 @@ impl<R> EntropyServiceImpl<R> {
     }
 }
 
-impl<R: RngCore + Send + Sync> Service for EntropyServiceImpl<R> {}
+#[async_trait::async_trait]
+impl<R: Send + Sync> Service for EntropyServiceImpl<R> {
+    async fn initialize(&self) -> AppResult<()> {
+        Ok(())
+    }
+}
