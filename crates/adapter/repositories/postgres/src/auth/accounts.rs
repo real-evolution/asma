@@ -268,15 +268,15 @@ mod models {
         pub updated_at: DateTime<Utc>,
     }
 
-    impl Into<InsertAccountModel> for InsertAccount {
-        fn into(self) -> InsertAccountModel {
+    impl From<InsertAccount> for InsertAccountModel {
+        fn from(val: InsertAccount) -> Self {
             InsertAccountModel {
                 id: uuid::Uuid::new_v4(),
-                user_id: self.user_id.into(),
-                account_name: self.account_name,
-                holder_name: self.holder_name,
-                password_hash: self.password_hash,
-                state: self.state.into(),
+                user_id: val.user_id.into(),
+                account_name: val.account_name,
+                holder_name: val.holder_name,
+                password_hash: val.password_hash,
+                state: val.state.into(),
             }
         }
     }

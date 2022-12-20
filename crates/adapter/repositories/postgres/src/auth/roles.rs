@@ -73,10 +73,9 @@ impl RolesRepo for SqlxRolesRepo {
         .into_group_map()
         .into_iter()
         .map(|(code, perms)| {
-            (code, perms.into_iter().filter_map(|i| i).collect())
+            (code, perms.into_iter().flatten().collect())
         })
         .collect();
-        //.map(|(code, perms)| (code, perms.into_iter().filter_map(|i| i)));
 
         Ok(items)
     }

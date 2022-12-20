@@ -20,7 +20,7 @@ impl SqlxAuthDataStore {
             users: users::SqlxUsersRepo(pool.clone()),
             accounts: accounts::SqlxAccountsRepo(pool.clone()),
             roles: roles::SqlxRolesRepo(pool.clone()),
-            sessions: sessions::SqlxSessionsRepo(pool.clone()),
+            sessions: sessions::SqlxSessionsRepo(pool),
         }
     }
 }

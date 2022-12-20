@@ -133,5 +133,5 @@ impl ToTokens for RepoDeriveInput {
 pub fn expand_repo(input: syn::DeriveInput) -> TokenStream {
     let receiver = RepoDeriveInput::from_derive_input(&input).unwrap();
 
-    quote!(#receiver).into()
+    quote!(#receiver)
 }
