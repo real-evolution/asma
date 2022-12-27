@@ -100,8 +100,10 @@ database = "asma_test"
 min_connections = 8
 # Maximum number of connections to be opened & pooled to the database server
 max_connections = 64
-# Lifetime of connections (in seconds), after which the connections should be
-# closed
-max_lifetime = 120000
+# Lifetime of connections (in milliseconds), after which the connections should
+# be closed
+max_lifetime_ms = 120000
+# Idle connections timeout
+idle_timeout_ms = 600000
 # Whether to created connections lazily (on demand) or not
 lazy = true
