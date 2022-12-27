@@ -9,7 +9,7 @@ pub const DATA_CONFIG_SECTION: &str = "data";
 
 #[derive(Debug, Deserialize, Validate)]
 pub struct DataConfig {
-    #[validate(custom = "supported_driver")]
+    #[validate(custom = "supported_data_driver")]
     pub driver: String,
     #[validate(custom = "endpoint")]
     pub host: String,
