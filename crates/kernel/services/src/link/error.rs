@@ -9,11 +9,14 @@ pub enum LinkError {
     UnsupportedEvent(String),
 
     #[error("communication error: {0}")]
-    CommunicationError(String),
+    Communication(String),
 
     #[error("invalid params: {0}")]
     InvalidParams(String),
 
     #[error("invalid channel state: {0}")]
     InvalidChannelState(String),
+
+    #[error("ipc error: {0}")]
+    MessagePassing(anyhow::Error),
 }
