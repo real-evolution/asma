@@ -107,3 +107,25 @@ max_lifetime_ms = 120000
 idle_timeout_ms = 600000
 # Whether to created connections lazily (on demand) or not
 lazy = true
+
+[message_queue]
+# Message passing queue protoocl. Currently, only `amqp` is supported
+protocol = "amqp"
+# Message passing queue server address
+host = "localhost"
+# Message passing queue server listening port
+port = 5672
+# Message passing queue server username
+username = "asma"
+# Message passing queue server password
+password = "asma"
+# Whether to require delivery acknowledgement or not
+require_ack = true
+
+[message_queue.pool]
+# Maximum number of connections to be opened & pooled to the message queue
+# server
+max_connections = 64
+# Lifetime of connections (in milliseconds), after which the connections should
+# be closed
+max_lifetime_ms = 120000
