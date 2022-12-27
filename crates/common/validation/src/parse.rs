@@ -30,10 +30,6 @@ pub struct IpEndpoint {
 pub struct IpAddress(pub IpAddr);
 
 #[derive(Validator)]
-#[validator(regex(RE_SUPPORTED_DRIVERS))]
-pub struct SupportedDriver(pub String);
-
-#[derive(Validator)]
 #[validator(regex(RE_IDENTIFIER))]
 pub struct Identifier(pub String);
 
