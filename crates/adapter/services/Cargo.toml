@@ -7,22 +7,31 @@ authors.workspace = true
 
 [dependencies]
 # crate dependencies
-config = "0"
-directories = "4"
-toml = "0"
 argon2 = "0"
+async-stream = "0"
+config = "0"
+deadpool-lapin = { version = "0.10.0", features = ["rt_tokio_1"] }
+directories = "4"
+lapin = "2"
+rmp-serde = "1"
+toml = "0"
 
 # project dependencies
+common_macros = { path = "../../common/macros" }
+common_validation = { path = "../../common/validation" }
 kernel_services = { path = "../../kernel/services" }
 kernel_proc_macros = { path = "../../kernel/proc_macros" }
 
 # workspace dependencies
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+chrono = { workspace = true }
 derive_more = { workspace = true }
+futures = { workspace = true }
 rand = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }
+tokio-stream = { workspace = true }
 tracing = { workspace = true }
 uuid = { workspace = true }
 validator = { workspace = true }
