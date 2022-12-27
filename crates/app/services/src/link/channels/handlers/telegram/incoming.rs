@@ -92,7 +92,7 @@ impl TryFrom<Update> for IncomingHandlerUpdate {
                 })
             }
             | UpdateKind::Error(err) => {
-                Err(LinkError::CommunicationError(err.to_string()).into())
+                Err(LinkError::Communication(err.to_string()).into())
             }
             | _ => Err(LinkError::UnsupportedEvent(format!(
                 "unsupported telegram update: {:#?}",
