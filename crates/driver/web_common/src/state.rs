@@ -5,6 +5,7 @@ use adapter_services::{
     config::TomlConfigService,
     crypto::hash::Argon2CryptoHashService,
     entropy::SecureEntropyService,
+    link::message_passing::RabbitMqMessagePassingService,
 };
 use app_services::{
     auth::AppAuthService,
@@ -17,7 +18,7 @@ use kernel_services::{
     config::ConfigService,
     crypto::hash::CryptoHashService,
     entropy::EntropyService,
-    link::channels::ChannelsService,
+    link::{channels::ChannelsService, message_passing::MessagePassingService},
     setup::SetupService,
     Service,
 };
@@ -27,6 +28,7 @@ pub type AppState = Arc<
         TomlConfigService,
         SecureEntropyService,
         Argon2CryptoHashService<'static>,
+        RabbitMqMessagePassingService,
         AppAuthService<TomlConfigService>,
         AppSetupService,
         AppChannelsService,
@@ -37,6 +39,7 @@ pub struct AppStateImpl<
     Config: ConfigService,
     Entropy: EntropyService,
     CryptoHash: CryptoHashService,
+    MessagePassing: MessagePassingService,
     Auth: AuthService,
     Setup: SetupService,
     Channels: ChannelsService,
@@ -45,14 +48,19 @@ pub struct AppStateImpl<
     pub config: Arc<Config>,
     pub entropy: Arc<Entropy>,
     pub hash: Arc<CryptoHash>,
+    pub message_passing: Arc<MessagePassing>,
     pub auth: Arc<Auth>,
     pub setup: Arc<Setup>,
     pub channels: Arc<Channels>,
 }
 
-pub async fn create_state<'a>() -> anyhow::Result<AppState> {
-    let config = init(TomlConfigService::default()).await?;
+pub async fn get_config_service() -> anyhow::Result<Arc<TomlConfigService>> {
+    Ok(init(TomlConfigService::default()).await?)
+}
 
+pub async fn create_state<'a>(
+    config: Arc<TomlConfigService>,
+) -> anyhow::Result<AppState> {
     debug!("creating datastore");
     let conf = config.get_section::<DataConfig>(DATA_CONFIG_SECTION)?;
     let data = create_datastore(conf).await?;
@@ -60,6 +68,9 @@ pub async fn create_state<'a>() -> anyhow::Result<AppState> {
     debug!("creating base services");
     let entropy = init(SecureEntropyService::default()).await?;
     let hash = init(Argon2CryptoHashService::new()).await?;
+    let message_passing =
+        init(RabbitMqMessagePassingService::create(config.clone()).await?)
+            .await?;
 
     debug!("creating app services");
     let auth = Arc::new(AppAuthService::new(
@@ -77,6 +88,7 @@ pub async fn create_state<'a>() -> anyhow::Result<AppState> {
         config,
         entropy,
         hash,
+        message_passing,
         auth,
         setup,
         channels,
