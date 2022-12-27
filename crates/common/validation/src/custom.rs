@@ -25,15 +25,13 @@ pub fn username(value: &str) -> Result<(), ValidationError> {
     validate::<Username>("username", value)
 }
 
-pub fn in_future(value: &DateTime<Utc>) -> Result<(), ValidationError> {
-    if value < &Utc::now() {
-        return Err(ValidationError::new("value cannot be in the past"));
-    }
 pub fn supported_data_driver(value: &str) -> Result<(), ValidationError> {
     validate_with("supported_data_driver", value, |v| {
         SUPPORTED_DATA_DRIVERS.contains(&v)
     })
 }
 
-    Ok(())
+
+pub fn in_future(value: &DateTime<Utc>) -> Result<(), ValidationError> {
+    validate_with("in_future", value, |ts| ts < &Utc::now())
 }
