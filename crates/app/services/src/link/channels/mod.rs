@@ -98,7 +98,7 @@ impl ChannelsService for AppChannelsService {
                 let channel = state.channel();
 
                 debug!(
-                    "stopping {:?} channel #{} of#{} ({})",
+                    "stopping {:?} channel #{} of #{} ({})",
                     channel.platform, channel.id, channel.user_id, channel.name,
                 );
 
