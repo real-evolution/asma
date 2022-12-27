@@ -1,15 +1,17 @@
 use std::net::SocketAddr;
 
-use driver_web_common::state::create_state;
+use driver_web_common::state::{create_state, get_config_service};
 use driver_web_rest::app::make_app;
 use tower_http::trace::TraceLayer;
 
 use crate::config;
 
 pub(super) async fn launch() -> anyhow::Result<()> {
-    let state = create_state().await?;
+    let config = get_config_service().await?;
+    config::log::configure_logger_with(&*config)?;
 
-    config::log::configure_logger_with(&*state.config)?;
+    info!("initializing application");
+    let state = create_state(config).await?;
 
     let bind_addr = config::web::get_bind_address(&*state.config)?;
     info!("running server on: {bind_addr}");
