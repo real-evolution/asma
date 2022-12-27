@@ -47,10 +47,16 @@ validator = { version = "0", features = ["derive"] }
 # build config
 [profile.dev]
 opt-level = 0
+incremental = true
 
 [profile.release]
 opt-level = 3
+incremental = true
 
 # sqlx-optimization
 [profile.dev.package.sqlx-macros]
 opt-level = 3
+
+# mold linker
+[build]
+rustflags = ["-C", "link-arg=-fuse-ld=mold"]
