@@ -16,7 +16,7 @@ use kernel_entities::{
 use kernel_repositories::{error::RepoResult, DataStore};
 use kernel_services::{
     error::AppResult,
-    link::{channels::ChannelsService, models::ChannelStatus},
+    link::channels::{ChannelStatus, ChannelsService},
     Service,
 };
 use tokio::sync::RwLock;

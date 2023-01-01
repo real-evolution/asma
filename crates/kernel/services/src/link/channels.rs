@@ -1,10 +1,11 @@
+use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use kernel_entities::{
     entities::{auth::User, link::Channel},
     traits::Key,
 };
+use serde::Serialize;
 
-use super::models::ChannelStatus;
 use crate::error::AppResult;
 
 #[async_trait::async_trait]
@@ -31,4 +32,10 @@ pub trait ChannelsService: Send + Sync {
         &'a self,
         user_id: Key<User>,
     ) -> BoxStream<'a, AppResult<()>>;
+}
+
+#[derive(Clone, Copy, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChannelStatus {
+    pub started_at: DateTime<Utc>,
 }
