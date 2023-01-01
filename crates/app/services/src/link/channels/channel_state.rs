@@ -10,7 +10,7 @@ use tokio_util::sync::CancellationToken;
 use super::handlers::{ChannelHandler, self};
 
 pub(super) struct ChannelState {
-    handler: Arc<dyn ChannelHandler>,
+    _handler: Arc<dyn ChannelHandler>,
     cancellation: CancellationToken,
     started_at: DateTime<Utc>,
     channel: Channel,
@@ -52,7 +52,7 @@ impl ChannelState {
         });
 
         Ok(Self {
-            handler,
+            _handler: handler,
             cancellation,
             channel,
             task,
