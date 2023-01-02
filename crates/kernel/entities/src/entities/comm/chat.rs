@@ -1,34 +1,24 @@
-use chrono::{DateTime, Utc};
+use kernel_proc_macros::entity;
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-use crate::entities::link::{Instance, Peer};
-use crate::traits::Entity;
-use crate::{entities::auth::User, traits::Key};
+use crate::{
+    entities::{auth::User, link::Instance},
+    traits::*,
+};
 
-#[derive(Clone, Debug, JsonSchema)]
+#[derive(Clone, Debug, JsonSchema, Serialize, Deserialize)]
 pub enum ChatState {
     Active,
     Archived,
     Closed,
 }
 
+#[entity]
 #[derive(Clone, Debug, JsonSchema)]
 pub struct Chat {
-    pub id: Key<Chat>,
     pub label: Option<String>,
     pub state: ChatState,
-    pub peer_id: Key<Peer>,
     pub instance_id: Key<Instance>,
     pub user_id: Key<User>,
-    pub started_at: DateTime<Utc>,
-}
-
-impl Entity for Chat {
-    fn id(&self) -> &Key<Self> {
-        &self.id
-    }
-
-    fn created_at(&self) -> DateTime<Utc> {
-        self.started_at
-    }
 }
