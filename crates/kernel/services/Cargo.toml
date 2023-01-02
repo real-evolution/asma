@@ -24,5 +24,6 @@ itertools = { workspace = true }
 lazy_static = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+tokio = { workspace = true }
 uuid = { workspace = true }
 validator = { workspace = true }
