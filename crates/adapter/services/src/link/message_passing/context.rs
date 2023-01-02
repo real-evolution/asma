@@ -2,16 +2,25 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use async_stream::stream;
 use deadpool_lapin::{Config, Object, Pool, Runtime};
+use derive_more::Constructor;
 use futures::{stream::BoxStream, StreamExt};
-use kernel_services::error::AppResult;
-use lapin::Channel;
+use kernel_services::{
+    error::AppResult,
+    link::message_passing::MessageConfirmation,
+};
+use lapin::{
+    acker::Acker,
+    message::Delivery,
+    options::BasicNackOptions,
+    Channel,
+};
 use serde::{de::DeserializeOwned, Serialize};
-use tokio::sync::RwLock;
+use tokio::{pin, sync::RwLock};
 
 use super::{
     config::MessageQueueConfig,
     topic::RabbitMQTopic,
-    util::map_ipc_error,
+    util::{map_ipc_error, map_params_error},
 };
 
 pub(super) struct RabbitMQContext {
@@ -98,18 +107,60 @@ impl RabbitMQContext {
         topic: &'a str,
         key: Option<&'a str>,
     ) -> BoxStream<'a, AppResult<T>> {
+        self.do_subscribe(topic, key)
+            .map(|i| {
+                i.map(|i| {
+                    rmp_serde::from_slice(&i.data).map_err(map_params_error)
+                })?
+            })
+            .boxed()
+    }
+
+    pub(super) fn subscribe_manual<'a, T: DeserializeOwned + Send + 'a>(
+        &'a self,
+        topic: &'a str,
+        key: Option<&'a str>,
+    ) -> BoxStream<'a, AppResult<(T, Arc<dyn MessageConfirmation>)>> {
+        stream! {
+            let stream = self.do_subscribe(topic, key);
+
+            pin!(stream);
+
+            while let Some(i) = stream.next().await {
+                match i {
+                    | Ok(i) => {
+                        let body = rmp_serde::from_slice::<T>(&i.data)
+                            .map_err(map_ipc_error)?;
+                        let acker: Arc<dyn MessageConfirmation> =
+                            Arc::new(RabbitMQMessageConfirmation::new(i.acker));
+
+                        yield Ok((body, acker));
+                    }
+                    | Err(err) => yield Err(err)
+                }
+            }
+        }
+        .boxed::<'a>()
+    }
+
+    fn do_subscribe<'a>(
+        &'a self,
+        topic: &'a str,
+        key: Option<&'a str>,
+    ) -> impl tokio_stream::Stream<Item = AppResult<Delivery>> + 'a {
         stream! {
             let (_, chan) = self.acquire_channel().await?;
             let key = key.unwrap_or("#");
 
             let topic = self.ensure_topic_created(&chan, topic).await?;
-            let mut stream = topic.subscribe::<T>(&chan, key);
+            let stream = topic.subscribe(&chan, key);
+
+            pin!(stream);
 
             while let Some(i) = stream.next().await {
                 yield i;
             }
         }
-        .boxed()
     }
 
     async fn ensure_topic_created(
@@ -137,5 +188,30 @@ impl RabbitMQContext {
         let chan = conn.create_channel().await.map_err(map_ipc_error)?;
 
         Ok((conn, chan))
+    }
+}
+
+#[derive(Constructor)]
+pub(super) struct RabbitMQMessageConfirmation {
+    acker: Acker,
+}
+
+#[async_trait::async_trait]
+impl MessageConfirmation for RabbitMQMessageConfirmation {
+    async fn ack(self) -> AppResult<()> {
+        self.acker
+            .ack(Default::default())
+            .await
+            .map_err(map_ipc_error)
+    }
+
+    async fn nack(self, requeue: bool) -> AppResult<()> {
+        self.acker
+            .nack(BasicNackOptions {
+                multiple: false,
+                requeue,
+            })
+            .await
+            .map_err(map_ipc_error)
     }
 }

@@ -9,7 +9,7 @@ use futures::stream::BoxStream;
 use kernel_services::{
     config::ConfigService,
     error::AppResult,
-    link::message_passing::MessagePassingService,
+    link::message_passing::{MessageConfirmation, MessagePassingService},
     Service,
 };
 use serde::{de::DeserializeOwned, Serialize};
@@ -53,6 +53,14 @@ impl MessagePassingService for RabbitMqMessagePassingService {
         key: Option<&'a str>,
     ) -> BoxStream<'a, AppResult<T>> {
         self.ctx.subscribe(topic, key)
+    }
+
+    fn subscribe_manual<'a, T: DeserializeOwned + Send + 'a>(
+        &'a self,
+        topic: &'a str,
+        key: Option<&'a str>,
+    ) -> BoxStream<'a, AppResult<(T, Arc<dyn MessageConfirmation>)>> {
+        self.ctx.subscribe_manual(topic, key)
     }
 }
 

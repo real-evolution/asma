@@ -3,10 +3,15 @@ use std::{
     sync::atomic::{AtomicU32, Ordering},
 };
 
-use futures::{stream::BoxStream, StreamExt};
+use futures::StreamExt;
 use kernel_services::error::AppResult;
-use lapin::{publisher_confirm::PublisherConfirm, Channel, ExchangeKind};
-use serde::{de::DeserializeOwned, Serialize};
+use lapin::{
+    message::Delivery,
+    publisher_confirm::PublisherConfirm,
+    Channel,
+    ExchangeKind,
+};
+use serde::Serialize;
 use tokio::sync::RwLock;
 
 use super::util::{map_ipc_error, map_params_error};
@@ -94,11 +99,11 @@ impl RabbitMQTopic {
         Ok(())
     }
 
-    pub(super) fn subscribe<'a, B: DeserializeOwned + Send + 'a>(
+    pub(super) fn subscribe<'a>(
         &'a self,
         ch: &'a Channel,
         key: &'a str,
-    ) -> BoxStream<'a, AppResult<B>> {
+    ) -> impl tokio_stream::Stream<Item = AppResult<Delivery>> + 'a {
         async_stream::stream! {
             let id = self
                 .current_consumer_id
@@ -113,15 +118,9 @@ impl RabbitMQTopic {
                 .map_err(map_ipc_error)?;
 
             while let Some(i) = stream.next().await {
-                match i {
-                    | Ok(i) => {
-                        yield Ok(rmp_serde::from_slice(&i.data).map_err(map_params_error)?);
-                    }
-                    | Err(err) => yield Err(map_ipc_error(err)),
-                }
+                yield i.map_err(map_ipc_error)
             }
         }
-        .boxed()
     }
 
     async fn ensure_queue_created(
