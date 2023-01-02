@@ -1,7 +1,7 @@
 imports_granularity = "Crate"
 format_code_in_doc_comments = true
 format_strings = true
-hex_literal_case = "upper"
+hex_literal_case = "Upper"
 imports_layout = "HorizontalVertical"
 match_arm_leading_pipes = "Always"
 group_imports = "StdExternalCrate"
