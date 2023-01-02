@@ -5,7 +5,7 @@ use adapter_services::{
     config::TomlConfigService,
     crypto::hash::Argon2CryptoHashService,
     entropy::SecureEntropyService,
-    link::message_passing::RabbitMqMessagePassingService,
+    link::message_passing::{RabbitMqMessagePassingService, RabbitMqTopic},
 };
 use app_services::{
     auth::AppAuthService,
@@ -39,7 +39,7 @@ pub struct AppStateImpl<
     Config: ConfigService,
     Entropy: EntropyService,
     CryptoHash: CryptoHashService,
-    MessagePassing: MessagePassingService,
+    MessagePassing: MessagePassingService<RabbitMqTopic>,
     Auth: AuthService,
     Setup: SetupService,
     Channels: ChannelsService,
