@@ -3,7 +3,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    entities::{auth::User, link::Instance},
+    entities::{auth::User, link::{Instance, Channel}},
     traits::*,
 };
 
@@ -19,6 +19,7 @@ pub enum ChatState {
 pub struct Chat {
     pub label: Option<String>,
     pub state: ChatState,
+    pub channel_id: Key<Channel>,
     pub instance_id: Key<Instance>,
     pub user_id: Key<User>,
 }
