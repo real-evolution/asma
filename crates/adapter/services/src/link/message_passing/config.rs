@@ -19,8 +19,6 @@ pub(super) struct MessageQueueConfig {
     #[validate(custom = "identifier")]
     pub username: String,
     pub password: String,
-    #[serde(default = "default_require_ack")]
-    pub require_ack: bool,
     #[validate]
     pub pool: PoolConfig,
 }
