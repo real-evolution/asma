@@ -1,6 +1,7 @@
 use error::AppResult;
 
 pub mod auth;
+pub mod comm;
 pub mod config;
 pub mod crypto;
 pub mod entropy;
