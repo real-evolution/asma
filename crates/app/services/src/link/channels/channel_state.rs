@@ -7,10 +7,10 @@ use kernel_services::error::AppResult;
 use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 
-use super::handlers::{ChannelHandler, self};
+use super::channel_stream::ChannelStream;
 
 pub(super) struct ChannelState {
-    _handler: Arc<dyn ChannelHandler>,
+    stream: Arc<dyn ChannelStream>,
     cancellation: CancellationToken,
     started_at: DateTime<Utc>,
     channel: Channel,
@@ -24,11 +24,10 @@ impl ChannelState {
 
         let (h, c) = (handler.clone(), cancellation.clone());
 
-        let task  =tokio::spawn(async move {
+        let task = tokio::spawn(async move {
             let mut updates = h.updates().await;
 
             while !c.is_cancelled() {
-
                 tokio::select! {
                     Some(update) = updates.next() => {
                         info!("got an update: {update:#?}");
