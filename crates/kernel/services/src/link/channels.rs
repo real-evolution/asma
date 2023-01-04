@@ -23,18 +23,18 @@ pub trait ChannelsService<IpcTopic: Topic>: Send + Sync {
         user_id: &'a Key<User>,
     ) -> BoxStream<'a, (Key<Channel>, ChannelStatus)>;
 
-    fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
-    fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>>;
+    fn start_channels(&self) -> BoxStream<'_, AppResult<()>>;
+    fn stop_channels(&self) -> BoxStream<'_, AppResult<()>>;
 
-    fn start_channels_of<'a>(
-        &'a self,
+    fn start_channels_of(
+        &self,
         user_id: Key<User>,
-    ) -> BoxStream<'a, AppResult<()>>;
+    ) -> BoxStream<'_, AppResult<()>>;
 
-    fn stop_channels_of<'a>(
-        &'a self,
+    fn stop_channels_of(
+        &self,
         user_id: Key<User>,
-    ) -> BoxStream<'a, AppResult<()>>;
+    ) -> BoxStream<'_, AppResult<()>>;
 
     async fn get_pipe_of(
         &self,
@@ -57,9 +57,9 @@ pub struct ChannelStatus {
 }
 
 #[derive(Debug)]
-pub enum MessageUpdateKind {
+pub enum IncomingMessageUpdateKind {
     New {
-        platform_message_id: Option<String>,
+        platform_message_id: String,
         content: Option<String>,
     },
 
@@ -67,27 +67,36 @@ pub enum MessageUpdateKind {
         platform_message_id: String,
         content: Option<String>,
     },
+}
 
-    Delete {
+#[derive(Debug)]
+pub enum OutgoingMessageUpdateKind {
+    New {
+        content: String,
+    },
+
+    Edit {
         platform_message_id: String,
+        content: Option<String>,
     },
 }
 
 #[derive(Debug)]
-pub struct MessageUpdate {
-    pub chat_id: String,
-    pub by_id: String,
-    pub kind: MessageUpdateKind,
-    pub sent_at: DateTime<Utc>,
+pub enum IncomingChannelUpdate {
+    Message {
+        platform_chat_id: String,
+        platform_user_id: String,
+        kind: IncomingMessageUpdateKind,
+        timestamp: DateTime<Utc>,
+    },
 }
 
 #[derive(Debug)]
-pub enum ChannelUpdateKind {
-    Message(MessageUpdate),
-}
-
-pub struct ChannelUpdate {
-    pub user_id: Key<User>,
-    pub channel_id: Key<Channel>,
-    pub kind: ChannelUpdateKind,
+pub enum OutgoingChannelUpdate {
+    Message {
+        platform_chat_id: String,
+        platform_user_id: String,
+        kind: OutgoingMessageUpdateKind,
+        timestamp: DateTime<Utc>,
+    },
 }

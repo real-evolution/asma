@@ -8,7 +8,7 @@ use crate::{error::AppResult, Service};
 pub trait ConfigService: Service + Send + Sync {
     async fn reload(&self) -> AppResult<()>;
 
-    fn get_section<'de, T: DeserializeOwned>(
+    fn get_section<T: DeserializeOwned>(
         &self,
         section: &str,
     ) -> AppResult<T>;
