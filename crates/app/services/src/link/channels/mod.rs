@@ -16,20 +16,28 @@ use kernel_entities::{
 use kernel_repositories::{error::RepoResult, DataStore};
 use kernel_services::{
     error::AppResult,
-    link::channels::{ChannelStatus, ChannelsService},
+    link::{
+        channels::{ChannelPipe, ChannelStatus, ChannelsService},
+        message_passing::{MessagePassingService, Topic},
+    },
     Service,
 };
 use tokio::sync::RwLock;
 
 use self::channel_state::ChannelState;
 
-pub struct AppChannelsService {
+pub struct AppChannelsService<IPC> {
     data: Arc<dyn DataStore>,
+    ipc: Arc<IPC>,
     states: RwLock<HashMap<Key<User>, HashMap<Key<Channel>, ChannelState>>>,
 }
 
 #[async_trait]
-impl ChannelsService for AppChannelsService {
+impl<
+        Ipc: MessagePassingService<TopicType = IpcTopic>,
+        IpcTopic: Topic + Send + Sync,
+    > ChannelsService<IpcTopic> for AppChannelsService<Ipc>
+{
     async fn status(
         &self,
         id: &Key<Channel>,
@@ -117,10 +125,32 @@ impl ChannelsService for AppChannelsService {
         }
         .boxed()
     }
+
+    async fn get_pipe_of(
+        &self,
+        user_id: &Key<User>,
+        channel_id: Option<&Key<Channel>>,
+    ) -> AppResult<ChannelPipe<IpcTopic>> {
+        let channel_segment = channel_id
+            .map(|i| i.value().to_string())
+            .unwrap_or("*".to_owned());
+
+        let key = format!("{}.{}", user_id.value_ref(), channel_segment);
+
+        self.create_pipe(&key).await
+    }
+
+    async fn get_pipe_of_all(&self) -> AppResult<ChannelPipe<IpcTopic>> {
+        self.create_pipe("#").await
+    }
 }
 
 #[async_trait]
-impl Service for AppChannelsService {
+impl<
+        Ipc: MessagePassingService<TopicType = IpcTopic>,
+        IpcTopic: Topic + Send + Sync,
+    > Service for AppChannelsService<Ipc>
+{
     async fn initialize(&self) -> AppResult<()> {
         let mut channels = self.start_channels();
 
@@ -134,10 +164,13 @@ impl Service for AppChannelsService {
     }
 }
 
-impl AppChannelsService {
-    pub fn new(data: Arc<dyn DataStore>) -> Self {
+impl<IPC: MessagePassingService<TopicType = IpcTopic>, IpcTopic: Topic>
+    AppChannelsService<IPC>
+{
+    pub fn new(data: Arc<dyn DataStore>, ipc: Arc<IPC>) -> Self {
         Self {
             data,
+            ipc,
             states: Default::default(),
         }
     }
@@ -199,6 +232,13 @@ impl AppChannelsService {
                 states.insert(user_id.clone(), user_states);
             }
         }
+    }
+
+    async fn create_pipe(&self, key: &str) -> AppResult<ChannelPipe<IpcTopic>> {
+        let tx = self.ipc.get_topic(&format!("channels.{key}-out")).await?;
+        let rx = self.ipc.get_topic(&format!("channels.{key}-in")).await?;
+
+        Ok(ChannelPipe { tx, rx })
     }
 }
 

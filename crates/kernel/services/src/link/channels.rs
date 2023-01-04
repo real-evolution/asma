@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use kernel_entities::{
@@ -6,10 +8,11 @@ use kernel_entities::{
 };
 use serde::Serialize;
 
+use super::message_passing::Topic;
 use crate::error::AppResult;
 
 #[async_trait::async_trait]
-pub trait ChannelsService: Send + Sync {
+pub trait ChannelsService<IpcTopic: Topic>: Send + Sync {
     async fn status(
         &self,
         id: &Key<Channel>,
@@ -32,6 +35,19 @@ pub trait ChannelsService: Send + Sync {
         &'a self,
         user_id: Key<User>,
     ) -> BoxStream<'a, AppResult<()>>;
+
+    async fn get_pipe_of(
+        &self,
+        user_id: &Key<User>,
+        channel_id: Option<&Key<Channel>>,
+    ) -> AppResult<ChannelPipe<IpcTopic>>;
+
+    async fn get_pipe_of_all(&self) -> AppResult<ChannelPipe<IpcTopic>>;
+}
+
+pub struct ChannelPipe<IpcTopic: Topic> {
+    pub tx: Arc<IpcTopic>,
+    pub rx: Arc<IpcTopic>,
 }
 
 #[derive(Clone, Copy, Debug, Serialize)]

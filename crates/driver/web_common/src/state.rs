@@ -31,7 +31,7 @@ pub type AppState = Arc<
         RabbitMqMessagePassingService,
         AppAuthService<TomlConfigService>,
         AppSetupService,
-        AppChannelsService,
+        AppChannelsService<RabbitMqMessagePassingService>,
     >,
 >;
 
@@ -39,16 +39,16 @@ pub struct AppStateImpl<
     Config: ConfigService,
     Entropy: EntropyService,
     CryptoHash: CryptoHashService,
-    MessagePassing: MessagePassingService<RabbitMqTopic>,
+    MessagePassing: MessagePassingService,
     Auth: AuthService,
     Setup: SetupService,
-    Channels: ChannelsService,
+    Channels: ChannelsService<RabbitMqTopic>,
 > {
     pub data: Arc<dyn DataStore>,
     pub config: Arc<Config>,
     pub entropy: Arc<Entropy>,
     pub hash: Arc<CryptoHash>,
-    pub message_passing: Arc<MessagePassing>,
+    pub ipc: Arc<MessagePassing>,
     pub auth: Arc<Auth>,
     pub setup: Arc<Setup>,
     pub channels: Arc<Channels>,
@@ -68,7 +68,7 @@ pub async fn create_state<'a>(
     debug!("creating base services");
     let entropy = init(SecureEntropyService::default()).await?;
     let hash = init(Argon2CryptoHashService::new()).await?;
-    let message_passing =
+    let ipc =
         init(RabbitMqMessagePassingService::create(config.clone()).await?)
             .await?;
 
@@ -80,7 +80,8 @@ pub async fn create_state<'a>(
         entropy.clone(),
     ));
     let setup = init(AppSetupService::new(data.clone(), auth.clone())).await?;
-    let channels = init(AppChannelsService::new(data.clone())).await?;
+    let channels =
+        init(AppChannelsService::new(data.clone(), ipc.clone())).await?;
 
     debug!("building application state");
     Ok(Arc::new(AppStateImpl {
@@ -88,7 +89,7 @@ pub async fn create_state<'a>(
         config,
         entropy,
         hash,
-        message_passing,
+        ipc,
         auth,
         setup,
         channels,

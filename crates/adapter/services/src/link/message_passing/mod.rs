@@ -23,7 +23,9 @@ pub struct RabbitMqMessagePassingService {
 }
 
 #[async_trait::async_trait]
-impl MessagePassingService<RabbitMqTopic> for RabbitMqMessagePassingService {
+impl MessagePassingService for RabbitMqMessagePassingService {
+    type TopicType = RabbitMqTopic;
+
     async fn get_topic(&self, name: &str) -> AppResult<Arc<RabbitMqTopic>> {
         if let Some(topic) = self.topics.read().await.get(name) {
             return Ok(topic.clone());

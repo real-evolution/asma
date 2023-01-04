@@ -7,8 +7,10 @@ use serde::{de::DeserializeOwned, Serialize};
 use crate::error::AppResult;
 
 #[async_trait]
-pub trait MessagePassingService<T>: Send + Sync {
-    async fn get_topic(&self, name: &str) -> AppResult<Arc<T>>;
+pub trait MessagePassingService: Send + Sync {
+    type TopicType: Topic;
+
+    async fn get_topic(&self, name: &str) -> AppResult<Arc<Self::TopicType>>;
 }
 
 #[async_trait]
