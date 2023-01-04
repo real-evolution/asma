@@ -1,0 +1,185 @@
+use std::sync::{
+    atomic::{AtomicI32, Ordering},
+    Arc,
+};
+
+use kernel_entities::entities::link::Channel;
+use kernel_services::{
+    error::AppResult,
+    link::{
+        channels::{
+            IncomingChannelUpdate,
+            IncomingMessageUpdateKind,
+            OutgoingChannelUpdate,
+            OutgoingMessageUpdateKind,
+        },
+        error::LinkError,
+    },
+};
+use teloxide::{
+    requests::Requester,
+    types::{MediaKind, Message, MessageId, MessageKind, Update, UpdateKind},
+    Bot,
+};
+
+use super::util::map_request_error;
+use crate::link::channels::{
+    channel_stream::ChannelStream,
+    util::BoundedQueue,
+};
+
+pub(super) struct TelegramStream {
+    bot: Bot,
+    update_idx: AtomicI32,
+    in_buf: BoundedQueue<IncomingChannelUpdate>,
+}
+
+#[async_trait::async_trait]
+impl ChannelStream for TelegramStream {
+    async fn create(channel: &Channel) -> AppResult<Arc<Self>> {
+        Ok(Arc::new(Self {
+            bot: Bot::new(channel.api_key),
+            update_idx: 0.into(),
+            in_buf: BoundedQueue::new(1024),
+        }))
+    }
+
+    async fn recv(&self) -> AppResult<IncomingChannelUpdate> {
+        self.read_next_update().await
+    }
+
+    async fn send(&self, update: OutgoingChannelUpdate) -> AppResult<()> {
+        self.send_update(update).await
+    }
+}
+
+impl TelegramStream {
+    fn from_telegram_update(
+        &self,
+        update: Update,
+    ) -> AppResult<IncomingChannelUpdate> {
+        match update.kind {
+            | UpdateKind::Message(msg) => {
+                self.from_telegram_message::<true>(msg)
+            }
+            | UpdateKind::EditedMessage(msg) => {
+                self.from_telegram_message::<false>(msg)
+            }
+            | UpdateKind::Error(err) => {
+                Err(LinkError::Communication(err.to_string()).into())
+            }
+            | _ => Err(LinkError::UnsupportedEvent(format!(
+                "unsupported telegram update: {:#?}",
+                update
+            ))
+            .into()),
+        }
+    }
+
+    fn from_telegram_message<const NEW: bool>(
+        &self,
+        message: Message,
+    ) -> AppResult<IncomingChannelUpdate> {
+        let MessageKind::Common(inner) = message.kind else {
+            return Err(LinkError::UnsupportedEvent(format!("unsupported telegram update: {:?}", message.kind)).into());
+        };
+
+        let Some(from) = inner.from else {
+            return Err(LinkError::UnsupportedEvent("only private chats are supported".into()).into());
+        };
+
+        let MediaKind::Text(content) = inner.media_kind else {
+            return Err(LinkError::UnsupportedEvent("only text messages supported".into()).into());             
+        };
+
+        let platform_chat_id = message.chat.id.to_string();
+        let platform_user_id = from.id.to_string();
+        let timestamp = message.date;
+
+        let kind = if NEW {
+            IncomingMessageUpdateKind::New {
+                platform_message_id: message.id.0.to_string(),
+                content: Some(content.text),
+            }
+        } else {
+            IncomingMessageUpdateKind::Edit {
+                platform_message_id: message.id.0.to_string(),
+                content: Some(content.text),
+            }
+        };
+
+        Ok(IncomingChannelUpdate::Message {
+            platform_chat_id,
+            platform_user_id,
+            kind,
+            timestamp,
+        })
+    }
+
+    #[inline]
+    async fn read_next_update(&self) -> AppResult<IncomingChannelUpdate> {
+        loop {
+            match self.in_buf.dequeue().await {
+                | Some(update) => return Ok(update),
+                | None => {
+                    let mut req = self.bot.get_updates();
+
+                    req.offset = Some(self.update_idx.load(Ordering::AcqRel));
+
+                    for update in req.await.map_err(map_request_error)? {
+                        self.update_idx.store(update.id + 1, Ordering::AcqRel);
+
+                        let item = self.from_telegram_update(update)?;
+
+                        if let Err(err) = self.in_buf.enqueue(item).await {
+                            warn!("error enqueuing item: {err:#?}");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[inline]
+    async fn send_update(
+        &self,
+        update: OutgoingChannelUpdate,
+    ) -> AppResult<()> {
+        match update {
+            | OutgoingChannelUpdate::Message {
+                platform_chat_id,
+                platform_user_id,
+                kind,
+                timestamp,
+            } => match kind {
+                | OutgoingMessageUpdateKind::New { content } => {
+                    self.bot
+                        .send_message(platform_chat_id, content)
+                        .await
+                        .map_err(map_request_error)?;
+
+                    Ok(())
+                }
+                | OutgoingMessageUpdateKind::Edit {
+                    platform_message_id,
+                    content,
+                } => {
+                    let Ok(message_id) = i32::from_str_radix(&platform_message_id, 10) else {
+                        return Err(LinkError::InvalidParams(format!("invalid message id: {}", platform_message_id),).into());
+                    };
+
+                    self.bot
+                        .edit_message_text(
+                            platform_chat_id,
+                            MessageId(message_id),
+                            content.unwrap_or(String::new()),
+                        )
+                        .await
+                        .map_err(map_request_error)?;
+
+                    Ok(())
+                }
+            },
+        }
+    }
+}
