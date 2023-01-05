@@ -40,9 +40,9 @@ impl<E, T: Clone> From<T> for Key<E, T> {
     }
 }
 
-impl<E> Into<KeyType> for Key<E> {
-    fn into(self) -> KeyType {
-        self.value()
+impl<E> From<Key<E>> for KeyType {
+    fn from(val: Key<E>) -> Self {
+        val.value()
     }
 }
 
