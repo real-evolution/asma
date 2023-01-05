@@ -37,9 +37,25 @@ where
         chat_id: &Key<Chat>,
         text: &str,
     ) -> AppResult<Message> {
+        let update = OutgoingChannelUpdate {
+            user_id: todo!(),
+            channel_id: todo!(),
+            kind: OutgoingChannelUpdateKind::Message {
+                platform_chat_id: "test_chat_id,".to_owned(),
+                platform_user_id: "test_user_id".to_owned(),
+                kind: OutgoingMessageUpdateKind::New {
+                    content: text.to_owned(),
+                },
+                timestamp: Utc::now(),
+            },
+        };
+
+        self.listener.enqueue_update(update)?;
+
         todo!()
     }
 }
+
 impl<IPC: MessagePassingService> AppChatsService<IPC> {
     pub async fn create(
         ipc: Arc<IPC>,
