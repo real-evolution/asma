@@ -9,8 +9,8 @@ use kernel_services::{
     error::AppResult,
     link::{
         channels::{
-            IncomingChannelUpdate, IncomingMessageUpdateKind,
-            OutgoingChannelUpdate, OutgoingMessageUpdateKind,
+            IncomingChannelUpdateKind, IncomingMessageUpdateKind,
+            OutgoingChannelUpdateKind, OutgoingMessageUpdateKind,
         },
         error::LinkError,
     },
@@ -27,16 +27,16 @@ use crate::link::channels::channel_stream::ChannelStream;
 pub(crate) struct TelegramStream {
     bot: Bot,
     update_idx: AtomicI32,
-    in_buf: BoundedQueue<IncomingChannelUpdate>,
+    in_buf: BoundedQueue<IncomingChannelUpdateKind>,
 }
 
 #[async_trait::async_trait]
 impl ChannelStream for TelegramStream {
-    async fn recv(&self) -> AppResult<IncomingChannelUpdate> {
+    async fn recv(&self) -> AppResult<IncomingChannelUpdateKind> {
         self.read_next_update().await
     }
 
-    async fn send(&self, update: OutgoingChannelUpdate) -> AppResult<()> {
+    async fn send(&self, update: OutgoingChannelUpdateKind) -> AppResult<()> {
         self.send_update(update).await
     }
 }
@@ -53,7 +53,7 @@ impl TelegramStream {
     fn convert_from_telegram_update(
         &self,
         update: Update,
-    ) -> AppResult<IncomingChannelUpdate> {
+    ) -> AppResult<IncomingChannelUpdateKind> {
         match update.kind {
             | UpdateKind::Message(msg) => {
                 self.convert_from_telegram_message::<true>(msg)
@@ -75,7 +75,7 @@ impl TelegramStream {
     fn convert_from_telegram_message<const NEW: bool>(
         &self,
         message: Message,
-    ) -> AppResult<IncomingChannelUpdate> {
+    ) -> AppResult<IncomingChannelUpdateKind> {
         let MessageKind::Common(inner) = message.kind else {
             return Err(LinkError::UnsupportedEvent(format!("unsupported telegram update: {:?}", message.kind)).into());
         };
@@ -104,7 +104,7 @@ impl TelegramStream {
             }
         };
 
-        Ok(IncomingChannelUpdate::Message {
+        Ok(IncomingChannelUpdateKind::Message {
             platform_chat_id,
             platform_user_id,
             kind,
@@ -113,7 +113,7 @@ impl TelegramStream {
     }
 
     #[inline]
-    async fn read_next_update(&self) -> AppResult<IncomingChannelUpdate> {
+    async fn read_next_update(&self) -> AppResult<IncomingChannelUpdateKind> {
         loop {
             match self.in_buf.dequeue().await {
                 | Some(update) => return Ok(update),
@@ -139,10 +139,10 @@ impl TelegramStream {
     #[inline]
     async fn send_update(
         &self,
-        update: OutgoingChannelUpdate,
+        update: OutgoingChannelUpdateKind,
     ) -> AppResult<()> {
         match update {
-            | OutgoingChannelUpdate::Message {
+            | OutgoingChannelUpdateKind::Message {
                 platform_chat_id,
                 platform_user_id: _,
                 kind,
