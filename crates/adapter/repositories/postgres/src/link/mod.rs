@@ -14,7 +14,7 @@ impl SqlxLinkDataStore {
     pub(crate) fn new(pool: SqlxPool) -> Self {
         Self {
             channels: channels::SqlxChannelsRepo(pool.clone()),
-            instances: instances::SqlxInstancesRepo(pool.clone()),
+            instances: instances::SqlxInstancesRepo(pool),
         }
     }
 }
