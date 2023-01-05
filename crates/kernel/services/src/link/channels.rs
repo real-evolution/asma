@@ -6,7 +6,7 @@ use kernel_entities::{
     entities::{auth::User, link::Channel},
     traits::Key,
 };
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use super::message_passing::Topic;
 use crate::error::AppResult;
@@ -58,6 +58,18 @@ pub struct ChannelStatus {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub enum OutgoingMessageUpdateKind {
+    New {
+        content: String,
+    },
+
+    Edit {
+        platform_message_id: String,
+        content: Option<String>,
+    },
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub enum IncomingMessageUpdateKind {
     New {
         platform_message_id: String,
@@ -71,19 +83,17 @@ pub enum IncomingMessageUpdateKind {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum OutgoingMessageUpdateKind {
-    New {
-        content: String,
-    },
-
-    Edit {
-        platform_message_id: String,
-        content: Option<String>,
+pub enum OutgoingChannelUpdateKind {
+    Message {
+        platform_chat_id: String,
+        platform_user_id: String,
+        kind: OutgoingMessageUpdateKind,
+        timestamp: DateTime<Utc>,
     },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum IncomingChannelUpdate {
+pub enum IncomingChannelUpdateKind {
     Message {
         platform_chat_id: String,
         platform_user_id: String,
@@ -93,11 +103,11 @@ pub enum IncomingChannelUpdate {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum OutgoingChannelUpdate {
-    Message {
-        platform_chat_id: String,
-        platform_user_id: String,
-        kind: OutgoingMessageUpdateKind,
-        timestamp: DateTime<Utc>,
-    },
+pub struct ChannelUpdate<Kind> {
+    pub user_id: Key<User>,
+    pub channel_id: Key<Channel>,
+    pub kind: Kind,
 }
+
+pub type OutgoingChannelUpdate = ChannelUpdate<OutgoingChannelUpdateKind>;
+pub type IncomingChannelUpdate = ChannelUpdate<IncomingChannelUpdateKind>;
