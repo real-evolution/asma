@@ -45,8 +45,7 @@ pub fn expand_entity(
                 self.created_at
             }
         }
-    }
-    .into();
+    };
 
     if let EntityType::Mutable = args.entity_type {
         fields.push(field!(updated_at: chrono::DateTime<chrono::Utc>));
@@ -66,5 +65,4 @@ pub fn expand_entity(
 
         #impls
     }
-    .into()
 }

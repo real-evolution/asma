@@ -25,7 +25,7 @@ pub async fn get_all(
             (Resource::Accounts, Action::View),
         ])?
         .of(&user_id)
-        .or(claims.in_role(KnownRoles::Admin))?;
+        .or_else(|_| claims.in_role(KnownRoles::Admin))?;
 
     let accounts = state
         .data
@@ -34,7 +34,7 @@ pub async fn get_all(
         .get_paginated_of(&user_id, &pagination.before, pagination.page_size)
         .await?
         .into_iter()
-        .map(|a| AccountDto::from(a))
+        .map(AccountDto::from)
         .collect_vec();
 
     Ok(Json(accounts))
@@ -51,7 +51,7 @@ pub async fn get_by_id(
             (Resource::Accounts, Action::View),
         ])?
         .of(&user_id)
-        .or(claims.in_role(KnownRoles::Admin))?;
+        .or_else(|_| claims.in_role(KnownRoles::Admin))?;
 
     let account = state
         .data

@@ -1,6 +1,6 @@
 use syn::*;
 
-pub fn extract_struct<'a>(ast: &'a mut DeriveInput) -> &'a mut DataStruct {
+pub fn extract_struct(ast: &mut DeriveInput) -> &mut DataStruct {
     if let syn::Data::Struct(ref mut data) = ast.data {
         return data;
     }
@@ -8,7 +8,7 @@ pub fn extract_struct<'a>(ast: &'a mut DeriveInput) -> &'a mut DataStruct {
     panic!("`{}` is not a struct", ast.ident);
 }
 
-pub fn extract_named_fields<'a>(data: &'a mut DataStruct) -> &'a mut FieldsNamed {
+pub fn extract_named_fields(data: &mut DataStruct) -> &mut FieldsNamed {
     if let Fields::Named(ref mut fields) = data.fields {
         return fields;
     }

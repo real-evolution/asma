@@ -48,7 +48,7 @@ impl FromRequestParts<AppState> for Claims {
         let config = ApiConfig::from_request_parts(parts, state).await?;
 
         Ok(jsonwebtoken::decode::<Claims>(
-            &auth.token(),
+            auth.token(),
             &DecodingKey::from_secret(config.token.signing_key.as_bytes()),
             &Validation::default(),
         )

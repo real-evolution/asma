@@ -29,7 +29,7 @@ pub struct Channel {
 impl From<i32> for ChannelPlatform {
     fn from(value: i32) -> Self {
         Self::from_repr(value)
-            .expect(&format!("invalid channel platform: {value}"))
+            .unwrap_or_else(|| panic!("invalid channel platform: {value}"))
     }
 }
 

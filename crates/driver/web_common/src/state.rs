@@ -55,7 +55,7 @@ pub struct AppStateImpl<
 }
 
 pub async fn get_config_service() -> anyhow::Result<Arc<TomlConfigService>> {
-    Ok(init(TomlConfigService::default()).await?)
+    init(TomlConfigService::default()).await
 }
 
 pub async fn create_state<'a>(
@@ -67,7 +67,7 @@ pub async fn create_state<'a>(
 
     debug!("creating base services");
     let entropy = init(SecureEntropyService::default()).await?;
-    let hash = init(Argon2CryptoHashService::new()).await?;
+    let hash = init(Argon2CryptoHashService::default()).await?;
     let ipc =
         init(RabbitMqMessagePassingService::create(config.clone()).await?)
             .await?;

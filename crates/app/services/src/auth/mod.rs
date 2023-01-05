@@ -211,8 +211,7 @@ impl<C: ConfigService> AuthService for AppAuthService<C> {
                 self.hash_svc.hash(&password)?,
                 is_active.into(),
             ))
-            .await?
-            .into())
+            .await?)
     }
 
     async fn update_password_for(
@@ -272,7 +271,7 @@ impl<C: ConfigService> AppAuthService<C> {
             | Err(RepoError::NotFound) => {
                 Err(AuthError::NotAuthenticated.into())
             }
-            | Err(err) => return Err(err.into()),
+            | Err(err) => Err(err.into()),
         }
     }
 }

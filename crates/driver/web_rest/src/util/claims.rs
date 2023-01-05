@@ -1,16 +1,19 @@
-use std::collections::HashSet;
-use std::{cmp::min, collections::HashMap};
+use std::{
+    cmp::min,
+    collections::{HashMap, HashSet},
+};
 
 use aide::OperationIo;
 use chrono::Utc;
 use itertools::Itertools;
 use jsonwebtoken::{EncodingKey, Header};
-use kernel_entities::entities::auth::*;
-use kernel_entities::traits::Key;
+use kernel_entities::{entities::auth::*, traits::Key};
 use serde::{Deserialize, Serialize};
 
-use crate::config::ApiConfig;
-use crate::error::{ApiError, ApiResult};
+use crate::{
+    config::ApiConfig,
+    error::{ApiError, ApiResult},
+};
 
 #[derive(Clone, Debug, Deserialize, Serialize, OperationIo)]
 #[aide(input)]
@@ -50,8 +53,8 @@ impl Claims {
         let iat = Utc::now().timestamp();
         let conf_exp = iat + config.token.timeout_seconds;
         let exp = match session.expires_at {
-            Some(session_exp) => min(conf_exp, session_exp.timestamp()),
-            None => conf_exp,
+            | Some(session_exp) => min(conf_exp, session_exp.timestamp()),
+            | None => conf_exp,
         };
 
         let (roles, permissions): (HashSet<_>, Vec<_>) =
@@ -107,7 +110,7 @@ impl Claims {
     #[inline]
     pub fn in_role<'a, R: Into<&'a str>>(&self, role: R) -> ApiResult<&Self> {
         self.is_root()
-            .or(self.require(|| self.roles.contains(role.into())))
+            .or_else(|_| self.require(|| self.roles.contains(role.into())))
     }
 
     #[inline]
@@ -115,12 +118,12 @@ impl Claims {
         &self,
         perms: &[(Resource, A)],
     ) -> ApiResult<&Self> {
-        self.is_root().or(self.require(|| {
+        self.is_root().or_else(|_| self.require(|| {
             perms
                 .iter()
                 .all(|(res, act)| match self.permissions.get(res) {
-                    Some(p) => p.has(act),
-                    None => false,
+                    | Some(p) => p.has(act),
+                    | None => false,
                 })
         }))
     }

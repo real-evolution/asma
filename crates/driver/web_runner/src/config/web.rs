@@ -22,8 +22,8 @@ struct LanuchConfig {
     listen_port: u16,
 }
 
-pub fn get_bind_address<'a, C: ConfigService + ?Sized>(
-    svc: &'a C,
+pub fn get_bind_address<C: ConfigService + ?Sized>(
+    svc: &C,
 ) -> Result<SocketAddr> {
     let conf: LanuchConfig = svc.get_section(CONFIG_SECTION)?;
 

@@ -86,9 +86,9 @@ enum LogLevel {
     Off,
 }
 
-impl Into<LevelFilter> for LogLevel {
-    fn into(self) -> LevelFilter {
-        match self {
+impl From<LogLevel> for LevelFilter {
+    fn from(val: LogLevel) -> Self {
+        match val {
             | LogLevel::Trace => LevelFilter::TRACE,
             | LogLevel::Debug => LevelFilter::DEBUG,
             | LogLevel::Info => LevelFilter::INFO,
@@ -109,7 +109,7 @@ pub fn configure_logger_with<'a, C: ConfigService + ?Sized>(
         LogConfig::default()
     });
 
-    if let Err(_) = std::env::var(ENV_LOG_KEY) {
+    if std::env::var(ENV_LOG_KEY).is_err() {
         std::env::set_var(ENV_LOG_KEY, conf.level.to_string());
     }
 
