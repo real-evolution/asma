@@ -90,7 +90,7 @@ impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
     }
 
     fn next_string(&self, len: usize) -> AppResult<String> {
-        Ok(self.next_string_with(len, Default::default())?)
+        self.next_string_with(len, Default::default())
     }
 
     fn next_string_with(
@@ -101,7 +101,7 @@ impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
         let mut pool = String::new();
 
         if let Some(ctype) = opts.alpha {
-            pool.push_str(&match ctype {
+            pool.push_str(match ctype {
                 | CharacterCase::Lower => LOWER_ALPHA,
                 | CharacterCase::Upper => UPPER_ALPHA,
                 | CharacterCase::Mixed => MIXED_ALPHA,
@@ -131,7 +131,7 @@ impl<R: RngCore + Send + Sync> EntropyService for EntropyServiceImpl<R> {
 }
 
 impl<R> EntropyServiceImpl<R> {
-    fn inner<'a>(&'a self) -> AppResult<MutexGuard<'a, R>> {
+    fn inner(&self) -> AppResult<MutexGuard<'_, R>> {
         let lck = self
             .0
             .lock()
