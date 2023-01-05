@@ -3,15 +3,17 @@ use std::collections::HashMap;
 use chrono::Utc;
 use itertools::Itertools;
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::auth::*;
-use kernel_repositories::error::*;
-use kernel_repositories::traits::*;
+use kernel_repositories::{auth::*, error::*, traits::*};
 use ormx::{Delete, Patch, Table};
 use proc_macros::Repo;
 use tracing::warn;
 
-use crate::database::SqlxPool;
-use crate::{sqlx_ok, sqlx_vec_ok, util::error::map_sqlx_error};
+use crate::{
+    database::SqlxPool,
+    sqlx_ok,
+    sqlx_vec_ok,
+    util::error::map_sqlx_error,
+};
 
 #[derive(Repo)]
 #[repo(
@@ -59,22 +61,20 @@ impl RolesRepo for SqlxRolesRepo {
         .await
         .map_err(map_sqlx_error)?
         .into_iter()
-        .filter_map(|i| {
+        .map(|i| {
             let (Some(res), Some(act)) = (i.resource, i.actions) else {
-                return Some((i.code, None))
+                return (i.code, None)
             };
 
             if let Resource::Unknown = Resource::from(res) {
                 warn!("unknown resource with code `{}`", res);
             }
 
-            Some((i.code, Some((Resource::from(res), Actions::from(act)))))
+            (i.code, Some((Resource::from(res), Actions::from(act))))
         })
         .into_group_map()
         .into_iter()
-        .map(|(code, perms)| {
-            (code, perms.into_iter().flatten().collect())
-        })
+        .map(|(code, perms)| (code, perms.into_iter().flatten().collect()))
         .collect();
 
         Ok(items)
@@ -120,7 +120,8 @@ impl RolesRepo for SqlxRolesRepo {
 
         if exists.unwrap_or(false) {
             return Err(RepoError::DuplicateValue(format!(
-                "permission {resource}:{actions:?} was already added to role #{role_id:?}"
+                "permission {resource}:{actions:?} was already added to role \
+                 #{role_id:?}"
             )));
         }
 
@@ -199,8 +200,7 @@ impl RolesRepo for SqlxRolesRepo {
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};
-    use kernel_entities::entities::auth::*;
-    use kernel_entities::traits::KeyType;
+    use kernel_entities::{entities::auth::*, traits::KeyType};
     use kernel_repositories::auth::InsertRole;
 
     use crate::generate_mapping;
