@@ -5,7 +5,7 @@ use adapter_services::{
     config::TomlConfigService,
     crypto::hash::Argon2CryptoHashService,
     entropy::SecureEntropyService,
-    link::message_passing::{RabbitMqMessagePassingService, RabbitMqTopic},
+    link::message_passing::RabbitMqMessagePassingService,
 };
 use app_services::{
     auth::AppAuthService,
@@ -42,7 +42,7 @@ pub struct AppStateImpl<
     MessagePassing: MessagePassingService,
     Auth: AuthService,
     Setup: SetupService,
-    Channels: ChannelsService<RabbitMqTopic>,
+    Channels: ChannelsService,
 > {
     pub data: Arc<dyn DataStore>,
     pub config: Arc<Config>,
