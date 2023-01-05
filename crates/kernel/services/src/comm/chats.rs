@@ -1,6 +1,9 @@
-use kernel_entities::{traits::Key, entities::comm::Chat};
+use kernel_entities::{
+    entities::comm::{Chat, Message},
+    traits::Key,
+};
 
+use crate::error::AppResult;
 #[async_trait::async_trait]
 pub trait ChatsService: Send + Sync {
-    async fn append(&self, chat_id: &Key<Chat>);
 }
