@@ -71,11 +71,11 @@ impl<
         .boxed()
     }
 
-    fn start_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>> {
+    fn start_channels(&self) -> BoxStream<'_, AppResult<()>> {
         self.start_channels_stream(self.data.link().channels().stream_active())
     }
 
-    fn stop_channels<'a>(&'a self) -> BoxStream<'a, AppResult<()>> {
+    fn stop_channels(&self) -> BoxStream<'_, AppResult<()>> {
         let states = self.states.blocking_read();
 
         stream::iter(states.keys().map(|i| i.clone()).collect::<Vec<_>>())
@@ -84,19 +84,19 @@ impl<
             .boxed()
     }
 
-    fn start_channels_of<'a>(
-        &'a self,
+    fn start_channels_of(
+        &self,
         user_id: Key<User>,
-    ) -> BoxStream<'a, AppResult<()>> {
+    ) -> BoxStream<'_, AppResult<()>> {
         self.start_channels_stream(
             self.data.link().channels().stream_active_of(user_id),
         )
     }
 
-    fn stop_channels_of<'a>(
-        &'a self,
+    fn stop_channels_of(
+        &self,
         user_id: Key<User>,
-    ) -> BoxStream<'a, AppResult<()>> {
+    ) -> BoxStream<'_, AppResult<()>> {
         async_stream::stream! {
             let mut states = self.states.write().await;
 

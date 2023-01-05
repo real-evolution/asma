@@ -15,11 +15,11 @@ pub trait ChannelsRepo:
     + Send
     + Sync
 {
-    fn stream_active<'a>(&'a self) -> BoxStream<'a, RepoResult<Channel>>;
-    fn stream_active_of<'a>(
-        &'a self,
+    fn stream_active(&self) -> BoxStream<'_, RepoResult<Channel>>;
+    fn stream_active_of(
+        &self,
         user_id: Key<User>,
-    ) -> BoxStream<'a, RepoResult<Channel>>;
+    ) -> BoxStream<'_, RepoResult<Channel>>;
 }
 
 #[derive(Constructor)]
