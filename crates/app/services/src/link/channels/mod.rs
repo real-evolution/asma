@@ -20,7 +20,7 @@ use kernel_services::{
     error::AppResult,
     link::{
         channels::{ChannelPipe, ChannelStatus, ChannelsService},
-        message_passing::{MessagePassingService, Topic},
+        message_passing::MessagePassingService,
     },
     Service,
 };
@@ -28,18 +28,17 @@ use tokio::sync::RwLock;
 
 use self::channel_state::ChannelState;
 
+type ChannelStatesMap = HashMap<Key<Channel>, ChannelState>;
+type UserChannelsMap = HashMap<Key<User>, ChannelStatesMap>;
+
 pub struct AppChannelsService<IPC> {
     data: Arc<dyn DataStore>,
     ipc: Arc<IPC>,
-    states: RwLock<HashMap<Key<User>, HashMap<Key<Channel>, ChannelState>>>,
+    states: RwLock<UserChannelsMap>,
 }
 
 #[async_trait]
-impl<
-        Ipc: MessagePassingService<TopicType = IpcTopic>,
-        IpcTopic: Topic + Send + Sync,
-    > ChannelsService<IpcTopic> for AppChannelsService<Ipc>
-{
+impl<Ipc: MessagePassingService> ChannelsService for AppChannelsService<Ipc> {
     async fn status(
         &self,
         id: &Key<Channel>,
@@ -78,7 +77,7 @@ impl<
     fn stop_channels(&self) -> BoxStream<'_, AppResult<()>> {
         let states = self.states.blocking_read();
 
-        stream::iter(states.keys().map(|i| i.clone()).collect::<Vec<_>>())
+        stream::iter(states.keys().cloned().collect::<Vec<_>>())
             .map(|user_id| self.stop_channels_of(user_id))
             .flatten()
             .boxed()
@@ -132,27 +131,23 @@ impl<
         &self,
         user_id: &Key<User>,
         channel_id: Option<&Key<Channel>>,
-    ) -> AppResult<ChannelPipe<IpcTopic>> {
+    ) -> AppResult<ChannelPipe> {
         let channel_segment = channel_id
             .map(|i| i.value().to_string())
-            .unwrap_or("*".to_owned());
+            .unwrap_or_else(|| "*".to_owned());
 
         let key = format!("{}.{}", user_id.value_ref(), channel_segment);
 
         self.create_pipe(&key).await
     }
 
-    async fn get_pipe_of_all(&self) -> AppResult<ChannelPipe<IpcTopic>> {
+    async fn get_pipe_of_all(&self) -> AppResult<ChannelPipe> {
         self.create_pipe("#").await
     }
 }
 
 #[async_trait]
-impl<
-        Ipc: MessagePassingService<TopicType = IpcTopic>,
-        IpcTopic: Topic + Send + Sync,
-    > Service for AppChannelsService<Ipc>
-{
+impl<Ipc: MessagePassingService> Service for AppChannelsService<Ipc> {
     async fn initialize(&self) -> AppResult<()> {
         let mut channels = self.start_channels();
 
@@ -166,9 +161,7 @@ impl<
     }
 }
 
-impl<IPC: MessagePassingService<TopicType = IpcTopic>, IpcTopic: Topic>
-    AppChannelsService<IPC>
-{
+impl<IPC: MessagePassingService> AppChannelsService<IPC> {
     pub fn new(data: Arc<dyn DataStore>, ipc: Arc<IPC>) -> Self {
         Self {
             data,
@@ -199,8 +192,13 @@ impl<IPC: MessagePassingService<TopicType = IpcTopic>, IpcTopic: Topic>
                     channel.platform, channel.id, channel.user_id, channel.name,
                 );
 
-                match ChannelState::spawn(channel).await {
-                    | Ok(state) => {
+                let pipe = self
+                    .get_pipe_of(&channel.user_id, Some(&channel.id))
+                    .await?;
+                let state = ChannelState::new(channel, pipe)?;
+
+                match state.run().await {
+                    | Ok(_) => {
                         self.append_state(
                             &state.channel().user_id.clone(),
                             state,
@@ -236,18 +234,21 @@ impl<IPC: MessagePassingService<TopicType = IpcTopic>, IpcTopic: Topic>
         }
     }
 
-    async fn create_pipe(&self, key: &str) -> AppResult<ChannelPipe<IpcTopic>> {
+    async fn create_pipe(&self, key: &str) -> AppResult<ChannelPipe> {
         let tx = self.ipc.get_topic(&format!("channels.{key}-out")).await?;
         let rx = self.ipc.get_topic(&format!("channels.{key}-in")).await?;
 
-        Ok(ChannelPipe { tx, rx })
+        Ok(ChannelPipe {
+            incoming: tx,
+            outgoing: rx,
+        })
     }
 }
 
-impl Into<ChannelStatus> for &ChannelState {
-    fn into(self) -> ChannelStatus {
+impl From<&ChannelState> for ChannelStatus {
+    fn from(val: &ChannelState) -> Self {
         ChannelStatus {
-            started_at: self.started_at(),
+            started_at: val.started_at(),
         }
     }
 }

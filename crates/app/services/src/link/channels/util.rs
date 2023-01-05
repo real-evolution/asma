@@ -1,5 +1,3 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
-
 use tokio::sync::{
     mpsc::{channel, error::SendError, Receiver, Sender},
     Mutex,
@@ -8,7 +6,6 @@ use tokio::sync::{
 pub(super) struct BoundedQueue<T> {
     tx: Sender<T>,
     rx: Mutex<Receiver<T>>,
-    sz: AtomicUsize,
 }
 
 impl<T> BoundedQueue<T> {
@@ -18,7 +15,6 @@ impl<T> BoundedQueue<T> {
         Self {
             tx,
             rx: Mutex::new(rx),
-            sz: 0.into(),
         }
     }
 
@@ -28,9 +24,5 @@ impl<T> BoundedQueue<T> {
 
     pub(super) async fn dequeue(&self) -> Option<T> {
         self.rx.lock().await.recv().await
-    }
-
-    pub(super) fn size(&self) -> usize {
-        self.sz.load(Ordering::AcqRel)
     }
 }

@@ -1,39 +1,73 @@
 use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
-use futures::StreamExt;
-use kernel_entities::entities::link::Channel;
-use kernel_services::error::AppResult;
-use tokio::task::JoinHandle;
+use kernel_entities::entities::link::{Channel, ChannelPlatform};
+use kernel_services::{error::AppResult, link::channels::ChannelPipe};
+use tokio_stream::StreamExt;
 use tokio_util::sync::CancellationToken;
 
-use super::channel_stream::ChannelStream;
+use super::{
+    channel_stream::ChannelStream,
+    telegram::telegram_stream::TelegramStream,
+};
 
 pub(super) struct ChannelState {
+    channel: Channel,
     stream: Arc<dyn ChannelStream>,
+    pipe: ChannelPipe,
     cancellation: CancellationToken,
     started_at: DateTime<Utc>,
-    channel: Channel,
-    task: JoinHandle<()>,
 }
 
 impl ChannelState {
-    pub(super) async fn spawn(channel: Channel) -> AppResult<Self> {
-        let handler = handlers::create_handler(&channel);
-        let cancellation = CancellationToken::new();
+    pub(super) fn new(channel: Channel, pipe: ChannelPipe) -> AppResult<Self> {
+        let stream = match channel.platform {
+            | ChannelPlatform::Telegram => TelegramStream::new(&channel)?,
+        };
 
-        let (h, c) = (handler.clone(), cancellation.clone());
+        Ok(Self {
+            channel,
+            stream,
+            pipe,
+            cancellation: CancellationToken::new(),
+            started_at: Utc::now(),
+        })
+    }
 
-        let task = tokio::spawn(async move {
-            let mut updates = h.updates().await;
+    pub(super) async fn run(&self) -> AppResult<()> {
+        let (stream, pipe, cancellation) = (
+            self.stream.clone(),
+            self.pipe.clone(),
+            self.cancellation.clone(),
+        );
 
-            while !c.is_cancelled() {
+        tokio::spawn(async move {
+            let Ok(mut outgoing_stream) = pipe.outgoing.subscribe_manual(None).await else {
+                error!("could not subscribe to channel IPC pipe");
+                return;
+            };
+
+            while !cancellation.is_cancelled() {
                 tokio::select! {
-                    Some(update) = updates.next() => {
-                        info!("got an update: {update:#?}");
+                    Some(Ok((update, confirm))) = outgoing_stream.next() => {
+                        if let Err(err) = match stream.send(update).await {
+                            Ok(_) => confirm.ack().await,
+                            Err(err) => {
+                                warn!("could not send outgoing update: {err:#?}");
+                                confirm.nack(true).await
+                            }
+                        } {
+                            error!("failed to send ack/nack: {err:#?}");
+                        }
+                    },
+
+                    Ok(update) = stream.recv() => {
+                        if let Err(err) = pipe.incoming.publish(None, &update).await {
+                            warn!("could not publish update: {err:#?}");
+                        }
                     }
 
-                _ = c.cancelled() => {
+                _ = cancellation.cancelled() => {
                         debug!("handler stopped due to cancellation");
                         break;
                     }
@@ -45,24 +79,14 @@ impl ChannelState {
                 };
             }
 
-            if !c.is_cancelled() {
-                c.cancel();
-            }
+            cancellation.cancelled().await;
         });
 
-        Ok(Self {
-            _handler: handler,
-            cancellation,
-            channel,
-            task,
-            started_at: Utc::now(),
-        })
+        Ok(())
     }
 
     pub(super) async fn stop(self) -> AppResult<()> {
         self.cancellation.cancel();
-        self.task.await.map_err(anyhow::Error::new)?;
-
         Ok(())
     }
 
