@@ -115,7 +115,7 @@ impl Service for TomlConfigService {
 }
 
 impl TomlConfigService {
-    fn inner<'a>(&'a self) -> AppResult<MutexGuard<'a, Config>> {
+    fn inner(&self) -> AppResult<MutexGuard<'_, Config>> {
         let lck = self
             .0
             .lock()
@@ -197,7 +197,7 @@ fn map_config_error(err: config::ConfigError) -> ConfigError {
 
         | config::ConfigError::FileParse { uri, cause } => {
             ConfigError::FileParse {
-                uri: uri.unwrap_or("<unknown>".into()),
+                uri: uri.unwrap_or_else(|| "<unknown>".into()),
                 error: cause.to_string(),
             }
         }
