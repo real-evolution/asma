@@ -107,7 +107,7 @@ impl BitAnd for Actions {
     type Output = Actions;
 
     fn bitand(self, rhs: Actions) -> Self::Output {
-        Actions(self.0 | rhs.0)
+        Actions(self.0 & rhs.0)
     }
 }
 
