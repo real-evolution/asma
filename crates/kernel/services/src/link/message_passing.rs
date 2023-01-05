@@ -20,7 +20,7 @@ pub trait MessageConfirmation: Send + Sync + 'static {
 }
 
 #[async_trait]
-pub trait Topic<T>: Send + Sync {
+pub trait TopicWriter<T>: Send + Sync {
     async fn publish(&self, key: Option<&str>, body: &T) -> AppResult<()>;
 
     async fn publish_confirmed(
@@ -28,7 +28,10 @@ pub trait Topic<T>: Send + Sync {
         key: Option<&str>,
         body: &T,
     ) -> AppResult<()>;
+}
 
+#[async_trait]
+pub trait TopicReader<T>: Send + Sync {
     async fn subscribe(
         &self,
         key: Option<&str>,
@@ -44,3 +47,8 @@ pub trait Topic<T>: Send + Sync {
         key: Option<&str>,
     ) -> AppResult<BoxStream<'_, AppResult<T>>>;
 }
+
+#[async_trait]
+pub trait Topic<T>: TopicReader<T> + TopicWriter<T> {}
+
+impl<T, U> Topic<T> for U where U: TopicWriter<T> + TopicReader<T>{}

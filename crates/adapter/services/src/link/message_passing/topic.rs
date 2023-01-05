@@ -12,20 +12,19 @@ use derive_more::Constructor;
 use futures::{stream::BoxStream, StreamExt};
 use kernel_services::{
     error::AppResult,
-    link::message_passing::{MessageConfirmation, Topic},
+    link::message_passing::{
+        MessageConfirmation, Topic, TopicReader, TopicWriter,
+    },
 };
 use lapin::{
     acker::Acker,
     message::Delivery,
     options::{
-        BasicConsumeOptions,
-        BasicNackOptions,
-        ExchangeDeclareOptions,
+        BasicConsumeOptions, BasicNackOptions, ExchangeDeclareOptions,
         QueueDeclareOptions,
     },
     publisher_confirm::PublisherConfirm,
-    Channel,
-    ExchangeKind,
+    Channel, ExchangeKind,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::RwLock;
@@ -188,9 +187,8 @@ impl RabbitMqTopic {
         Ok((conn, chan))
     }
 }
-
 #[async_trait::async_trait]
-impl<T> Topic<T> for RabbitMqTopicWrapper<T>
+impl<T> TopicWriter<T> for RabbitMqTopicWrapper<T>
 where
     T: Serialize + DeserializeOwned + Send + Sync,
 {
@@ -213,7 +211,13 @@ where
 
         Ok(())
     }
+}
 
+#[async_trait::async_trait]
+impl<T> TopicReader<T> for RabbitMqTopicWrapper<T>
+where
+    T: Serialize + DeserializeOwned + Send + Sync,
+{
     async fn subscribe(
         &self,
         key: Option<&str>,
