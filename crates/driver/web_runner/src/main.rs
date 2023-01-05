@@ -16,5 +16,6 @@ async fn main() -> impl Termination {
     }
 
     info!("app exited normally");
-    return ExitCode::FAILURE;
+
+    ExitCode::SUCCESS
 }
