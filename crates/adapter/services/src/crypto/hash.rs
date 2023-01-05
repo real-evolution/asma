@@ -14,12 +14,7 @@ use rand::rngs::OsRng;
 pub type Argon2CryptoHashService<'a> =
     CryptoHashServiceImpl<argon2::Argon2<'a>>;
 
-impl<'a> Argon2CryptoHashService<'a> {
-    pub fn new() -> Self {
-        Self(argon2::Argon2::default())
-    }
-}
-
+#[derive(Default)]
 pub struct CryptoHashServiceImpl<H>(H);
 
 impl<H> CryptoHashService for CryptoHashServiceImpl<H>
