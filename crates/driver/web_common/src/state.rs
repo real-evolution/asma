@@ -2,19 +2,18 @@ use std::sync::Arc;
 
 use adapter_repositories_postgres::*;
 use adapter_services::{
-    config::TomlConfigService,
-    crypto::hash::Argon2CryptoHashService,
+    config::TomlConfigService, crypto::hash::Argon2CryptoHashService,
     entropy::SecureEntropyService,
     link::message_passing::RabbitMqMessagePassingService,
 };
 use app_services::{
-    auth::AppAuthService,
-    link::channels::AppChannelsService,
-    setup::AppSetupService,
+    auth::AppAuthService, comm::chats::AppChatsService,
+    link::channels::AppChannelsService, setup::AppSetupService,
 };
 use kernel_repositories::DataStore;
 use kernel_services::{
     auth::AuthService,
+    comm::chats::ChatsService,
     config::ConfigService,
     crypto::hash::CryptoHashService,
     entropy::EntropyService,
@@ -32,6 +31,7 @@ pub type AppState = Arc<
         AppAuthService<TomlConfigService>,
         AppSetupService,
         AppChannelsService<RabbitMqMessagePassingService>,
+        AppChatsService<RabbitMqMessagePassingService>,
     >,
 >;
 
@@ -43,6 +43,7 @@ pub struct AppStateImpl<
     Auth: AuthService,
     Setup: SetupService,
     Channels: ChannelsService,
+    Chats: ChatsService,
 > {
     pub data: Arc<dyn DataStore>,
     pub config: Arc<Config>,
@@ -52,6 +53,7 @@ pub struct AppStateImpl<
     pub auth: Arc<Auth>,
     pub setup: Arc<Setup>,
     pub channels: Arc<Channels>,
+    pub chats: Arc<Chats>,
 }
 
 pub async fn get_config_service() -> anyhow::Result<Arc<TomlConfigService>> {
@@ -82,6 +84,9 @@ pub async fn create_state<'a>(
     let setup = init(AppSetupService::new(data.clone(), auth.clone())).await?;
     let channels =
         init(AppChannelsService::new(data.clone(), ipc.clone())).await?;
+    let chats =
+        init(AppChatsService::create(ipc.clone(), channels.clone()).await?)
+            .await?;
 
     debug!("building application state");
     Ok(Arc::new(AppStateImpl {
@@ -93,6 +98,7 @@ pub async fn create_state<'a>(
         auth,
         setup,
         channels,
+        chats,
     }))
 }
 
