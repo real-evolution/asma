@@ -8,6 +8,7 @@ use crate::error::AppResult;
 
 #[async_trait]
 pub trait MessagePassingService: Send + Sync {
+    #[deprecated]
     async fn get_topic<T>(&self, name: &str) -> AppResult<Arc<dyn Topic<T>>>
     where
         T: Serialize + DeserializeOwned + Send + Sync + 'static;
