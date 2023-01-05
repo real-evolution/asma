@@ -1,7 +1,6 @@
 mod channel_state;
 mod channel_stream;
 mod telegram;
-mod util;
 
 use std::{collections::HashMap, sync::Arc};
 
@@ -149,6 +148,8 @@ impl<Ipc: MessagePassingService> ChannelsService for AppChannelsService<Ipc> {
 #[async_trait]
 impl<Ipc: MessagePassingService> Service for AppChannelsService<Ipc> {
     async fn initialize(&self) -> AppResult<()> {
+        debug!("starting channels");
+
         let mut channels = self.start_channels();
 
         while let Some(res) = channels.next().await {

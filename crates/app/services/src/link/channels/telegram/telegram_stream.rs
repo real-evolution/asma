@@ -3,15 +3,14 @@ use std::sync::{
     Arc,
 };
 
+use common_async_utils::queue::BoundedQueue;
 use kernel_entities::entities::link::Channel;
 use kernel_services::{
     error::AppResult,
     link::{
         channels::{
-            IncomingChannelUpdate,
-            IncomingMessageUpdateKind,
-            OutgoingChannelUpdate,
-            OutgoingMessageUpdateKind,
+            IncomingChannelUpdate, IncomingMessageUpdateKind,
+            OutgoingChannelUpdate, OutgoingMessageUpdateKind,
         },
         error::LinkError,
     },
@@ -23,10 +22,7 @@ use teloxide::{
 };
 
 use super::util::map_request_error;
-use crate::link::channels::{
-    channel_stream::ChannelStream,
-    util::BoundedQueue,
-};
+use crate::link::channels::channel_stream::ChannelStream;
 
 pub(crate) struct TelegramStream {
     bot: Bot,

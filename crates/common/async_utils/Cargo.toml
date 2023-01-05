@@ -1,0 +1,10 @@
+[package]
+name = "common_async_utils"
+description = "A crate to hold asynchornous utilities"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
+# workspace dependencies
+tokio = { workspace = true }

@@ -3,13 +3,13 @@ use tokio::sync::{
     Mutex,
 };
 
-pub(super) struct BoundedQueue<T> {
+pub struct BoundedQueue<T> {
     tx: Sender<T>,
     rx: Mutex<Receiver<T>>,
 }
 
 impl<T> BoundedQueue<T> {
-    pub(super) fn new(buffer: usize) -> Self {
+    pub fn new(buffer: usize) -> Self {
         let (tx, rx) = channel(buffer);
 
         Self {
@@ -18,11 +18,11 @@ impl<T> BoundedQueue<T> {
         }
     }
 
-    pub(super) async fn enqueue(&self, value: T) -> Result<(), SendError<T>> {
+    pub async fn enqueue(&self, value: T) -> Result<(), SendError<T>> {
         self.tx.send(value).await
     }
 
-    pub(super) async fn dequeue(&self) -> Option<T> {
+    pub async fn dequeue(&self) -> Option<T> {
         self.rx.lock().await.recv().await
     }
 }
