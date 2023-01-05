@@ -2,13 +2,15 @@ use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
 use kernel_entities::entities::link::{Channel, ChannelPlatform};
-use kernel_services::{error::AppResult, link::channels::ChannelPipe};
+use kernel_services::{
+    error::AppResult,
+    link::channels::{ChannelPipe, IncomingChannelUpdate},
+};
 use tokio_stream::StreamExt;
 use tokio_util::sync::CancellationToken;
 
 use super::{
-    channel_stream::ChannelStream,
-    telegram::telegram_stream::TelegramStream,
+    channel_stream::ChannelStream, telegram::telegram_stream::TelegramStream,
 };
 
 pub(super) struct ChannelState {
@@ -35,7 +37,8 @@ impl ChannelState {
     }
 
     pub(super) async fn run(&self) -> AppResult<()> {
-        let (stream, pipe, cancellation) = (
+        let (channel, stream, pipe, cancellation) = (
+            self.channel.clone(),
             self.stream.clone(),
             self.pipe.clone(),
             self.cancellation.clone(),
@@ -50,18 +53,30 @@ impl ChannelState {
             while !cancellation.is_cancelled() {
                 tokio::select! {
                     Some(Ok((update, confirm))) = outgoing_stream.next() => {
-                        if let Err(err) = match stream.send(update).await {
-                            Ok(_) => confirm.ack().await,
-                            Err(err) => {
-                                warn!("could not send outgoing update: {err:#?}");
-                                confirm.nack(true).await
-                            }
-                        } {
-                            error!("failed to send ack/nack: {err:#?}");
+
+                        if update.user_id != channel.user_id || update.channel_id != channel.id {
+                            warn!("mismatching channel info found in update, skipping");
+                            confirm.nack(true).await.unwrap_or_else(|err| {
+                                error!("could not nack ipc message: {err:#?}");
+                            });
+                        } else {
+                             match stream.send(update.kind).await {
+                                Ok(_) => confirm.ack().await,
+                                Err(err) => {
+                                    warn!("could not send outgoing update: {err:#?}");
+                                    confirm.nack(true).await
+                                }
+                            }.unwrap_or_else(|err| error!("failed to send ack/nack: {err:#?}"));
                         }
                     },
 
-                    Ok(update) = stream.recv() => {
+                    Ok(update_kind) = stream.recv() => {
+                        let update = IncomingChannelUpdate {
+                            user_id: channel.user_id.clone(),
+                            channel_id: channel.id.clone(),
+                            kind: update_kind,
+                        };
+
                         if let Err(err) = pipe.incoming.publish(None, &update).await {
                             warn!("could not publish update: {err:#?}");
                         }
