@@ -19,7 +19,7 @@ impl SqlxPool {
     }
 
     pub(crate) async fn acquire(&self) -> RepoResult<PoolConnection<DbType>> {
-        Ok(self.0.acquire().await.map_err(map_sqlx_error)?)
+        self.0.acquire().await.map_err(map_sqlx_error)
     }
 }
 
