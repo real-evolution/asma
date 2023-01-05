@@ -12,9 +12,7 @@ use derive_more::Constructor;
 use futures::{stream::BoxStream, StreamExt};
 use kernel_services::{
     error::AppResult,
-    link::message_passing::{
-        MessageConfirmation, Topic, TopicReader, TopicWriter,
-    },
+    link::message_passing::{MessageConfirmation, TopicReader, TopicWriter},
 };
 use lapin::{
     acker::Acker,
@@ -190,7 +188,7 @@ impl RabbitMqTopic {
 #[async_trait::async_trait]
 impl<T> TopicWriter<T> for RabbitMqTopicWrapper<T>
 where
-    T: Serialize + DeserializeOwned + Send + Sync,
+    T: Serialize + Send + Sync,
 {
     async fn publish(&self, key: Option<&str>, body: &T) -> AppResult<()> {
         self.inner.do_publish(key, body).await?;
@@ -216,7 +214,7 @@ where
 #[async_trait::async_trait]
 impl<T> TopicReader<T> for RabbitMqTopicWrapper<T>
 where
-    T: Serialize + DeserializeOwned + Send + Sync,
+    T: DeserializeOwned + Send + Sync,
 {
     async fn subscribe(
         &self,
@@ -260,9 +258,9 @@ where
 
 impl<T> RabbitMqTopicWrapper<T>
 where
-    T: Send + Sync + Serialize + DeserializeOwned + 'static,
+    T: Send + Sync,
 {
-    pub(super) fn new_arc(value: Arc<RabbitMqTopic>) -> Arc<dyn Topic<T>> {
+    pub(super) fn new_arc(value: Arc<RabbitMqTopic>) -> Arc<Self> {
         Arc::new(RabbitMqTopicWrapper {
             inner: value,
             _phantom: PhantomData,

@@ -8,7 +8,9 @@ use deadpool_lapin::{Config, Pool, Runtime};
 use kernel_services::{
     config::ConfigService,
     error::AppResult,
-    link::message_passing::{MessagePassingService, Topic},
+    link::message_passing::{
+        MessagePassingService, Topic, TopicReader, TopicWriter,
+    },
     Service,
 };
 use serde::{de::DeserializeOwned, Serialize};
@@ -27,24 +29,31 @@ pub struct RabbitMqMessagePassingService {
 
 #[async_trait::async_trait]
 impl MessagePassingService for RabbitMqMessagePassingService {
+    async fn get_topic_writer<T>(
+        &self,
+        name: &str,
+    ) -> AppResult<Arc<dyn TopicWriter<T>>>
+    where
+        T: Serialize + Send + Sync + 'static,
+    {
+        Ok(self.get_topic_wrapper(name).await?)
+    }
+
+    async fn get_topic_reader<T>(
+        &self,
+        name: &str,
+    ) -> AppResult<Arc<dyn TopicReader<T>>>
+    where
+        T: DeserializeOwned + Send + Sync + 'static,
+    {
+        Ok(self.get_topic_wrapper(name).await?)
+    }
+
     async fn get_topic<T>(&self, name: &str) -> AppResult<Arc<dyn Topic<T>>>
     where
         T: Serialize + DeserializeOwned + Send + Sync + 'static,
     {
-        if let Some(topic) = self.topics.read().await.get(name) {
-            return Ok(RabbitMqTopicWrapper::new_arc(topic.clone()));
-        };
-
-        let topic = Arc::new(
-            RabbitMqTopic::create(name.to_owned(), self.pool.clone()).await?,
-        );
-
-        self.topics
-            .write()
-            .await
-            .insert(name.to_owned(), topic.clone());
-
-        Ok(RabbitMqTopicWrapper::new_arc(topic))
+        Ok(self.get_topic_wrapper(name).await?)
     }
 }
 
@@ -79,6 +88,29 @@ impl RabbitMqMessagePassingService {
             pool,
             topics: Default::default(),
         })
+    }
+
+    async fn get_topic_wrapper<T>(
+        &self,
+        name: &str,
+    ) -> AppResult<Arc<RabbitMqTopicWrapper<T>>>
+    where
+        T: Send + Sync,
+    {
+        if let Some(topic) = self.topics.read().await.get(name) {
+            return Ok(RabbitMqTopicWrapper::new_arc(topic.clone()));
+        };
+
+        let topic = Arc::new(
+            RabbitMqTopic::create(name.to_owned(), self.pool.clone()).await?,
+        );
+
+        self.topics
+            .write()
+            .await
+            .insert(name.to_owned(), topic.clone());
+
+        Ok(RabbitMqTopicWrapper::new_arc(topic))
     }
 }
 
