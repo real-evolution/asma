@@ -8,43 +8,39 @@ use crate::error::AppResult;
 
 #[async_trait]
 pub trait MessagePassingService: Send + Sync {
-    type TopicType: Topic;
-
-    async fn get_topic(&self, name: &str) -> AppResult<Arc<Self::TopicType>>;
+    async fn get_topic<T>(&self, name: &str) -> AppResult<Arc<dyn Topic<T>>>
+    where
+        T: Serialize + DeserializeOwned + Send + Sync + 'static;
 }
 
 #[async_trait]
 pub trait MessageConfirmation: Send + Sync + 'static {
-    async fn ack(self) -> AppResult<()>;
-    async fn nack(self, requeue: bool) -> AppResult<()>;
+    async fn ack(&self) -> AppResult<()>;
+    async fn nack(&self, requeue: bool) -> AppResult<()>;
 }
 
 #[async_trait]
-pub trait Topic {
-    async fn publish<T: Serialize + Send + Sync>(
+pub trait Topic<T>: Send + Sync {
+    async fn publish(&self, key: Option<&str>, body: &T) -> AppResult<()>;
+
+    async fn publish_confirmed(
         &self,
         key: Option<&str>,
         body: &T,
     ) -> AppResult<()>;
 
-    async fn publish_confirmed<T: Serialize + Send + Sync>(
+    async fn subscribe(
         &self,
         key: Option<&str>,
-        body: &T,
-    ) -> AppResult<()>;
+    ) -> AppResult<BoxStream<'_, AppResult<T>>>;
 
-    async fn subscribe<'a, T: DeserializeOwned + Send + 'a>(
-        &'a self,
-        key: Option<&'a str>,
-    ) -> AppResult<BoxStream<'a, AppResult<T>>>;
+    async fn subscribe_manual(
+        &self,
+        key: Option<&str>,
+    ) -> AppResult<BoxStream<'_, AppResult<(T, Arc<dyn MessageConfirmation>)>>>;
 
-    async fn subscribe_manual<'a, T: DeserializeOwned + Send + 'a>(
-        &'a self,
-        key: Option<&'a str>,
-    ) -> AppResult<BoxStream<'a, AppResult<(T, Arc<dyn MessageConfirmation>)>>>;
-
-    async fn mirror<'a, T: DeserializeOwned + Send + 'a>(
-        &'a self,
-        key: Option<&'a str>,
-    ) -> AppResult<BoxStream<'a, AppResult<T>>>;
+    async fn mirror(
+        &self,
+        key: Option<&str>,
+    ) -> AppResult<BoxStream<'_, AppResult<T>>>;
 }
