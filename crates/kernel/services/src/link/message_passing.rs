@@ -8,6 +8,20 @@ use crate::error::AppResult;
 
 #[async_trait]
 pub trait MessagePassingService: Send + Sync {
+    async fn get_topic_writer<T>(
+        &self,
+        name: &str,
+    ) -> AppResult<Arc<dyn TopicWriter<T>>>
+    where
+        T: Serialize + Send + Sync + 'static;
+
+    async fn get_topic_reader<T>(
+        &self,
+        name: &str,
+    ) -> AppResult<Arc<dyn TopicReader<T>>>
+    where
+        T: DeserializeOwned + Send + Sync + 'static;
+
     #[deprecated]
     async fn get_topic<T>(&self, name: &str) -> AppResult<Arc<dyn Topic<T>>>
     where
@@ -52,4 +66,4 @@ pub trait TopicReader<T>: Send + Sync {
 #[async_trait]
 pub trait Topic<T>: TopicReader<T> + TopicWriter<T> {}
 
-impl<T, U> Topic<T> for U where U: TopicWriter<T> + TopicReader<T>{}
+impl<T, U> Topic<T> for U where U: TopicWriter<T> + TopicReader<T> {}
