@@ -24,7 +24,9 @@ use kernel_services::{
 use self::channels_listener::ChatsChannelsListener;
 
 pub struct AppChatsService<IPC> {
+    listener: ChatsChannelsListener<IPC>,
 }
+
 #[async_trait::async_trait]
 impl<IPC> ChatsService for AppChatsService<IPC>
 where
@@ -38,5 +40,20 @@ where
         todo!()
     }
 }
+impl<IPC: MessagePassingService> AppChatsService<IPC> {
+    pub async fn create(
+        ipc: Arc<IPC>,
+        channels_svc: Arc<dyn ChannelsService>,
+    ) -> AppResult<Self> {
+        let listener = ChatsChannelsListener::create(ipc, channels_svc).await?;
+
+        Ok(Self { listener })
+    }
+}
+
 #[async_trait::async_trait]
+impl<IPC: MessagePassingService> Service for AppChatsService<IPC> {
+    async fn initialize(&self) -> AppResult<()> {
+        Ok(())
+    }
 }
