@@ -1,5 +1,6 @@
 use std::{
     collections::HashSet,
+    marker::PhantomData,
     sync::{
         atomic::{AtomicU32, Ordering},
         Arc,
@@ -29,13 +30,20 @@ use lapin::{
 use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::RwLock;
 
-use super::util::{map_ipc_error, map_params_error};
+use super::util::{deserialize, map_ipc_error, map_params_error};
 
-pub struct RabbitMqTopic {
+#[derive(Debug)]
+pub(super) struct RabbitMqTopic {
     name: String,
     pool: Pool,
     queues: RwLock<HashSet<String>>,
     current_consumer_id: AtomicU32,
+}
+
+#[derive(Debug)]
+pub(super) struct RabbitMqTopicWrapper<T> {
+    inner: Arc<RabbitMqTopic>,
+    _phantom: PhantomData<T>,
 }
 
 impl RabbitMqTopic {
@@ -179,30 +187,26 @@ impl RabbitMqTopic {
 
         Ok((conn, chan))
     }
-
-    fn deserialize<T: DeserializeOwned>(buf: &[u8]) -> AppResult<T> {
-        rmp_serde::from_slice(buf).map_err(map_params_error)
-    }
 }
 
 #[async_trait::async_trait]
-impl Topic for RabbitMqTopic {
-    async fn publish<T: Serialize + Send + Sync>(
-        &self,
-        key: Option<&str>,
-        body: &T,
-    ) -> AppResult<()> {
-        self.do_publish(key, body).await?;
+impl<T> Topic<T> for RabbitMqTopicWrapper<T>
+where
+    T: Serialize + DeserializeOwned + Send + Sync,
+{
+    async fn publish(&self, key: Option<&str>, body: &T) -> AppResult<()> {
+        self.inner.do_publish(key, body).await?;
 
         Ok(())
     }
 
-    async fn publish_confirmed<T: Serialize + Send + Sync>(
+    async fn publish_confirmed(
         &self,
         key: Option<&str>,
         body: &T,
     ) -> AppResult<()> {
-        self.do_publish(key, body)
+        self.inner
+            .do_publish(key, body)
             .await?
             .await
             .map_err(map_ipc_error)?;
@@ -210,42 +214,55 @@ impl Topic for RabbitMqTopic {
         Ok(())
     }
 
-    async fn subscribe<'a, T: DeserializeOwned + Send + 'a>(
-        &'a self,
-        key: Option<&'a str>,
-    ) -> AppResult<BoxStream<'a, AppResult<T>>> {
+    async fn subscribe(
+        &self,
+        key: Option<&str>,
+    ) -> AppResult<BoxStream<'_, AppResult<T>>> {
         Ok(self
-            .do_subscribe(key, false, false, |i| {
-                Self::deserialize::<T>(&i.data)
-            })
+            .inner
+            .do_subscribe(key, false, false, |i| deserialize::<T>(&i.data))
             .await?
             .boxed())
     }
 
-    async fn subscribe_manual<'a, T: DeserializeOwned + Send + 'a>(
-        &'a self,
-        key: Option<&'a str>,
-    ) -> AppResult<BoxStream<'a, AppResult<(T, Arc<dyn MessageConfirmation>)>>>
+    async fn subscribe_manual(
+        &self,
+        key: Option<&str>,
+    ) -> AppResult<BoxStream<'_, AppResult<(T, Arc<dyn MessageConfirmation>)>>>
     {
         Ok(self
+            .inner
             .do_subscribe(key, false, true, |i| {
                 let confirm: Arc<dyn MessageConfirmation> =
                     Arc::new(RabbitMQMessageConfirmation::new(i.acker));
 
-                Ok((Self::deserialize(&i.data)?, confirm))
+                Ok((deserialize::<T>(&i.data)?, confirm))
             })
             .await?
             .boxed())
     }
 
-    async fn mirror<'a, T: DeserializeOwned + Send + 'a>(
-        &'a self,
-        key: Option<&'a str>,
-    ) -> AppResult<BoxStream<'a, AppResult<T>>> {
+    async fn mirror(
+        &self,
+        key: Option<&str>,
+    ) -> AppResult<BoxStream<'_, AppResult<T>>> {
         Ok(self
-            .do_subscribe(key, true, false, |i| Self::deserialize::<T>(&i.data))
+            .inner
+            .do_subscribe(key, true, false, |i| deserialize::<T>(&i.data))
             .await?
             .boxed())
+    }
+}
+
+impl<T> RabbitMqTopicWrapper<T>
+where
+    T: Send + Sync + Serialize + DeserializeOwned + 'static,
+{
+    pub(super) fn new_arc(value: Arc<RabbitMqTopic>) -> Arc<dyn Topic<T>> {
+        Arc::new(RabbitMqTopicWrapper {
+            inner: value,
+            _phantom: PhantomData,
+        })
     }
 }
 
@@ -256,14 +273,14 @@ pub(super) struct RabbitMQMessageConfirmation {
 
 #[async_trait::async_trait]
 impl MessageConfirmation for RabbitMQMessageConfirmation {
-    async fn ack(self) -> AppResult<()> {
+    async fn ack(&self) -> AppResult<()> {
         self.acker
             .ack(Default::default())
             .await
             .map_err(map_ipc_error)
     }
 
-    async fn nack(self, requeue: bool) -> AppResult<()> {
+    async fn nack(&self, requeue: bool) -> AppResult<()> {
         self.acker
             .nack(BasicNackOptions {
                 multiple: false,

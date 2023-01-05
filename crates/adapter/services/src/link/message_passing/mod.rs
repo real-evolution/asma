@@ -8,13 +8,16 @@ use deadpool_lapin::{Config, Pool, Runtime};
 use kernel_services::{
     config::ConfigService,
     error::AppResult,
-    link::message_passing::MessagePassingService,
+    link::message_passing::{MessagePassingService, Topic},
     Service,
 };
+use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::RwLock;
-pub use topic::RabbitMqTopic;
 
-use self::config::{MessageQueueConfig, MESSAGE_QUEUE_CONFIG_SECTION};
+use self::{
+    config::{MessageQueueConfig, MESSAGE_QUEUE_CONFIG_SECTION},
+    topic::{RabbitMqTopic, RabbitMqTopicWrapper},
+};
 use crate::link::message_passing::util::map_ipc_error;
 
 pub struct RabbitMqMessagePassingService {
@@ -24,11 +27,12 @@ pub struct RabbitMqMessagePassingService {
 
 #[async_trait::async_trait]
 impl MessagePassingService for RabbitMqMessagePassingService {
-    type TopicType = RabbitMqTopic;
-
-    async fn get_topic(&self, name: &str) -> AppResult<Arc<RabbitMqTopic>> {
+    async fn get_topic<T>(&self, name: &str) -> AppResult<Arc<dyn Topic<T>>>
+    where
+        T: Serialize + DeserializeOwned + Send + Sync + 'static,
+    {
         if let Some(topic) = self.topics.read().await.get(name) {
-            return Ok(topic.clone());
+            return Ok(RabbitMqTopicWrapper::new_arc(topic.clone()));
         };
 
         let topic = Arc::new(
@@ -40,7 +44,7 @@ impl MessagePassingService for RabbitMqMessagePassingService {
             .await
             .insert(name.to_owned(), topic.clone());
 
-        Ok(topic)
+        Ok(RabbitMqTopicWrapper::new_arc(topic))
     }
 }
 
