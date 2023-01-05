@@ -77,15 +77,15 @@ impl RabbitMqTopic {
         body: &T,
     ) -> AppResult<PublisherConfirm> {
         let buf = rmp_serde::to_vec(body).map_err(map_params_error)?;
-        let key = key.unwrap_or("#");
+        let key = format!("{}.{}", &self.name, key.unwrap_or("#"));
 
         let (_, ch) = Self::acquire_channel(&self.pool).await?;
-        self.ensure_queue_created(key, false, &ch).await?;
+        self.ensure_queue_created(&key, false, &ch).await?;
 
         let confirm = ch
             .basic_publish(
                 &self.name,
-                key,
+                &key,
                 Default::default(),
                 &buf,
                 Default::default(),
@@ -107,7 +107,7 @@ impl RabbitMqTopic {
             .current_consumer_id
             .fetch_add(1, Ordering::AcqRel)
             .to_string();
-        let key = key.unwrap_or("#");
+        let key = format!("{}.{}", &self.name, key.unwrap_or("#"));
 
         let opts = BasicConsumeOptions {
             exclusive: mirror,
@@ -116,7 +116,7 @@ impl RabbitMqTopic {
         };
 
         let (_, ch) = Self::acquire_channel(&self.pool).await?;
-        let queue = self.ensure_queue_created(key, mirror, &ch).await?;
+        let queue = self.ensure_queue_created(&key, mirror, &ch).await?;
 
         Ok(ch
             .basic_consume(&queue, &id, opts, Default::default())

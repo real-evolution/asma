@@ -7,8 +7,7 @@ use std::{collections::HashMap, sync::Arc};
 use async_trait::async_trait;
 use futures::{
     stream::{self, BoxStream},
-    Stream,
-    StreamExt,
+    Stream, StreamExt,
 };
 use kernel_entities::{
     entities::{auth::User, link::Channel},
@@ -29,6 +28,8 @@ use self::channel_state::ChannelState;
 
 type ChannelStatesMap = HashMap<Key<Channel>, ChannelState>;
 type UserChannelsMap = HashMap<Key<User>, ChannelStatesMap>;
+
+const CHANNELS_TOPIC_NAME: &str = "channels";
 
 pub struct AppChannelsService<IPC> {
     data: Arc<dyn DataStore>,
@@ -141,13 +142,15 @@ impl<Ipc: MessagePassingService> ChannelsService for AppChannelsService<Ipc> {
     }
 
     async fn get_pipe_of_all(&self) -> AppResult<ChannelPipe> {
-        self.create_pipe("#").await
+        self.create_pipe("*.*").await
     }
 }
 
 #[async_trait]
 impl<Ipc: MessagePassingService> Service for AppChannelsService<Ipc> {
     async fn initialize(&self) -> AppResult<()> {
+        self.get_pipe_of_all().await?;
+
         debug!("starting channels");
 
         let mut channels = self.start_channels();
@@ -236,8 +239,15 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
     }
 
     async fn create_pipe(&self, key: &str) -> AppResult<ChannelPipe> {
-        let tx = self.ipc.get_topic(&format!("channels.{key}-out")).await?;
-        let rx = self.ipc.get_topic(&format!("channels.{key}-in")).await?;
+        let tx = self
+            .ipc
+            .get_topic(&format!("{CHANNELS_TOPIC_NAME}.{key}.out"))
+            .await?;
+
+        let rx = self
+            .ipc
+            .get_topic(&format!("{CHANNELS_TOPIC_NAME}.{key}.in"))
+            .await?;
 
         Ok(ChannelPipe {
             incoming: tx,
