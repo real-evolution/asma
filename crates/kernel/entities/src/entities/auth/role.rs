@@ -30,9 +30,9 @@ pub enum KnownRoles {
     UserOwner,
 }
 
-impl Into<&str> for KnownRoles {
-    fn into(self) -> &'static str {
-        match self {
+impl From<KnownRoles> for &str {
+    fn from(val: KnownRoles) -> Self {
+        match val {
             KnownRoles::Root => "root",
             KnownRoles::Admin => "admin",
             KnownRoles::UserOwner => "user_owner",

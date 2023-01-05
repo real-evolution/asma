@@ -165,8 +165,8 @@ impl From<i64> for Resource {
     }
 }
 
-impl Into<i64> for Resource {
-    fn into(self) -> i64 {
-        self.repr()
+impl From<Resource> for i64 {
+    fn from(val: Resource) -> Self {
+        val.repr()
     }
 }

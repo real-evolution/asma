@@ -33,8 +33,8 @@ impl From<i32> for ChannelPlatform {
     }
 }
 
-impl Into<i32> for ChannelPlatform {
-    fn into(self) -> i32 {
-        self.repr()
+impl From<ChannelPlatform> for i32 {
+    fn from(val: ChannelPlatform) -> Self {
+        val.repr()
     }
 }

@@ -28,11 +28,11 @@ impl<K: Display, D: Serialize, P: Display> IntoResponse for Created<K, D, P> {
     }
 }
 
-impl<'a, K, E: Serialize> Into<Created<K, E, String>>
-    for Created<K, E, &'a str>
+impl<'a, K, E: Serialize> From<Created<K, E, &'a str>>
+    for Created<K, E, String>
 {
-    fn into(self) -> Created<K, E, String> {
-        Created(self.0.to_string(), self.1, self.2)
+    fn from(val: Created<K, E, &'a str>) -> Self {
+        Created(val.0.to_string(), val.1, val.2)
     }
 }
 

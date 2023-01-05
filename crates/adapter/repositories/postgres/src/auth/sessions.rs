@@ -154,15 +154,15 @@ mod models {
         pub updated_at: DateTime<Utc>,
     }
 
-    impl Into<InsertSessionModel> for InsertSession {
-        fn into(self) -> InsertSessionModel {
+    impl From<InsertSession> for InsertSessionModel {
+        fn from(val: InsertSession) -> Self {
             InsertSessionModel {
-                account_id: self.account_id.into(),
-                device_identifier: self.device_identifier,
-                agent: self.agent,
-                refresh_token: self.refresh_token,
-                last_address: self.address,
-                expires_at: self.expires_at,
+                account_id: val.account_id.into(),
+                device_identifier: val.device_identifier,
+                agent: val.agent,
+                refresh_token: val.refresh_token,
+                last_address: val.address,
+                expires_at: val.expires_at,
             }
         }
     }

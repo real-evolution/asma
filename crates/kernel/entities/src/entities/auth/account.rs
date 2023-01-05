@@ -31,9 +31,9 @@ impl From<i32> for AccountState {
     }
 }
 
-impl Into<i32> for AccountState {
-    fn into(self) -> i32 {
-        self.repr()
+impl From<AccountState> for i32 {
+    fn from(val: AccountState) -> Self {
+        val.repr()
     }
 }
 

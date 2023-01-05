@@ -68,13 +68,13 @@ mod models {
         pub updated_at: DateTime<Utc>,
     }
 
-    impl Into<InsertUserModel> for InsertUser {
-        fn into(self) -> InsertUserModel {
+    impl From<InsertUser> for InsertUserModel {
+        fn from(val: InsertUser) -> Self {
             InsertUserModel {
                 id: uuid::Uuid::new_v4(),
-                username: self.username,
-                display_name: self.display_name,
-                is_active: self.is_active,
+                username: val.username,
+                display_name: val.display_name,
+                is_active: val.is_active,
             }
         }
     }

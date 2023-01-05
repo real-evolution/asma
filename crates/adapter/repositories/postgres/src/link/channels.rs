@@ -149,16 +149,16 @@ mod models {
         pub updated_at: DateTime<Utc>,
     }
 
-    impl Into<InsertChannelModel> for InsertChannel {
-        fn into(self) -> InsertChannelModel {
+    impl From<InsertChannel> for InsertChannelModel {
+        fn from(val: InsertChannel) -> Self {
             InsertChannelModel {
                 id: uuid::Uuid::new_v4(),
-                user_id: self.user_id.into(),
-                name: self.name,
-                platform: self.platform.into(),
-                api_key: self.api_key,
-                valid_until: self.valid_until,
-                is_active: self.is_active,
+                user_id: val.user_id.into(),
+                name: val.name,
+                platform: val.platform.into(),
+                api_key: val.api_key,
+                valid_until: val.valid_until,
+                is_active: val.is_active,
             }
         }
     }

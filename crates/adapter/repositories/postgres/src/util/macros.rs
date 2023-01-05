@@ -3,9 +3,9 @@ macro_rules! generate_mapping {
     ($entity:ty, $model:ty, $field_count:expr) => {
         seq_macro::seq!(N in 1..$field_count {
 
-            impl Into<$entity> for $model {
-                fn into(self) -> $entity {
-                    let (v0, #(v~N,)*) = self.into();
+            impl From<$model> for $entity {
+                fn from(value: $model) -> Self {
+                    let (v0, #(v~N,)*) = value.into();
 
                     $entity::from((v0.into(), #(v~N.into(),)*))
                 }

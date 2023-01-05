@@ -29,8 +29,8 @@ impl Default for Pagination {
     }
 }
 
-impl Into<(DateTime<Utc>, usize)> for Pagination {
-    fn into(self) -> (DateTime<Utc>, usize) {
-        (self.before, self.page_size)
+impl From<Pagination> for (DateTime<Utc>, usize) {
+    fn from(val: Pagination) -> Self {
+        (val.before, val.page_size)
     }
 }

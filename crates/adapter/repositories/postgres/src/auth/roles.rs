@@ -252,12 +252,12 @@ mod models {
         pub created_at: DateTime<Utc>,
     }
 
-    impl Into<InsertRoleModel> for InsertRole {
-        fn into(self) -> InsertRoleModel {
+    impl From<InsertRole> for InsertRoleModel {
+        fn from(val: InsertRole) -> Self {
             InsertRoleModel {
                 id: uuid::Uuid::new_v4(),
-                code: self.code,
-                friendly_name: self.friendly_name,
+                code: val.code,
+                friendly_name: val.friendly_name,
                 is_active: true,
             }
         }
