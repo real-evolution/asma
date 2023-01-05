@@ -6,13 +6,13 @@ use kernel_entities::{
     entities::{auth::User, link::Channel},
     traits::Key,
 };
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
 use super::message_passing::Topic;
 use crate::error::AppResult;
 
 #[async_trait::async_trait]
-pub trait ChannelsService<IpcTopic: Topic>: Send + Sync {
+pub trait ChannelsService: Send + Sync {
     async fn status(
         &self,
         id: &Key<Channel>,
@@ -40,14 +40,15 @@ pub trait ChannelsService<IpcTopic: Topic>: Send + Sync {
         &self,
         user_id: &Key<User>,
         channel_id: Option<&Key<Channel>>,
-    ) -> AppResult<ChannelPipe<IpcTopic>>;
+    ) -> AppResult<ChannelPipe>;
 
-    async fn get_pipe_of_all(&self) -> AppResult<ChannelPipe<IpcTopic>>;
+    async fn get_pipe_of_all(&self) -> AppResult<ChannelPipe>;
 }
 
-pub struct ChannelPipe<IpcTopic: Topic> {
-    pub tx: Arc<IpcTopic>,
-    pub rx: Arc<IpcTopic>,
+#[derive(Clone)]
+pub struct ChannelPipe {
+    pub outgoing: Arc<dyn Topic<OutgoingChannelUpdate>>,
+    pub incoming: Arc<dyn Topic<IncomingChannelUpdate>>,
 }
 
 #[derive(Clone, Copy, Debug, Serialize)]
@@ -56,7 +57,7 @@ pub struct ChannelStatus {
     pub started_at: DateTime<Utc>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum IncomingMessageUpdateKind {
     New {
         platform_message_id: String,
@@ -69,7 +70,7 @@ pub enum IncomingMessageUpdateKind {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum OutgoingMessageUpdateKind {
     New {
         content: String,
@@ -81,7 +82,7 @@ pub enum OutgoingMessageUpdateKind {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum IncomingChannelUpdate {
     Message {
         platform_chat_id: String,
@@ -91,7 +92,7 @@ pub enum IncomingChannelUpdate {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum OutgoingChannelUpdate {
     Message {
         platform_chat_id: String,
