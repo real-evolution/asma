@@ -5,7 +5,7 @@ use crate::error::RepoResult;
 
 #[async_trait::async_trait]
 pub trait Repo {
-    type Entity;
+    type Entity: Entity;
 
     async fn get(&self, key: &Key<Self::Entity>) -> RepoResult<Self::Entity>;
     async fn get_paginated(
