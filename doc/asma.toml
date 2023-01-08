@@ -108,6 +108,31 @@ idle_timeout_ms = 600000
 # Whether to created connections lazily (on demand) or not
 lazy = true
 
+[docs]
+# Documents store (NoSQL) connection driver. Supported drivers are: mongodb
+driver = "mongodx"
+# Document store server address
+host = "localhost"
+# Document store server listening port
+port = 5432
+# Document store server username
+#username = "postgres"
+# Document store server password
+#password = "123"
+# Document store to be used by the system
+database = "asma_test"
+
+[docs.pool]
+# Minumum number of connections to be opened & pooled to the database server
+min_connections = 8
+# Maximum number of connections to be opened & pooled to the database server
+max_connections = 64
+# Lifetime of connections (in milliseconds), after which the connections should
+# be closed
+max_lifetime_ms = 120000
+# Idle connections timeout
+idle_timeout_ms = 600000
+
 [message_queue]
 # Message passing queue protoocl. Currently, only `amqp` is supported
 protocol = "amqp"
