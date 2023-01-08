@@ -6,3 +6,12 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# crate dependencies
+mongodb = { version = "2", features = [
+  "bson-uuid-0_8",
+  "bson-chrono-0_4",
+] }
+
+# project dependencies
+common_validation = { path = "../../../common/validation" }
+validator = { workspace = true }
