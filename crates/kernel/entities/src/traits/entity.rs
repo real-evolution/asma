@@ -2,11 +2,11 @@ use std::{fmt::Display, marker::PhantomData};
 
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema_repr;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 pub type KeyType = uuid::Uuid;
 
-pub trait Entity: Sized {
+pub trait Entity: Serialize + DeserializeOwned + Send + Sync + Sized {
     fn id(&self) -> &Key<Self>;
     fn created_at(&self) -> DateTime<Utc>;
 }
