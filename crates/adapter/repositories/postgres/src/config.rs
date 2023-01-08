@@ -1,9 +1,11 @@
 use std::time::Duration;
 
-use anyhow::Result;
 use common_validation::*;
+use kernel_repositories::error::{RepoError, RepoResult};
 use serde::Deserialize;
 use validator::Validate;
+
+use crate::util::error::map_sqlx_error;
 
 pub const DATA_CONFIG_SECTION: &str = "data";
 
@@ -36,15 +38,15 @@ pub struct PoolConfig {
 }
 
 impl DataConfig {
-    pub fn get_connection_string(&self) -> Result<String> {
+    pub fn get_connection_string(&self) -> RepoResult<String> {
         self.do_get_connection_string::<false>()
     }
 
-    pub fn get_concealed_connection_string(&self) -> Result<String> {
+    pub fn get_concealed_connection_string(&self) -> RepoResult<String> {
         self.do_get_connection_string::<true>()
     }
 
-    pub async fn into_pool<Db: sqlx::Database>(self) -> Result<sqlx::Pool<Db>> {
+    pub async fn into_pool<Db: sqlx::Database>(self) -> RepoResult<sqlx::Pool<Db>> {
         let url = self.get_connection_string()?;
         let mut opts = sqlx::pool::PoolOptions::<Db>::new();
 
@@ -65,9 +67,9 @@ impl DataConfig {
         }
 
         let pool = if self.pool.lazy.unwrap_or(false) {
-            opts.connect_lazy(&url)?
+            opts.connect_lazy(&url).map_err(map_sqlx_error)?
         } else {
-            opts.connect(&url).await?
+            opts.connect(&url).await.map_err(map_sqlx_error)?
         };
 
         Ok(pool)
@@ -75,11 +77,13 @@ impl DataConfig {
 
     pub fn do_get_connection_string<const CONCEALED: bool>(
         &self,
-    ) -> Result<String> {
-        let ep = Endpoint::parse_str(&self.host)?;
+    ) -> RepoResult<String> {
+
+        let ep = Endpoint::parse_str(&self.host)
+            .map_err(|err| RepoError::InvalidParameter(err.to_string()))?;
         let host = match self.port.or(ep.port) {
-            Some(port) => format!("{}:{}", ep.domain, port),
-            None => ep.domain,
+            | Some(port) => format!("{}:{}", ep.domain, port),
+            | None => ep.domain,
         };
 
         let password = if CONCEALED { "***" } else { &self.password };
