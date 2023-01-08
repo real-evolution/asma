@@ -1,1 +1,2 @@
+mod chats;
 mod messages;
