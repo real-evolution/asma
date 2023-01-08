@@ -1,7 +1,8 @@
 [package]
 name = "adapter_repositories_mongodb"
 description = "MongoDB-specific repositories implementation"
-version = "0.1.0"
-edition = "2021"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
 
 [dependencies]
