@@ -7,7 +7,6 @@ use kernel_entities::{
     entities::comm::{Chat, Message},
     traits::Key,
 };
-use kernel_repositories::DataStore;
 use kernel_services::{
     comm::chats::ChatsService,
     error::AppResult,
