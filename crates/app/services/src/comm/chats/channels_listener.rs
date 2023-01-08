@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
+use kernel_repositories::{comm::InsertMessage, DocumentStore};
 use kernel_services::{
+    comm::chats::ChatsService,
     error::{AppError, AppResult},
     link::channels::{ChannelPipe, ChannelsService, OutgoingChannelUpdate},
 };
@@ -12,6 +14,7 @@ use tokio_stream::StreamExt;
 
 pub(super) struct ChatsChannelsListener<IPC> {
     ipc: Arc<IPC>,
+    docs: Arc<dyn DocumentStore>,
     outgoing_tx: UnboundedSender<OutgoingChannelUpdate>,
     outgoing_task: JoinHandle<()>,
     incoming_task: JoinHandle<()>,
@@ -20,6 +23,7 @@ pub(super) struct ChatsChannelsListener<IPC> {
 impl<IPC> ChatsChannelsListener<IPC> {
     pub(super) async fn create(
         ipc: Arc<IPC>,
+        docs: Arc<dyn DocumentStore>,
         channels_svc: Arc<dyn ChannelsService>,
     ) -> AppResult<Self> {
         let ChannelPipe {
@@ -46,6 +50,14 @@ impl<IPC> ChatsChannelsListener<IPC> {
                     .unwrap_or_else(|err| {
                         error!("could not publish channel update: {err:#?}");
                     });
+                //
+                // docs.messages()
+                //     .create(InsertMessage {
+                //         chat_id: update.chat_id,
+                //         text: Some(text.to_owned()),
+                //         direction: MessageDirection::Outgoing,
+                //     })
+                //     .await?;
             }
         });
 
@@ -84,6 +96,7 @@ impl<IPC> ChatsChannelsListener<IPC> {
 
         Ok(Self {
             ipc,
+            docs,
             outgoing_tx,
             outgoing_task,
             incoming_task,

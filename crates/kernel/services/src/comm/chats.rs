@@ -11,5 +11,5 @@ pub trait ChatsService: Send + Sync {
         &self,
         chat_id: &Key<Chat>,
         text: &str,
-    ) -> AppResult<Message>;
+    ) -> AppResult<()>;
 }

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use adapter_repositories_mongodb::{
-    DocumentStoreConfig, DOC_STORE_CONFIG_SECTION, create_doc_store,
+    create_doc_store, DocumentStoreConfig, DOC_STORE_CONFIG_SECTION,
 };
 use adapter_repositories_postgres::*;
 use adapter_services::{
@@ -93,9 +93,16 @@ pub async fn create_state<'a>(
     let setup = init(AppSetupService::new(data.clone(), auth.clone())).await?;
     let channels =
         init(AppChannelsService::new(data.clone(), ipc.clone())).await?;
-    let chats =
-        init(AppChatsService::create(ipc.clone(), channels.clone()).await?)
-            .await?;
+    let chats = init(
+        AppChatsService::create(
+            ipc.clone(),
+            data.clone(),
+            docs.clone(),
+            channels.clone(),
+        )
+        .await?,
+    )
+    .await?;
 
     debug!("building application state");
     Ok(Arc::new(AppStateImpl {
