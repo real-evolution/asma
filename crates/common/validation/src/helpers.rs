@@ -17,7 +17,7 @@ pub(crate) fn validate_with<T, F: Fn(T) -> bool>(
     value: T,
     f: F,
 ) -> Result<(), ValidationError> {
-    if !f(value) {
+    if f(value) {
         return Ok(());
     }
 
