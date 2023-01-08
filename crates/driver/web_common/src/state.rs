@@ -1,5 +1,8 @@
 use std::sync::Arc;
 
+use adapter_repositories_mongodb::{
+    DocumentStoreConfig, DOC_STORE_CONFIG_SECTION, create_doc_store,
+};
 use adapter_repositories_postgres::*;
 use adapter_services::{
     config::TomlConfigService, crypto::hash::Argon2CryptoHashService,
@@ -10,7 +13,7 @@ use app_services::{
     auth::AppAuthService, comm::chats::AppChatsService,
     link::channels::AppChannelsService, setup::AppSetupService,
 };
-use kernel_repositories::DataStore;
+use kernel_repositories::{DataStore, DocumentStore};
 use kernel_services::{
     auth::AuthService,
     comm::chats::ChatsService,
@@ -46,6 +49,7 @@ pub struct AppStateImpl<
     Chats: ChatsService,
 > {
     pub data: Arc<dyn DataStore>,
+    pub docs: Arc<dyn DocumentStore>,
     pub config: Arc<Config>,
     pub entropy: Arc<Entropy>,
     pub hash: Arc<CryptoHash>,
@@ -63,9 +67,14 @@ pub async fn get_config_service() -> anyhow::Result<Arc<TomlConfigService>> {
 pub async fn create_state<'a>(
     config: Arc<TomlConfigService>,
 ) -> anyhow::Result<AppState> {
-    debug!("creating datastore");
+    debug!("openning datastore");
     let conf = config.get_section::<DataConfig>(DATA_CONFIG_SECTION)?;
     let data = create_datastore(conf).await?;
+
+    debug!("openning document store");
+    let conf =
+        config.get_section::<DocumentStoreConfig>(DOC_STORE_CONFIG_SECTION)?;
+    let docs = create_doc_store(conf).await?;
 
     debug!("creating base services");
     let entropy = init(SecureEntropyService::default()).await?;
@@ -91,6 +100,7 @@ pub async fn create_state<'a>(
     debug!("building application state");
     Ok(Arc::new(AppStateImpl {
         data,
+        docs,
         config,
         entropy,
         hash,

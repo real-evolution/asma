@@ -11,6 +11,7 @@ app_services = { path = "../../app/services" }
 kernel_repositories = { path = "../../kernel/repositories" }
 kernel_services = { path = "../../kernel/services" }
 adapter_repositories_postgres = { path = "../../adapter/repositories/postgres" }
+adapter_repositories_mongodb = { path = "../../adapter/repositories/mongodb" }
 adapter_services = { path = "../../adapter/services" }
 
 # workspace dependencies
