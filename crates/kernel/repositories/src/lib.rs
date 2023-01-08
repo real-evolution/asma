@@ -13,3 +13,7 @@ pub trait DataStore: Send + Sync {
     fn auth(&self) -> &dyn auth::AuthDataStore;
     fn link(&self) -> &dyn link::LinkDataStore;
 }
+
+pub trait DocumentStore: Send + Sync {
+    fn messages(&self) -> &dyn comm::MessagesRepo;
+}
