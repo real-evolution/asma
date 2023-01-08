@@ -17,7 +17,9 @@ use kernel_services::{
 };
 use teloxide::{
     requests::Requester,
-    types::{MediaKind, Message, MessageId, MessageKind, Update, UpdateKind},
+    types::{
+        MediaKind, Message, MessageId, MessageKind, Update, UpdateKind, UserId,
+    },
     Bot,
 };
 
@@ -88,8 +90,7 @@ impl TelegramStream {
             return Err(LinkError::UnsupportedEvent("only text messages supported".into()).into());             
         };
 
-        let platform_chat_id = message.chat.id.to_string();
-        let platform_user_id = from.id.to_string();
+        let platform_user_id = from.id.0 as i64;
         let timestamp = message.date;
 
         let kind = if NEW {
@@ -105,7 +106,6 @@ impl TelegramStream {
         };
 
         Ok(IncomingChannelUpdateKind::Message {
-            platform_chat_id,
             platform_user_id,
             kind,
             timestamp,
@@ -143,14 +143,13 @@ impl TelegramStream {
     ) -> AppResult<()> {
         match update {
             | OutgoingChannelUpdateKind::Message {
-                platform_chat_id,
-                platform_user_id: _,
+                platform_user_id,
                 kind,
                 timestamp: _,
             } => match kind {
                 | OutgoingMessageUpdateKind::New { content } => {
                     self.bot
-                        .send_message(platform_chat_id, content)
+                        .send_message(UserId(platform_user_id as u64), content)
                         .await
                         .map_err(map_request_error)?;
 
@@ -166,7 +165,7 @@ impl TelegramStream {
 
                     self.bot
                         .edit_message_text(
-                            platform_chat_id,
+                            UserId(platform_user_id as u64),
                             MessageId(message_id),
                             content.unwrap_or_default(),
                         )
