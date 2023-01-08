@@ -18,4 +18,8 @@ pub enum RepoError {
 
     #[error("duplicate item: {0}")]
     DuplicateValue(String),
+
+    #[error("invlalid parameter: {0}")]
+    InvalidParameter(String),
+
 }
