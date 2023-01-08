@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
-use kernel_entities::entities::comm::Message;
+use kernel_entities::entities::comm::{Chat, Message};
 use kernel_repositories::{
-    comm::MessagesRepo, error::RepoResult, DocumentStore,
+    comm::{ChatsRepo, MessagesRepo},
+    error::RepoResult,
+    DocumentStore,
 };
 use mongodb::{Client, Database};
 use repo::MongoDbRepo;
@@ -18,10 +20,15 @@ pub use config::*;
 
 struct MongoDbDocumentStore {
     _client: Client,
+    chats: MongoDbRepo<Chat>,
     messages: MongoDbRepo<Message>,
 }
 
 impl DocumentStore for MongoDbDocumentStore {
+    fn chats(&self) -> &dyn ChatsRepo {
+        &self.chats
+    }
+
     fn messages(&self) -> &dyn MessagesRepo {
         &self.messages
     }
@@ -38,6 +45,7 @@ pub async fn create_doc_store(
     let (client, database) = conf.into_client().await?;
 
     Ok(Arc::new(MongoDbDocumentStore {
+        chats: get_initialized_repo(database.clone()).await?,
         messages: get_initialized_repo(database.clone()).await?,
         _client: client,
     }))
