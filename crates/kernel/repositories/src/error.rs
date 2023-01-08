@@ -22,4 +22,9 @@ pub enum RepoError {
     #[error("invlalid parameter: {0}")]
     InvalidParameter(String),
 
+    #[error("serialization: {0}")]
+    Serialization(String),
+
+    #[error("deserialization: {0}")]
+    Deserialization(String),
 }
