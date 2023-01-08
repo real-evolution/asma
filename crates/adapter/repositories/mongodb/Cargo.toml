@@ -14,4 +14,8 @@ mongodb = { version = "2", features = [
 
 # project dependencies
 common_validation = { path = "../../../common/validation" }
+kernel_entities = { path = "../../../kernel/entities" }
+# workspace dependencies
+async-trait = { workspace = true }
+serde = { workspace = true }
 validator = { workspace = true }
