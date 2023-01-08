@@ -2,7 +2,10 @@ use chrono::{DateTime, Utc};
 use validator::ValidationError;
 
 use crate::{
-    constants::{SUPPORTED_DATA_DRIVERS, SUPPORTED_MESSAGE_QUEUE_PROTOCOLS},
+    constants::{
+        SUPPORTED_DATA_DRIVERS, 
+        SUPPORTED_MESSAGE_QUEUE_PROTOCOLS, SUPPORTED_DOC_STORE_DRIVERS,
+    },
     helpers::{validate, validate_with},
     parse::*,
 };
@@ -29,6 +32,12 @@ pub fn username(value: &str) -> Result<(), ValidationError> {
 pub fn supported_data_driver(value: &str) -> Result<(), ValidationError> {
     validate_with("supported_data_driver", value, |v| {
         SUPPORTED_DATA_DRIVERS.contains(&v)
+    })
+}
+
+pub fn supported_doc_store_driver(value: &str) -> Result<(), ValidationError> {
+    validate_with("supported_doc_store_driver", value, |v| {
+        SUPPORTED_DOC_STORE_DRIVERS.contains(&v)
     })
 }
 
