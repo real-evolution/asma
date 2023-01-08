@@ -3,7 +3,7 @@ use std::sync::Arc;
 use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use kernel_entities::{
-    entities::{auth::User, link::Channel},
+    entities::{auth::User, link::Channel, comm::Chat},
     traits::Key,
 };
 use serde::{Deserialize, Serialize};
@@ -85,8 +85,7 @@ pub enum IncomingMessageUpdateKind {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum OutgoingChannelUpdateKind {
     Message {
-        platform_chat_id: String,
-        platform_user_id: String,
+        platform_user_id: i64,
         kind: OutgoingMessageUpdateKind,
         timestamp: DateTime<Utc>,
     },
@@ -95,8 +94,7 @@ pub enum OutgoingChannelUpdateKind {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum IncomingChannelUpdateKind {
     Message {
-        platform_chat_id: String,
-        platform_user_id: String,
+        platform_user_id: i64,
         kind: IncomingMessageUpdateKind,
         timestamp: DateTime<Utc>,
     },
