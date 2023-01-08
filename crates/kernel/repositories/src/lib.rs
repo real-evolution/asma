@@ -15,5 +15,6 @@ pub trait DataStore: Send + Sync {
 }
 
 pub trait DocumentStore: Send + Sync {
+    fn chats(&self) -> &dyn comm::ChatsRepo;
     fn messages(&self) -> &dyn comm::MessagesRepo;
 }
