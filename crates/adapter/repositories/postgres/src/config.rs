@@ -78,6 +78,9 @@ impl DataConfig {
     pub fn do_get_connection_string<const CONCEALED: bool>(
         &self,
     ) -> RepoResult<String> {
+        if let Err(err) = self.validate() {
+            return Err(RepoError::InvalidParameter(err.to_string()));
+        }
 
         let ep = Endpoint::parse_str(&self.host)
             .map_err(|err| RepoError::InvalidParameter(err.to_string()))?;
