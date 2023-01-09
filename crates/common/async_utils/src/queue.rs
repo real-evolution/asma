@@ -1,5 +1,5 @@
 use tokio::sync::{
-    mpsc::{channel, error::SendError, Receiver, Sender},
+    mpsc::{channel, error::{SendError, TryRecvError}, Receiver, Sender},
     Mutex,
 };
 
@@ -24,5 +24,9 @@ impl<T> BoundedQueue<T> {
 
     pub async fn dequeue(&self) -> Option<T> {
         self.rx.lock().await.recv().await
+    }
+
+    pub async fn try_dequeue(&self) -> Result<T, TryRecvError> {
+        self.rx.lock().await.try_recv()
     }
 }
