@@ -9,9 +9,7 @@ use kernel_repositories::{
 };
 use mongodb::{
     bson::{doc, Document},
-    options::{
-        CreateCollectionOptions, FindOneOptions, FindOptions, IndexOptions,
-    },
+    options::{FindOneOptions, FindOptions, IndexOptions},
     Collection, Database,
 };
 use tokio_stream::StreamExt;
@@ -40,11 +38,6 @@ impl<E: CollectionEntity> MongoDbRepo<E> {
 
     pub async fn initialize(&self) -> RepoResult<()> {
         debug!("initializing `{}` documents repo", E::name());
-
-        self.database
-            .create_collection(E::name(), CreateCollectionOptions::default())
-            .await
-            .map_err(map_mongo_error)?;
 
         let collection = self.collection();
 
