@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use kernel_entities::entities::link::{Channel, ChannelPlatform};
 use kernel_services::{
     error::AppResult,
-    link::channels::{ChannelPipe, IncomingChannelUpdate},
+    link::channels::{IncomingChannelUpdate, ReverseChannelPipe},
 };
 use tokio_stream::StreamExt;
 use tokio_util::sync::CancellationToken;
@@ -16,13 +16,16 @@ use super::{
 pub(super) struct ChannelState {
     channel: Channel,
     stream: Arc<dyn ChannelStream>,
-    pipe: ChannelPipe,
+    pipe: ReverseChannelPipe,
     cancellation: CancellationToken,
     started_at: DateTime<Utc>,
 }
 
 impl ChannelState {
-    pub(super) fn new(channel: Channel, pipe: ChannelPipe) -> AppResult<Self> {
+    pub(super) fn new(
+        channel: Channel,
+        pipe: ReverseChannelPipe,
+    ) -> AppResult<Self> {
         let stream = match channel.platform {
             | ChannelPlatform::Telegram => TelegramStream::new(&channel)?,
         };
@@ -45,7 +48,7 @@ impl ChannelState {
         );
 
         tokio::spawn(async move {
-            let Ok(mut outgoing_stream) = pipe.outgoing.subscribe_manual(None).await else {
+            let Ok(mut outgoing_stream) = pipe.rx.subscribe_manual(None).await else {
                 error!("could not subscribe to channel IPC pipe");
                 return;
             };
@@ -77,7 +80,7 @@ impl ChannelState {
                             kind: update_kind,
                         };
 
-                        if let Err(err) = pipe.incoming.publish(None, &update).await {
+                        if let Err(err) = pipe.tx.publish(None, &update).await {
                             warn!("could not publish update: {err:#?}");
                         }
                     }

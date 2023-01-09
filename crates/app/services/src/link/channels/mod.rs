@@ -17,11 +17,14 @@ use kernel_repositories::{error::RepoResult, DataStore};
 use kernel_services::{
     error::AppResult,
     link::{
-        channels::{ChannelPipe, ChannelStatus, ChannelsService},
-        message_passing::MessagePassingService,
+        channels::{
+            ChannelPipe, ChannelStatus, ChannelsService, ReverseChannelPipe,
+        },
+        message_passing::{MessagePassingService, TopicReader, TopicWriter},
     },
     Service,
 };
+use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::RwLock;
 
 use self::channel_state::ChannelState;
@@ -197,7 +200,10 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
                 );
 
                 let pipe = self
-                    .get_pipe_of(&channel.user_id, Some(&channel.id))
+                    .create_reverse_pipe(&format!(
+                        "{}.{}",
+                        channel.user_id, channel.id
+                    ))
                     .await?;
                 let state = ChannelState::new(channel, pipe)?;
 
@@ -239,20 +245,42 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
     }
 
     async fn create_pipe(&self, key: &str) -> AppResult<ChannelPipe> {
-        let tx = self
-            .ipc
-            .get_topic(&format!("{CHANNELS_TOPIC_NAME}.{key}.out"))
+        let (tx, rx) = self
+            .create_pipe_parts(
+                &format!("{CHANNELS_TOPIC_NAME}.{key}.out"),
+                &format!("{CHANNELS_TOPIC_NAME}.{key}.in"),
+            )
             .await?;
 
-        let rx = self
-            .ipc
-            .get_topic(&format!("{CHANNELS_TOPIC_NAME}.{key}.in"))
+        Ok(ChannelPipe { tx, rx })
+    }
+
+    async fn create_reverse_pipe(
+        &self,
+        key: &str,
+    ) -> AppResult<ReverseChannelPipe> {
+        let (tx, rx) = self
+            .create_pipe_parts(
+                &format!("{CHANNELS_TOPIC_NAME}.{key}.in"),
+                &format!("{CHANNELS_TOPIC_NAME}.{key}.out"),
+            )
             .await?;
 
-        Ok(ChannelPipe {
-            incoming: tx,
-            outgoing: rx,
-        })
+        Ok(ReverseChannelPipe { tx, rx })
+    }
+
+    async fn create_pipe_parts<
+        T: Serialize + Send + Sync + 'static,
+        R: DeserializeOwned + Send + Sync + 'static,
+    >(
+        &self,
+        tx_key: &str,
+        rx_key: &str,
+    ) -> AppResult<(Arc<dyn TopicWriter<T>>, Arc<dyn TopicReader<R>>)> {
+        let tx = self.ipc.get_topic_writer(tx_key).await?;
+        let rx = self.ipc.get_topic_reader(rx_key).await?;
+
+        Ok((tx, rx))
     }
 }
 
