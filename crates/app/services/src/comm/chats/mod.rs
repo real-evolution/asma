@@ -34,7 +34,7 @@ where
     async fn send_message(
         &self,
         chat_id: &Key<Chat>,
-        text: &str,
+        text: String,
     ) -> AppResult<()> {
         let chat = self.docs.chats().get(chat_id).await?;
         let instance =
