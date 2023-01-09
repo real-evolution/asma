@@ -34,7 +34,7 @@ pub type AppState = Arc<
         AppAuthService<TomlConfigService>,
         AppSetupService,
         AppChannelsService<RabbitMqMessagePassingService>,
-        AppChatsService<RabbitMqMessagePassingService>,
+        AppChatsService,
     >,
 >;
 

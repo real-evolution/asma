@@ -28,10 +28,7 @@ pub struct AppChatsService {
 }
 
 #[async_trait::async_trait]
-impl<IPC> ChatsService for AppChatsService<IPC>
-where
-    IPC: MessagePassingService,
-{
+impl ChatsService for AppChatsService {
     async fn send_message(
         &self,
         chat_id: &Key<Chat>,
@@ -59,7 +56,7 @@ where
     }
 }
 
-impl<IPC: MessagePassingService> AppChatsService<IPC> {
+impl AppChatsService {
     pub async fn create(
         ipc: Arc<IPC>,
         data: Arc<dyn DataStore>,
@@ -79,7 +76,7 @@ impl<IPC: MessagePassingService> AppChatsService<IPC> {
 }
 
 #[async_trait::async_trait]
-impl<IPC: MessagePassingService> Service for AppChatsService<IPC> {
+impl Service for AppChatsService {
     async fn initialize(self: Arc<Self>) -> AppResult<()> {
         Ok(())
     }
