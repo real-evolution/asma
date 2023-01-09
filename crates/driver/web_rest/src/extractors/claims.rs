@@ -47,11 +47,15 @@ impl FromRequestParts<AppState> for Claims {
 
         let config = ApiConfig::from_request_parts(parts, state).await?;
 
-        Ok(jsonwebtoken::decode::<Claims>(
+        let mut claims = jsonwebtoken::decode::<Claims>(
             auth.token(),
             &DecodingKey::from_secret(config.token.signing_key.as_bytes()),
             &Validation::default(),
         )
-        .map(|data| data.claims)?)
+        .map(|data| data.claims)?;
+
+        claims.config = config;
+
+        Ok(claims)
     }
 }
