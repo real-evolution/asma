@@ -9,6 +9,19 @@ pub async fn create_index<T: CollectionEntity>(
     keys: Document,
     options: Option<IndexOptions>,
 ) -> RepoResult<()> {
+    if let Some(ref options) = options {
+        if let Some(ref name) = options.name {
+            if collection
+                .list_index_names()
+                .await
+                .map_err(map_mongo_error)?
+                .contains(name)
+            {
+                return Ok(());
+            }
+        }
+    }
+
     collection
         .create_index(
             IndexModel::builder().keys(keys).options(options).build(),
