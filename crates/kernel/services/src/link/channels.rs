@@ -3,7 +3,7 @@ use std::sync::Arc;
 use chrono::{DateTime, Utc};
 use futures::stream::BoxStream;
 use kernel_entities::{
-    entities::{auth::User, link::Channel, comm::Chat},
+    entities::{auth::User, link::Channel},
     traits::Key,
 };
 use serde::{Deserialize, Serialize};
