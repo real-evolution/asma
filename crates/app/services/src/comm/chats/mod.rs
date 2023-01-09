@@ -1,29 +1,30 @@
-mod channels_listener;
-
 use std::sync::Arc;
 
 use chrono::Utc;
-use kernel_entities::{entities::comm::Chat, traits::Key};
-use kernel_repositories::{DataStore, DocumentStore};
+use kernel_entities::{
+    entities::{
+        comm::{Chat, MessageDirection},
+        link::Instance,
+    },
+    traits::Key,
+};
+use kernel_repositories::{comm::InsertMessage, DataStore, DocumentStore};
 use kernel_services::{
     comm::chats::ChatsService,
     error::AppResult,
-    link::{
-        channels::{
-            ChannelsService, OutgoingChannelUpdate, OutgoingChannelUpdateKind,
-            OutgoingMessageUpdateKind,
-        },
-        message_passing::MessagePassingService,
+    link::channels::{
+        ChannelPipe, ChannelsService, IncomingChannelUpdate,
+        OutgoingChannelUpdate, OutgoingChannelUpdateKind,
+        OutgoingMessageUpdateKind,
     },
     Service,
 };
+use tokio::sync::Mutex;
+use tokio_stream::StreamExt;
 
-use self::channels_listener::ChatsChannelsListener;
-
-pub struct AppChatsService<IPC> {
+pub struct AppChatsService {
     data: Arc<dyn DataStore>,
     docs: Arc<dyn DocumentStore>,
-    listener: ChatsChannelsListener<IPC>,
 }
 
 #[async_trait::async_trait]
