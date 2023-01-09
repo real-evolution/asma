@@ -74,7 +74,10 @@ impl RabbitMqTopic {
         body: &T,
     ) -> AppResult<PublisherConfirm> {
         let buf = rmp_serde::to_vec(body).map_err(map_params_error)?;
-        let key = format!("{}.{}", &self.name, key.unwrap_or("#"));
+        let key = match key {
+            | Some(key) => format!("{}.{}", &self.name, key),
+            | None => self.name.clone(),
+        };
 
         let (_, ch) = Self::acquire_channel(&self.pool).await?;
         self.ensure_queue_created(&key, false, &ch).await?;
@@ -104,7 +107,10 @@ impl RabbitMqTopic {
             .current_consumer_id
             .fetch_add(1, Ordering::AcqRel)
             .to_string();
-        let key = format!("{}.{}", &self.name, key.unwrap_or("#"));
+        let key = match key {
+            | Some(key) => format!("{}.{}", &self.name, key),
+            | None => self.name.clone(),
+        };
 
         let opts = BasicConsumeOptions {
             exclusive: mirror,
@@ -171,11 +177,7 @@ impl RabbitMqTopic {
             Ok(queue.name().to_string())
         }
 
-        if temporary {
-            create_queue(&self.name, key, true, ch).await
-        } else {
-            Ok(key.to_string())
-        }
+        create_queue(&self.name, key, temporary, ch).await
     }
 
     async fn acquire_channel(pool: &Pool) -> AppResult<(Object, Channel)> {
@@ -190,19 +192,37 @@ impl<T> TopicWriter<T> for RabbitMqTopicWrapper<T>
 where
     T: Serialize + Send + Sync,
 {
-    async fn publish(&self, key: Option<&str>, body: &T) -> AppResult<()> {
-        self.inner.do_publish(key, body).await?;
+    async fn publish(&self, body: &T) -> AppResult<()> {
+        self.inner.do_publish(None, body).await?;
 
         Ok(())
     }
 
-    async fn publish_confirmed(
+    async fn publish_to(&self, key: Option<&str>, body: &T) -> AppResult<()> {
+        self.inner
+            .do_publish(Some(key.unwrap_or("#")), body)
+            .await?;
+
+        Ok(())
+    }
+
+    async fn publish_confirmed(&self, body: &T) -> AppResult<()> {
+        self.inner
+            .do_publish(None, body)
+            .await?
+            .await
+            .map_err(map_ipc_error)?;
+
+        Ok(())
+    }
+
+    async fn publish_confirmed_to(
         &self,
         key: Option<&str>,
         body: &T,
     ) -> AppResult<()> {
         self.inner
-            .do_publish(key, body)
+            .do_publish(Some(key.unwrap_or("#")), body)
             .await?
             .await
             .map_err(map_ipc_error)?;
@@ -216,25 +236,51 @@ impl<T> TopicReader<T> for RabbitMqTopicWrapper<T>
 where
     T: DeserializeOwned + Send + Sync,
 {
-    async fn subscribe(
+    async fn subscribe(&self) -> AppResult<BoxStream<'_, AppResult<T>>> {
+        Ok(self
+            .inner
+            .do_subscribe(None, false, false, |i| deserialize::<T>(&i.data))
+            .await?
+            .boxed())
+    }
+
+    async fn subscribe_to(
         &self,
         key: Option<&str>,
     ) -> AppResult<BoxStream<'_, AppResult<T>>> {
         Ok(self
             .inner
-            .do_subscribe(key, false, false, |i| deserialize::<T>(&i.data))
+            .do_subscribe(Some(key.unwrap_or("#")), false, false, |i| {
+                deserialize::<T>(&i.data)
+            })
             .await?
             .boxed())
     }
 
     async fn subscribe_manual(
         &self,
+    ) -> AppResult<BoxStream<'_, AppResult<(T, Arc<dyn MessageConfirmation>)>>>
+    {
+        Ok(self
+            .inner
+            .do_subscribe(None, false, true, |i| {
+                let confirm: Arc<dyn MessageConfirmation> =
+                    Arc::new(RabbitMQMessageConfirmation::new(i.acker));
+
+                Ok((deserialize::<T>(&i.data)?, confirm))
+            })
+            .await?
+            .boxed())
+    }
+
+    async fn subscribe_manual_to(
+        &self,
         key: Option<&str>,
     ) -> AppResult<BoxStream<'_, AppResult<(T, Arc<dyn MessageConfirmation>)>>>
     {
         Ok(self
             .inner
-            .do_subscribe(key, false, true, |i| {
+            .do_subscribe(Some(key.unwrap_or("#")), false, true, |i| {
                 let confirm: Arc<dyn MessageConfirmation> =
                     Arc::new(RabbitMQMessageConfirmation::new(i.acker));
 

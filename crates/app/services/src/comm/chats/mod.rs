@@ -69,20 +69,17 @@ impl AppChatsService {
             .get_pipe_of(&chat.user_id, Some(&chat.channel_id))
             .await?;
 
-        tx.publish(
-            None,
-            &OutgoingChannelUpdate {
-                user_id: chat.user_id,
-                channel_id: chat.channel_id,
-                kind: OutgoingChannelUpdateKind::Message {
-                    platform_user_id: instance.platform_identifier,
-                    kind: OutgoingMessageUpdateKind::New {
-                        content: text.clone(),
-                    },
-                    timestamp: Utc::now(),
+        tx.publish(&OutgoingChannelUpdate {
+            user_id: chat.user_id,
+            channel_id: chat.channel_id,
+            kind: OutgoingChannelUpdateKind::Message {
+                platform_user_id: instance.platform_identifier,
+                kind: OutgoingMessageUpdateKind::New {
+                    content: text.clone(),
                 },
+                timestamp: Utc::now(),
             },
-        )
+        })
         .await?;
 
         self.docs
@@ -122,7 +119,7 @@ impl Service for AppChatsService {
             self.channels_svc.get_pipe_of_all().await?;
 
         let read_task = tokio::spawn(async move {
-            let mut stream = match rx.subscribe_manual(None).await {
+            let mut stream = match rx.subscribe_manual().await {
                 | Ok(stream) => stream,
                 | Err(err) => {
                     error!("could not acquire updates steream: {err:#?}");
