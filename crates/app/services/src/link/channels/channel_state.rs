@@ -48,7 +48,7 @@ impl ChannelState {
         );
 
         tokio::spawn(async move {
-            let Ok(mut outgoing_stream) = pipe.rx.subscribe_manual(None).await else {
+            let Ok(mut outgoing_stream) = pipe.rx.subscribe_manual().await else {
                 error!("could not subscribe to channel IPC pipe");
                 return;
             };
@@ -80,7 +80,7 @@ impl ChannelState {
                             kind: update_kind,
                         };
 
-                        if let Err(err) = pipe.tx.publish(None, &update).await {
+                        if let Err(err) = pipe.tx.publish(&update).await {
                             warn!("could not publish update: {err:#?}");
                         }
                     }
