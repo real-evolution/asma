@@ -25,6 +25,8 @@ use tokio_stream::StreamExt;
 pub struct AppChatsService {
     data: Arc<dyn DataStore>,
     docs: Arc<dyn DocumentStore>,
+    channels_svc: Arc<dyn ChannelsService>,
+    read_task: Mutex<Option<tokio::task::JoinHandle<()>>>,
 }
 
 #[async_trait::async_trait]
@@ -38,46 +40,133 @@ impl ChatsService for AppChatsService {
         let instance =
             self.data.link().instances().get(&chat.instance_id).await?;
 
-        let update = OutgoingChannelUpdate {
-            user_id: chat.user_id,
-            channel_id: chat.channel_id,
-            kind: OutgoingChannelUpdateKind::Message {
-                platform_user_id: instance.platform_identifier,
-                kind: OutgoingMessageUpdateKind::New {
-                    content: text.to_owned(),
-                },
-                timestamp: Utc::now(),
-            },
-        };
-
-        self.listener.enqueue_update(update)?;
-
-        Ok(())
+        self.send_update(text, chat, instance).await
     }
 }
 
 impl AppChatsService {
     pub async fn create(
-        ipc: Arc<IPC>,
         data: Arc<dyn DataStore>,
         docs: Arc<dyn DocumentStore>,
         channels_svc: Arc<dyn ChannelsService>,
     ) -> AppResult<Self> {
-        let listener =
-            ChatsChannelsListener::create(ipc, docs.clone(), channels_svc)
-                .await?;
-
         Ok(Self {
             data,
             docs,
-            listener,
+            channels_svc,
+            read_task: Default::default(),
         })
+    }
+
+    pub(super) async fn send_update(
+        &self,
+        text: String,
+        chat: Chat,
+        instance: Instance,
+    ) -> AppResult<()> {
+        let ChannelPipe {
+            outgoing,
+            incoming: _,
+        } = self
+            .channels_svc
+            .get_pipe_of(&chat.user_id, Some(&chat.channel_id))
+            .await?;
+
+        outgoing
+            .publish(
+                None,
+                &OutgoingChannelUpdate {
+                    user_id: chat.user_id,
+                    channel_id: chat.channel_id,
+                    kind: OutgoingChannelUpdateKind::Message {
+                        platform_user_id: instance.platform_identifier,
+                        kind: OutgoingMessageUpdateKind::New {
+                            content: text.clone(),
+                        },
+                        timestamp: Utc::now(),
+                    },
+                },
+            )
+            .await?;
+
+        self.docs
+            .messages()
+            .create(InsertMessage {
+                chat_id: chat.id,
+                text: Some(text),
+                direction: MessageDirection::Outgoing,
+            })
+            .await?;
+
+        Ok(())
+    }
+
+    async fn handle_incoming(update: IncomingChannelUpdate) -> AppResult<()> {
+        info!("");
+        info!("=========================================");
+        info!(
+            "Got update from channel #{} of user #{}:",
+            &update.channel_id, &update.user_id
+        );
+        info!("");
+        info!("{:#?}", &update.kind);
+        info!("=========================================");
+        info!("");
+
+        Ok(())
     }
 }
 
 #[async_trait::async_trait]
 impl Service for AppChatsService {
     async fn initialize(self: Arc<Self>) -> AppResult<()> {
+        debug!("starting chats inbound listener");
+
+        let ChannelPipe {
+            outgoing: _,
+            incoming,
+        } = self.channels_svc.get_pipe_of_all().await?;
+
+        let read_task = tokio::spawn(async move {
+            let mut stream = match incoming.subscribe_manual(None).await {
+                | Ok(stream) => stream,
+                | Err(err) => {
+                    error!("could not acquire updates steream: {err:#?}");
+                    return;
+                }
+            };
+
+            loop {
+                let (update, confirm) = match stream.try_next().await {
+                    | Ok(update) => match update {
+                        | Some(update) => update,
+                        | None => {
+                            debug!("incoming updates stream has terminated");
+                            break;
+                        }
+                    },
+                    | Err(err) => {
+                        error!("could not read next update: {err:#?}");
+                        continue;
+                    }
+                };
+
+                if let Err(err) = match Self::handle_incoming(update).await {
+                    | Ok(()) => confirm.ack().await,
+                    | Err(err) => {
+                        error!(
+                            "an error occured while handling update: {err:#?}"
+                        );
+                        confirm.nack(true).await
+                    }
+                } {
+                    error!("could not ack/nack IPC message: {err:#?}");
+                };
+            }
+        });
+
+        *self.read_task.lock().await = Some(read_task);
+
         Ok(())
     }
 }

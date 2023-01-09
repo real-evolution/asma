@@ -94,13 +94,8 @@ pub async fn create_state<'a>(
     let channels =
         init(AppChannelsService::new(data.clone(), ipc.clone())).await?;
     let chats = init(
-        AppChatsService::create(
-            ipc.clone(),
-            data.clone(),
-            docs.clone(),
-            channels.clone(),
-        )
-        .await?,
+        AppChatsService::create(data.clone(), docs.clone(), channels.clone())
+            .await?,
     )
     .await?;
 
