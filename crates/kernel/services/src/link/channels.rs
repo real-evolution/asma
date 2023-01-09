@@ -8,7 +8,7 @@ use kernel_entities::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::message_passing::Topic;
+use super::message_passing::{TopicReader, TopicWriter};
 use crate::error::AppResult;
 
 #[async_trait::async_trait]
@@ -47,8 +47,14 @@ pub trait ChannelsService: Send + Sync {
 
 #[derive(Clone)]
 pub struct ChannelPipe {
-    pub outgoing: Arc<dyn Topic<OutgoingChannelUpdate>>,
-    pub incoming: Arc<dyn Topic<IncomingChannelUpdate>>,
+    pub tx: Arc<dyn TopicWriter<OutgoingChannelUpdate>>,
+    pub rx: Arc<dyn TopicReader<IncomingChannelUpdate>>,
+}
+
+#[derive(Clone)]
+pub struct ReverseChannelPipe {
+    pub tx: Arc<dyn TopicWriter<IncomingChannelUpdate>>,
+    pub rx: Arc<dyn TopicReader<OutgoingChannelUpdate>>,
 }
 
 #[derive(Clone, Copy, Debug, Serialize)]
