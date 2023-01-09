@@ -8,9 +8,7 @@ use deadpool_lapin::{Config, Pool, Runtime};
 use kernel_services::{
     config::ConfigService,
     error::AppResult,
-    link::message_passing::{
-        MessagePassingService, Topic, TopicReader, TopicWriter,
-    },
+    link::message_passing::{MessagePassingService, TopicReader, TopicWriter},
     Service,
 };
 use serde::{de::DeserializeOwned, Serialize};
@@ -45,13 +43,6 @@ impl MessagePassingService for RabbitMqMessagePassingService {
     ) -> AppResult<Arc<dyn TopicReader<T>>>
     where
         T: DeserializeOwned + Send + Sync + 'static,
-    {
-        Ok(self.get_topic_wrapper(name).await?)
-    }
-
-    async fn get_topic<T>(&self, name: &str) -> AppResult<Arc<dyn Topic<T>>>
-    where
-        T: Serialize + DeserializeOwned + Send + Sync + 'static,
     {
         Ok(self.get_topic_wrapper(name).await?)
     }
