@@ -115,22 +115,21 @@ impl TelegramStream {
     #[inline]
     async fn read_next_update(&self) -> AppResult<IncomingChannelUpdateKind> {
         loop {
-            match self.in_buf.dequeue().await {
-                | Some(update) => return Ok(update),
-                | None => {
-                    let mut req = self.bot.get_updates();
+            if let Ok(update) = self.in_buf.try_dequeue().await {
+                return Ok(update);
+            };
 
-                    req.offset = Some(self.update_idx.load(Ordering::Acquire));
+            let mut req = self.bot.get_updates();
 
-                    for update in req.await.map_err(map_request_error)? {
-                        self.update_idx.store(update.id + 1, Ordering::Relaxed);
+            req.offset = Some(self.update_idx.load(Ordering::Acquire));
 
-                        let item = self.convert_from_telegram_update(update)?;
+            for update in req.await.map_err(map_request_error)? {
+                self.update_idx.store(update.id + 1, Ordering::Relaxed);
 
-                        if let Err(err) = self.in_buf.enqueue(item).await {
-                            warn!("error enqueuing item: {err:#?}");
-                        }
-                    }
+                let item = self.convert_from_telegram_update(update)?;
+
+                if let Err(err) = self.in_buf.enqueue(item).await {
+                    warn!("error enqueuing item: {err:#?}");
                 }
             }
         }
