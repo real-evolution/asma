@@ -120,7 +120,9 @@ pub async fn create_state<'a>(
 }
 
 async fn init<S: Service + Send + Sync>(svc: S) -> anyhow::Result<Arc<S>> {
-    svc.initialize().await?;
+    let svc = Arc::new(svc);
 
-    Ok(Arc::new(svc))
+    svc.clone().initialize().await?;
+
+    Ok(svc)
 }

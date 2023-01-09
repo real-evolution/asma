@@ -109,7 +109,7 @@ impl ConfigService for TomlConfigService {
 
 #[async_trait::async_trait]
 impl Service for TomlConfigService {
-    async fn initialize(&self) -> AppResult<()> {
+    async fn initialize(self: Arc<Self>) -> AppResult<()> {
         self.reload().await
     }
 }

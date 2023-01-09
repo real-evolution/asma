@@ -68,7 +68,7 @@ impl SetupService for AppSetupService {
 
 #[async_trait]
 impl Service for AppSetupService {
-    async fn initialize(&self) -> AppResult<()> {
+    async fn initialize(self: Arc<Self>) -> AppResult<()> {
         Ok(())
     }
 }

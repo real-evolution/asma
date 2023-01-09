@@ -243,7 +243,7 @@ impl<C: ConfigService> AuthService for AppAuthService<C> {
 
 #[async_trait]
 impl<C: ConfigService> Service for AppAuthService<C> {
-    async fn initialize(&self) -> AppResult<()> {
+    async fn initialize(self: Arc<Self>) -> AppResult<()> {
         let conf = self
             .config_svc
             .get_section::<AuthConfig>(AUTH_CONFIG_SECTION)?;

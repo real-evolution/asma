@@ -148,7 +148,7 @@ impl<Ipc: MessagePassingService> ChannelsService for AppChannelsService<Ipc> {
 
 #[async_trait]
 impl<Ipc: MessagePassingService> Service for AppChannelsService<Ipc> {
-    async fn initialize(&self) -> AppResult<()> {
+    async fn initialize(self: Arc<Self>) -> AppResult<()> {
         self.get_pipe_of_all().await?;
 
         debug!("starting channels");

@@ -143,7 +143,7 @@ impl<R> EntropyServiceImpl<R> {
 
 #[async_trait::async_trait]
 impl<R: Send + Sync> Service for EntropyServiceImpl<R> {
-    async fn initialize(&self) -> AppResult<()> {
+    async fn initialize(self: Arc<Self>) -> AppResult<()> {
         Ok(())
     }
 }

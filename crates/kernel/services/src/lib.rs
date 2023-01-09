@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use error::AppResult;
 
 pub mod auth;
@@ -11,5 +13,5 @@ pub mod setup;
 
 #[async_trait::async_trait]
 pub trait Service {
-    async fn initialize(&self) -> AppResult<()>;
+    async fn initialize(self: Arc<Self>) -> AppResult<()>;
 }

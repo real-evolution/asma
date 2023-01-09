@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use argon2::{
     password_hash::{Error, SaltString},
     PasswordHash,
@@ -43,7 +45,7 @@ where
 
 #[async_trait::async_trait]
 impl<H: Send + Sync> Service for CryptoHashServiceImpl<H> {
-    async fn initialize(&self) -> AppResult<()> {
+    async fn initialize(self: Arc<Self>) -> AppResult<()> {
         Ok(())
     }
 }

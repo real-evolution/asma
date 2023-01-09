@@ -79,7 +79,7 @@ impl<IPC: MessagePassingService> AppChatsService<IPC> {
 
 #[async_trait::async_trait]
 impl<IPC: MessagePassingService> Service for AppChatsService<IPC> {
-    async fn initialize(&self) -> AppResult<()> {
+    async fn initialize(self: Arc<Self>) -> AppResult<()> {
         Ok(())
     }
 }

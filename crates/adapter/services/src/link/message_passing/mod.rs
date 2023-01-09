@@ -116,7 +116,7 @@ impl RabbitMqMessagePassingService {
 
 #[async_trait::async_trait]
 impl Service for RabbitMqMessagePassingService {
-    async fn initialize(&self) -> AppResult<()> {
+    async fn initialize(self: Arc<Self>) -> AppResult<()> {
         Ok(())
     }
 }
