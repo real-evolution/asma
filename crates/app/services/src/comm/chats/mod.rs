@@ -44,10 +44,8 @@ impl ChatsService for AppChatsService {
         text: String,
     ) -> AppResult<()> {
         let chat = self.docs.chats().get(chat_id).await?;
-        let instance =
-            self.data.link().instances().get_in_chat(chat_id).await?;
 
-        self.send_update(text, chat, instance).await
+        self.send_update(chat, text).await
     }
 }
 
@@ -67,38 +65,46 @@ impl AppChatsService {
 
     pub(super) async fn send_update(
         &self,
-        text: String,
         chat: Chat,
-        instance: Instance,
+        text: String,
     ) -> AppResult<()> {
-        let ChannelPipe { tx, rx: _ } = self
-            .channels_svc
-            .get_pipe_of(&chat.user_id, Some(&instance.channel_id))
+        let instances = self
+            .data
+            .link()
+            .instances()
+            .get_members_of(&chat.id)
             .await?;
 
-        tx.publish(&OutgoingChannelUpdate {
-            user_id: chat.user_id,
-            channel_id: instance.channel_id,
-            kind: OutgoingChannelUpdateKind::Message {
-                platform_user_id: instance.platform_identifier,
-                kind: OutgoingMessageUpdateKind::New {
-                    content: text.clone(),
-                },
-                timestamp: Utc::now(),
-            },
-        })
-        .await?;
+        for instance in instances {
+            let ChannelPipe { tx, rx: _ } = self
+                .channels_svc
+                .get_pipe_of(&chat.user_id, Some(&instance.channel_id))
+                .await?;
 
-        self.docs
-            .messages()
-            .create(InsertMessage {
-                text: Some(text),
-                direction: MessageDirection::Outgoing,
-                chat_id: chat.id,
-                instance_id: instance.id,
-                delivered_at: Utc::now(),
+            tx.publish(&OutgoingChannelUpdate {
+                user_id: chat.user_id.clone(),
+                channel_id: instance.channel_id,
+                kind: OutgoingChannelUpdateKind::Message {
+                    platform_user_id: instance.platform_identifier,
+                    kind: OutgoingMessageUpdateKind::New {
+                        content: text.clone(),
+                    },
+                    timestamp: Utc::now(),
+                },
             })
             .await?;
+
+            self.docs
+                .messages()
+                .create(InsertMessage {
+                    text: Some(text.clone()),
+                    direction: MessageDirection::Outgoing,
+                    chat_id: chat.id.clone(),
+                    instance_id: instance.id,
+                    delivered_at: Utc::now(),
+                })
+                .await?;
+        }
 
         Ok(())
     }
