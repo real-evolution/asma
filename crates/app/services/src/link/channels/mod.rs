@@ -20,7 +20,9 @@ use kernel_services::{
         channels::{
             ChannelPipe, ChannelStatus, ChannelsService, ReverseChannelPipe,
         },
-        message_passing::{MessagePassingService, TopicReader, TopicWriter},
+        message_passing::{
+            MessagePassingService, ScopedTopicReader, ScopedTopicWriter,
+        },
     },
     Service,
 };
@@ -135,17 +137,11 @@ impl<Ipc: MessagePassingService> ChannelsService for AppChannelsService<Ipc> {
         user_id: &Key<User>,
         channel_id: Option<&Key<Channel>>,
     ) -> AppResult<ChannelPipe> {
-        let channel_segment = channel_id
-            .map(|i| i.value().to_string())
-            .unwrap_or_else(|| "*".to_owned());
-
-        let key = format!("{}.{}", user_id.value_ref(), channel_segment);
-
-        self.create_pipe(&key).await
+        self.create_pipe(Some(user_id), channel_id).await
     }
 
     async fn get_pipe_of_all(&self) -> AppResult<ChannelPipe> {
-        self.create_pipe("*.*").await
+        self.create_pipe(None, None).await
     }
 }
 
@@ -200,10 +196,7 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
                 );
 
                 let pipe = self
-                    .create_reverse_pipe(&format!(
-                        "{}.{}",
-                        channel.user_id, channel.id
-                    ))
+                    .create_reverse_pipe(&channel.user_id, &channel.id)
                     .await?;
                 let state = ChannelState::new(channel, pipe)?;
 
@@ -244,11 +237,18 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
         }
     }
 
-    async fn create_pipe(&self, key: &str) -> AppResult<ChannelPipe> {
+    async fn create_pipe(
+        &self,
+        user_id: Option<&Key<User>>,
+        channel_id: Option<&Key<Channel>>,
+    ) -> AppResult<ChannelPipe> {
+        let user_id = user_id.map_or("*".to_owned(), ToString::to_string);
+        let channel_id = channel_id.map_or("*".to_owned(), ToString::to_string);
+
         let (tx, rx) = self
             .create_pipe_parts(
-                &format!("{CHANNELS_TOPIC_NAME}.{key}.out"),
-                &format!("{CHANNELS_TOPIC_NAME}.{key}.in"),
+                &format!("{user_id}.{channel_id}.out"),
+                &format!("{user_id}.{channel_id}.in"),
             )
             .await?;
 
@@ -257,12 +257,13 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
 
     async fn create_reverse_pipe(
         &self,
-        key: &str,
+        user_id: &Key<User>,
+        channel_id: &Key<Channel>,
     ) -> AppResult<ReverseChannelPipe> {
         let (tx, rx) = self
             .create_pipe_parts(
-                &format!("{CHANNELS_TOPIC_NAME}.{key}.in"),
-                &format!("{CHANNELS_TOPIC_NAME}.{key}.out"),
+                &format!("{user_id}.{channel_id}.in"),
+                &format!("{user_id}.{channel_id}.out"),
             )
             .await?;
 
@@ -276,9 +277,19 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
         &self,
         tx_key: &str,
         rx_key: &str,
-    ) -> AppResult<(Arc<dyn TopicWriter<T>>, Arc<dyn TopicReader<R>>)> {
-        let tx = self.ipc.get_topic_writer(tx_key).await?;
-        let rx = self.ipc.get_topic_reader(rx_key).await?;
+    ) -> AppResult<(Arc<dyn ScopedTopicWriter<T>>, Arc<dyn ScopedTopicReader<R>>)>
+    {
+        let tx = self
+            .ipc
+            .get_topic_writer(CHANNELS_TOPIC_NAME)
+            .await?
+            .scoped(tx_key);
+
+        let rx = self
+            .ipc
+            .get_topic_reader(CHANNELS_TOPIC_NAME)
+            .await?
+            .scoped(rx_key);
 
         Ok((tx, rx))
     }
