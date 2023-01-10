@@ -70,11 +70,7 @@ pub enum OutgoingMessageUpdateKind {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum IncomingMessageUpdateKind {
-    New {
-        platform_message_id: String,
-        content: Option<String>,
-    },
-
+    New { content: Option<String> },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
