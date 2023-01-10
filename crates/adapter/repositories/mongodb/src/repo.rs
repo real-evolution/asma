@@ -80,7 +80,11 @@ impl<E: CollectionEntity> MongoDbRepo<E> {
         Ok(stream)
     }
 
-    async fn find_one<'a, D, O>(&self, filter: D, options: O) -> RepoResult<E>
+    pub async fn find_one<'a, D, O>(
+        &self,
+        filter: D,
+        options: O,
+    ) -> RepoResult<E>
     where
         D: Into<Option<Document>>,
         O: Into<Option<FindOneOptions>>,
