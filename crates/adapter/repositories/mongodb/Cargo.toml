@@ -10,6 +10,7 @@ authors.workspace = true
 mongodb = { version = "2", features = [
   "bson-uuid-0_8",
   "bson-chrono-0_4",
+  "bson-serde_with",
 ] }
 
 # project dependencies
