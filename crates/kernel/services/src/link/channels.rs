@@ -65,14 +65,7 @@ pub struct ChannelStatus {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum OutgoingMessageUpdateKind {
-    New {
-        content: String,
-    },
-
-    Edit {
-        platform_message_id: String,
-        content: Option<String>,
-    },
+    New { content: String },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -82,10 +75,6 @@ pub enum IncomingMessageUpdateKind {
         content: Option<String>,
     },
 
-    Edit {
-        platform_message_id: String,
-        content: Option<String>,
-    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
