@@ -4,13 +4,13 @@ use kernel_proc_macros::*;
 use schemars::JsonSchema;
 
 use super::Channel;
-use crate::traits::*;
+use crate::{entities::comm::Chat, traits::*};
 
 #[entity]
 #[derive(Clone, Debug, From, Into, JsonSchema)]
 pub struct Instance {
     pub platform_identifier: i64,
-    pub platform_username: String,
+    pub username: Option<String>,
     pub display_name: Option<String>,
     pub phone_number: Option<String>,
     pub last_active: Option<DateTime<Utc>>,
