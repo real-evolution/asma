@@ -14,5 +14,6 @@ pub struct Instance {
     pub display_name: Option<String>,
     pub phone_number: Option<String>,
     pub last_active: Option<DateTime<Utc>>,
+    pub chat_id: Key<Chat>,
     pub channel_id: Key<Channel>,
 }
