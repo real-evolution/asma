@@ -2,10 +2,7 @@ use kernel_proc_macros::entity;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    entities::{auth::User, link::{Instance, Channel}},
-    traits::*,
-};
+use crate::{entities::auth::User, traits::*};
 
 #[derive(Clone, Debug, JsonSchema, Serialize, Deserialize)]
 pub enum ChatState {
@@ -19,7 +16,5 @@ pub enum ChatState {
 pub struct Chat {
     pub label: Option<String>,
     pub state: ChatState,
-    pub channel_id: Key<Channel>,
-    pub instance_id: Key<Instance>,
     pub user_id: Key<User>,
 }
