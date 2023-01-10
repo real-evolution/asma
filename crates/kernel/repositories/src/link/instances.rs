@@ -1,5 +1,8 @@
 use derive_more::Constructor;
-use kernel_entities::{entities::link::*, traits::Key};
+use kernel_entities::{
+    entities::{comm::Chat, link::*},
+    traits::Key,
+};
 
 use crate::{error::RepoResult, traits::*};
 
@@ -7,16 +10,12 @@ use crate::{error::RepoResult, traits::*};
 pub trait InstancesRepo:
     Repo<Entity = Instance> + InsertRepo<InsertInstance> + Send + Sync
 {
+    async fn get_in_chat(&self, chat_id: &Key<Chat>) -> RepoResult<Instance>;
+
     async fn get_by_platform_identifier(
         &self,
         channel_id: &Key<Channel>,
         identifier: i64,
-    ) -> RepoResult<Instance>;
-
-    async fn get_by_platform_username(
-        &self,
-        channel_id: &Key<Channel>,
-        username: &str,
     ) -> RepoResult<Instance>;
 
     async fn get_all(
@@ -27,9 +26,10 @@ pub trait InstancesRepo:
 
 #[derive(Constructor)]
 pub struct InsertInstance {
-    pub channel_id: Key<Channel>,
     pub platform_identifier: i64,
-    pub platform_username: String,
+    pub username: Option<String>,
     pub display_name: Option<String>,
     pub phone_number: Option<String>,
+    pub chat_id: Key<Chat>,
+    pub channel_id: Key<Channel>,
 }
