@@ -3,17 +3,24 @@ use std::sync::Arc;
 use chrono::Utc;
 use kernel_entities::{
     entities::{
-        comm::{Chat, MessageDirection},
-        link::Instance,
+        auth::User,
+        comm::{Chat, ChatState, MessageDirection},
+        link::{Channel, Instance},
     },
     traits::Key,
 };
-use kernel_repositories::{comm::InsertMessage, DataStore, DocumentStore};
+use kernel_repositories::{
+    comm::{InsertChat, InsertMessage},
+    error::{RepoError, RepoResult},
+    link::InsertInstance,
+    DataStore, DocumentStore,
+};
 use kernel_services::{
     comm::chats::ChatsService,
     error::AppResult,
     link::channels::{
         ChannelPipe, ChannelsService, IncomingChannelUpdate,
+        IncomingChannelUpdateKind, IncomingMessageUpdateKind,
         OutgoingChannelUpdate, OutgoingChannelUpdateKind,
         OutgoingMessageUpdateKind,
     },
@@ -38,7 +45,7 @@ impl ChatsService for AppChatsService {
     ) -> AppResult<()> {
         let chat = self.docs.chats().get(chat_id).await?;
         let instance =
-            self.data.link().instances().get(&chat.instance_id).await?;
+            self.data.link().instances().get_in_chat(chat_id).await?;
 
         self.send_update(text, chat, instance).await
     }
@@ -66,12 +73,12 @@ impl AppChatsService {
     ) -> AppResult<()> {
         let ChannelPipe { tx, rx: _ } = self
             .channels_svc
-            .get_pipe_of(&chat.user_id, Some(&chat.channel_id))
+            .get_pipe_of(&chat.user_id, Some(&instance.channel_id))
             .await?;
 
         tx.publish(&OutgoingChannelUpdate {
             user_id: chat.user_id,
-            channel_id: chat.channel_id,
+            channel_id: instance.channel_id,
             kind: OutgoingChannelUpdateKind::Message {
                 platform_user_id: instance.platform_identifier,
                 kind: OutgoingMessageUpdateKind::New {
@@ -85,28 +92,113 @@ impl AppChatsService {
         self.docs
             .messages()
             .create(InsertMessage {
-                chat_id: chat.id,
                 text: Some(text),
                 direction: MessageDirection::Outgoing,
+                chat_id: chat.id,
+                instance_id: instance.id,
+                delivered_at: Utc::now(),
             })
             .await?;
 
         Ok(())
     }
 
-    async fn handle_incoming(update: IncomingChannelUpdate) -> AppResult<()> {
-        info!("");
-        info!("=========================================");
-        info!(
-            "Got update from channel #{} of user #{}:",
-            &update.channel_id, &update.user_id
+    async fn handle_incoming(
+        &self,
+        update: IncomingChannelUpdate,
+    ) -> AppResult<()> {
+        debug!(
+            "Got update from channel #{} of user #{}: {update:#?}",
+            &update.channel_id, &update.user_id,
         );
-        info!("");
-        info!("{:#?}", &update.kind);
-        info!("=========================================");
-        info!("");
+
+        match update.kind {
+            | IncomingChannelUpdateKind::Message {
+                platform_user_id,
+                kind,
+                timestamp,
+            } => {
+                let instance = self
+                    .ensure_instance_created(
+                        &update.user_id,
+                        &update.channel_id,
+                        platform_user_id,
+                    )
+                    .await?;
+
+                match kind {
+                    | IncomingMessageUpdateKind::New { content } => {
+                        let message = self
+                            .docs
+                            .messages()
+                            .create(InsertMessage {
+                                text: content.clone(),
+                                direction: MessageDirection::Incoming,
+                                delivered_at: timestamp,
+                                chat_id: instance.chat_id,
+                                instance_id: instance.id.clone(),
+                            })
+                            .await?;
+
+                        debug!(
+                            "message from instance #{} saved with #{}",
+                            instance.id, message.id
+                        );
+                    }
+                }
+            }
+        };
 
         Ok(())
+    }
+
+    async fn ensure_instance_created(
+        &self,
+        user_id: &Key<User>,
+        channel_id: &Key<Channel>,
+        identifier: i64,
+    ) -> RepoResult<Instance> {
+        let ret = self
+            .data
+            .link()
+            .instances()
+            .get_by_platform_identifier(channel_id, identifier)
+            .await;
+
+        if let Err(RepoError::NotFound) = ret {
+            info!("a new instance was detected on channel #{channel_id}");
+            debug!("creating a chat for the new instance");
+
+            let chat = self
+                .docs
+                .chats()
+                .create(InsertChat {
+                    label: None,
+                    state: ChatState::Active,
+                    user_id: user_id.clone(),
+                })
+                .await?;
+
+            debug!("creating instance record in chat #{}", chat.id);
+
+            let instance = self
+                .data
+                .link()
+                .instances()
+                .create(InsertInstance {
+                    platform_identifier: identifier,
+                    username: None,
+                    display_name: None,
+                    phone_number: None,
+                    chat_id: chat.id.clone(),
+                    channel_id: channel_id.clone(),
+                })
+                .await?;
+
+            return Ok(instance);
+        }
+
+        ret
     }
 }
 
@@ -118,7 +210,9 @@ impl Service for AppChatsService {
         let ChannelPipe { tx: _, rx } =
             self.channels_svc.get_pipe_of_all().await?;
 
-        let read_task = tokio::spawn(async move {
+        let this = self.clone();
+
+        *self.clone().read_task.lock().await = Some(tokio::spawn(async move {
             let mut stream = match rx.subscribe_manual().await {
                 | Ok(stream) => stream,
                 | Err(err) => {
@@ -142,7 +236,7 @@ impl Service for AppChatsService {
                     }
                 };
 
-                if let Err(err) = match Self::handle_incoming(update).await {
+                if let Err(err) = match this.handle_incoming(update).await {
                     | Ok(()) => confirm.ack().await,
                     | Err(err) => {
                         error!(
@@ -154,9 +248,7 @@ impl Service for AppChatsService {
                     error!("could not ack/nack IPC message: {err:#?}");
                 };
             }
-        });
-
-        *self.read_task.lock().await = Some(read_task);
+        }));
 
         Ok(())
     }
