@@ -10,7 +10,10 @@ use crate::{error::RepoResult, traits::*};
 pub trait InstancesRepo:
     Repo<Entity = Instance> + InsertRepo<InsertInstance> + Send + Sync
 {
-    async fn get_in_chat(&self, chat_id: &Key<Chat>) -> RepoResult<Instance>;
+    async fn get_members_of(
+        &self,
+        chat_id: &Key<Chat>,
+    ) -> RepoResult<Vec<Instance>>;
 
     async fn get_by_platform_identifier(
         &self,

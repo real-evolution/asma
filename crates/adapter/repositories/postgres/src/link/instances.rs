@@ -20,9 +20,12 @@ pub(crate) struct SqlxInstancesRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
 impl InstancesRepo for SqlxInstancesRepo {
-    async fn get_in_chat(&self, chat_id: &Key<Chat>) -> RepoResult<Instance> {
-        sqlx_ok!(
-            models::InstanceModel::get_in_chat(
+    async fn get_members_of(
+        &self,
+        chat_id: &Key<Chat>,
+    ) -> RepoResult<Vec<Instance>> {
+        sqlx_vec_ok!(
+            models::InstanceModel::get_by_chat(
                 self.0.get(),
                 chat_id.value_ref()
             )
@@ -84,7 +87,7 @@ mod models {
         pub phone_number: Option<String>,
         #[ormx(default, set)]
         pub last_active: Option<DateTime<Utc>>,
-        #[ormx(get_many = get_by_chat, get_one = get_in_chat)]
+        #[ormx(get_many = get_by_chat)]
         pub chat_id: KeyType,
         #[ormx(get_many)]
         pub channel_id: KeyType,
