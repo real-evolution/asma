@@ -17,9 +17,7 @@ use kernel_services::{
 };
 use teloxide::{
     requests::Requester,
-    types::{
-        MediaKind, Message, MessageId, MessageKind, Update, UpdateKind, UserId,
-    },
+    types::{MediaKind, Message, MessageKind, Update, UpdateKind, UserId},
     Bot,
 };
 
@@ -50,66 +48,6 @@ impl TelegramStream {
             update_idx: 0.into(),
             in_buf: BoundedQueue::new(1024),
         }))
-    }
-
-    fn convert_from_telegram_update(
-        &self,
-        update: Update,
-    ) -> AppResult<IncomingChannelUpdateKind> {
-        match update.kind {
-            | UpdateKind::Message(msg) => {
-                self.convert_from_telegram_message::<true>(msg)
-            }
-            | UpdateKind::EditedMessage(msg) => {
-                self.convert_from_telegram_message::<false>(msg)
-            }
-            | UpdateKind::Error(err) => {
-                Err(LinkError::Communication(err.to_string()).into())
-            }
-            | _ => Err(LinkError::UnsupportedEvent(format!(
-                "unsupported telegram update: {:#?}",
-                update
-            ))
-            .into()),
-        }
-    }
-
-    fn convert_from_telegram_message<const NEW: bool>(
-        &self,
-        message: Message,
-    ) -> AppResult<IncomingChannelUpdateKind> {
-        let MessageKind::Common(inner) = message.kind else {
-            return Err(LinkError::UnsupportedEvent(format!("unsupported telegram update: {:?}", message.kind)).into());
-        };
-
-        let Some(from) = inner.from else {
-            return Err(LinkError::UnsupportedEvent("only private chats are supported".into()).into());
-        };
-
-        let MediaKind::Text(content) = inner.media_kind else {
-            return Err(LinkError::UnsupportedEvent("only text messages supported".into()).into());             
-        };
-
-        let platform_user_id = from.id.0 as i64;
-        let timestamp = message.date;
-
-        let kind = if NEW {
-            IncomingMessageUpdateKind::New {
-                platform_message_id: message.id.0.to_string(),
-                content: Some(content.text),
-            }
-        } else {
-            IncomingMessageUpdateKind::Edit {
-                platform_message_id: message.id.0.to_string(),
-                content: Some(content.text),
-            }
-        };
-
-        Ok(IncomingChannelUpdateKind::Message {
-            platform_user_id,
-            kind,
-            timestamp,
-        })
     }
 
     #[inline]
@@ -154,26 +92,55 @@ impl TelegramStream {
 
                     Ok(())
                 }
-                | OutgoingMessageUpdateKind::Edit {
-                    platform_message_id,
-                    content,
-                } => {
-                    let Ok(message_id) = platform_message_id.parse::<i32>() else {
-                        return Err(LinkError::InvalidParams(format!("invalid message id: {}", platform_message_id),).into());
-                    };
-
-                    self.bot
-                        .edit_message_text(
-                            UserId(platform_user_id as u64),
-                            MessageId(message_id),
-                            content.unwrap_or_default(),
-                        )
-                        .await
-                        .map_err(map_request_error)?;
-
-                    Ok(())
-                }
             },
         }
+    }
+
+    fn convert_from_telegram_update(
+        &self,
+        update: Update,
+    ) -> AppResult<IncomingChannelUpdateKind> {
+        match update.kind {
+            | UpdateKind::Message(msg) => {
+                self.convert_from_telegram_message(msg)
+            }
+            | UpdateKind::Error(err) => {
+                Err(LinkError::Communication(err.to_string()).into())
+            }
+            | _ => Err(LinkError::UnsupportedEvent(format!(
+                "unsupported telegram update: {:#?}",
+                update
+            ))
+            .into()),
+        }
+    }
+
+    fn convert_from_telegram_message(
+        &self,
+        message: Message,
+    ) -> AppResult<IncomingChannelUpdateKind> {
+        let MessageKind::Common(inner) = message.kind else {
+            return Err(LinkError::UnsupportedEvent(format!("unsupported telegram update: {:?}", message.kind)).into());
+        };
+
+        let Some(from) = inner.from else {
+            return Err(LinkError::UnsupportedEvent("only private chats are supported".into()).into());
+        };
+
+        let MediaKind::Text(content) = inner.media_kind else {
+            return Err(LinkError::UnsupportedEvent("only text messages supported".into()).into());             
+        };
+
+        let platform_user_id = from.id.0 as i64;
+        let timestamp = message.date;
+        let kind = IncomingMessageUpdateKind::New {
+            content: Some(content.text),
+        };
+
+        Ok(IncomingChannelUpdateKind::Message {
+            platform_user_id,
+            kind,
+            timestamp,
+        })
     }
 }
