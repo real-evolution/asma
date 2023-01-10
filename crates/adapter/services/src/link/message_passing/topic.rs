@@ -12,7 +12,10 @@ use derive_more::Constructor;
 use futures::{stream::BoxStream, StreamExt};
 use kernel_services::{
     error::AppResult,
-    link::message_passing::{MessageConfirmation, TopicReader, TopicWriter},
+    link::message_passing::{
+        MessageConfirmation, ScopedTopicReader, ScopedTopicWriter, TopicReader,
+        TopicWriter,
+    },
 };
 use lapin::{
     acker::Acker,
@@ -39,6 +42,13 @@ pub(super) struct RabbitMqTopic {
 
 #[derive(Debug)]
 pub(super) struct RabbitMqTopicWrapper<T> {
+    inner: Arc<RabbitMqTopic>,
+    _phantom: PhantomData<T>,
+}
+
+#[derive(Debug)]
+pub(super) struct ScopedRabbitMqTopicWrapper<T> {
+    key: String,
     inner: Arc<RabbitMqTopic>,
     _phantom: PhantomData<T>,
 }
@@ -70,22 +80,18 @@ impl RabbitMqTopic {
 
     async fn do_publish<T: Serialize + Send + Sync>(
         &self,
-        key: Option<&str>,
+        key: &str,
         body: &T,
     ) -> AppResult<PublisherConfirm> {
         let buf = rmp_serde::to_vec(body).map_err(map_params_error)?;
-        let key = match key {
-            | Some(key) => format!("{}.{}", &self.name, key),
-            | None => self.name.clone(),
-        };
-
         let (_, ch) = Self::acquire_channel(&self.pool).await?;
-        self.ensure_queue_created(&key, false, &ch).await?;
+
+        let queue = self.ensure_queue_created(key, false, &ch).await?;
 
         let confirm = ch
             .basic_publish(
                 &self.name,
-                &key,
+                &queue,
                 Default::default(),
                 &buf,
                 Default::default(),
@@ -98,7 +104,7 @@ impl RabbitMqTopic {
 
     async fn do_subscribe<T, F: Fn(Delivery) -> AppResult<T>>(
         &self,
-        key: Option<&str>,
+        key: &str,
         mirror: bool,
         manual_ack: bool,
         mapper: F,
@@ -107,10 +113,6 @@ impl RabbitMqTopic {
             .current_consumer_id
             .fetch_add(1, Ordering::AcqRel)
             .to_string();
-        let key = match key {
-            | Some(key) => format!("{}.{}", &self.name, key),
-            | None => self.name.clone(),
-        };
 
         let opts = BasicConsumeOptions {
             exclusive: mirror,
@@ -119,7 +121,7 @@ impl RabbitMqTopic {
         };
 
         let (_, ch) = Self::acquire_channel(&self.pool).await?;
-        let queue = self.ensure_queue_created(&key, mirror, &ch).await?;
+        let queue = self.ensure_queue_created(key, mirror, &ch).await?;
 
         Ok(ch
             .basic_consume(&queue, &id, opts, Default::default())
@@ -137,11 +139,11 @@ impl RabbitMqTopic {
         temporary: bool,
         ch: &Channel,
     ) -> AppResult<String> {
-        let mut queues = self.queues.write().await;
-
-        if !queues.contains(key) {
-            queues.insert(create_queue(&self.name, key, true, ch).await?);
-        }
+        let key = if temporary {
+            "".to_owned()
+        } else {
+            format!("{}.{key}", self.name)
+        };
 
         async fn create_queue(
             topic_name: &str,
@@ -151,16 +153,12 @@ impl RabbitMqTopic {
         ) -> AppResult<String> {
             let declare_opts = QueueDeclareOptions {
                 durable: !temporary,
-                auto_delete: !temporary,
+                auto_delete: temporary,
                 ..Default::default()
             };
 
             let queue = ch
-                .queue_declare(
-                    if temporary { "" } else { key },
-                    declare_opts,
-                    Default::default(),
-                )
+                .queue_declare(key, declare_opts, Default::default())
                 .await
                 .map_err(map_ipc_error)?;
 
@@ -177,7 +175,17 @@ impl RabbitMqTopic {
             Ok(queue.name().to_string())
         }
 
-        create_queue(&self.name, key, temporary, ch).await
+        let mut queues = self.queues.write().await;
+
+        if !queues.contains(&key) {
+            queues.insert(create_queue(&self.name, &key, false, ch).await?);
+
+            if temporary {
+                return create_queue(&self.name, &key, true, ch).await;
+            }
+        }
+
+        Ok(key)
     }
 
     async fn acquire_channel(pool: &Pool) -> AppResult<(Object, Channel)> {
@@ -187,28 +195,21 @@ impl RabbitMqTopic {
         Ok((conn, chan))
     }
 }
+
 #[async_trait::async_trait]
 impl<T> TopicWriter<T> for RabbitMqTopicWrapper<T>
 where
-    T: Serialize + Send + Sync,
+    T: Serialize + Send + Sync + 'static,
 {
-    async fn publish(&self, body: &T) -> AppResult<()> {
-        self.inner.do_publish(None, body).await?;
+    async fn publish(&self, key: &str, body: &T) -> AppResult<()> {
+        self.inner.do_publish(key, body).await?;
 
         Ok(())
     }
 
-    async fn publish_to(&self, key: Option<&str>, body: &T) -> AppResult<()> {
+    async fn publish_confirmed(&self, key: &str, body: &T) -> AppResult<()> {
         self.inner
-            .do_publish(Some(key.unwrap_or("#")), body)
-            .await?;
-
-        Ok(())
-    }
-
-    async fn publish_confirmed(&self, body: &T) -> AppResult<()> {
-        self.inner
-            .do_publish(None, body)
+            .do_publish(key, body)
             .await?
             .await
             .map_err(map_ipc_error)?;
@@ -216,13 +217,29 @@ where
         Ok(())
     }
 
-    async fn publish_confirmed_to(
-        &self,
-        key: Option<&str>,
-        body: &T,
-    ) -> AppResult<()> {
+    fn scoped(&self, key: &str) -> Arc<dyn ScopedTopicWriter<T>> {
+        Arc::new(ScopedRabbitMqTopicWrapper {
+            key: key.to_owned(),
+            inner: self.inner.clone(),
+            _phantom: PhantomData,
+        })
+    }
+}
+
+#[async_trait::async_trait]
+impl<T> ScopedTopicWriter<T> for ScopedRabbitMqTopicWrapper<T>
+where
+    T: Serialize + Send + Sync,
+{
+    async fn publish(&self, body: &T) -> AppResult<()> {
+        self.inner.do_publish(&self.key, body).await?;
+
+        Ok(())
+    }
+
+    async fn publish_confirmed(&self, body: &T) -> AppResult<()> {
         self.inner
-            .do_publish(Some(key.unwrap_or("#")), body)
+            .do_publish(&self.key, body)
             .await?
             .await
             .map_err(map_ipc_error)?;
@@ -234,23 +251,65 @@ where
 #[async_trait::async_trait]
 impl<T> TopicReader<T> for RabbitMqTopicWrapper<T>
 where
+    T: DeserializeOwned + Send + Sync + 'static,
+{
+    async fn subscribe(
+        &self,
+        key: &str,
+    ) -> AppResult<BoxStream<'_, AppResult<T>>> {
+        Ok(self
+            .inner
+            .do_subscribe(key, false, false, |i| deserialize::<T>(&i.data))
+            .await?
+            .boxed())
+    }
+
+    async fn subscribe_manual(
+        &self,
+        key: &str,
+    ) -> AppResult<BoxStream<'_, AppResult<(T, Arc<dyn MessageConfirmation>)>>>
+    {
+        Ok(self
+            .inner
+            .do_subscribe(key, false, true, |i| {
+                let confirm: Arc<dyn MessageConfirmation> =
+                    Arc::new(RabbitMQMessageConfirmation::new(i.acker));
+
+                Ok((deserialize::<T>(&i.data)?, confirm))
+            })
+            .await?
+            .boxed())
+    }
+
+    async fn mirror(
+        &self,
+        key: &str,
+    ) -> AppResult<BoxStream<'_, AppResult<T>>> {
+        Ok(self
+            .inner
+            .do_subscribe(key, true, false, |i| deserialize::<T>(&i.data))
+            .await?
+            .boxed())
+    }
+
+    fn scoped(&self, key: &str) -> Arc<dyn ScopedTopicReader<T>> {
+        Arc::new(ScopedRabbitMqTopicWrapper {
+            key: key.to_owned(),
+            inner: self.inner.clone(),
+            _phantom: PhantomData,
+        })
+    }
+}
+
+#[async_trait::async_trait]
+impl<T> ScopedTopicReader<T> for ScopedRabbitMqTopicWrapper<T>
+where
     T: DeserializeOwned + Send + Sync,
 {
     async fn subscribe(&self) -> AppResult<BoxStream<'_, AppResult<T>>> {
         Ok(self
             .inner
-            .do_subscribe(None, false, false, |i| deserialize::<T>(&i.data))
-            .await?
-            .boxed())
-    }
-
-    async fn subscribe_to(
-        &self,
-        key: Option<&str>,
-    ) -> AppResult<BoxStream<'_, AppResult<T>>> {
-        Ok(self
-            .inner
-            .do_subscribe(Some(key.unwrap_or("#")), false, false, |i| {
+            .do_subscribe(&self.key, false, false, |i| {
                 deserialize::<T>(&i.data)
             })
             .await?
@@ -263,7 +322,7 @@ where
     {
         Ok(self
             .inner
-            .do_subscribe(None, false, true, |i| {
+            .do_subscribe(&self.key, false, true, |i| {
                 let confirm: Arc<dyn MessageConfirmation> =
                     Arc::new(RabbitMQMessageConfirmation::new(i.acker));
 
@@ -273,30 +332,10 @@ where
             .boxed())
     }
 
-    async fn subscribe_manual_to(
-        &self,
-        key: Option<&str>,
-    ) -> AppResult<BoxStream<'_, AppResult<(T, Arc<dyn MessageConfirmation>)>>>
-    {
+    async fn mirror(&self) -> AppResult<BoxStream<'_, AppResult<T>>> {
         Ok(self
             .inner
-            .do_subscribe(Some(key.unwrap_or("#")), false, true, |i| {
-                let confirm: Arc<dyn MessageConfirmation> =
-                    Arc::new(RabbitMQMessageConfirmation::new(i.acker));
-
-                Ok((deserialize::<T>(&i.data)?, confirm))
-            })
-            .await?
-            .boxed())
-    }
-
-    async fn mirror(
-        &self,
-        key: Option<&str>,
-    ) -> AppResult<BoxStream<'_, AppResult<T>>> {
-        Ok(self
-            .inner
-            .do_subscribe(key, true, false, |i| deserialize::<T>(&i.data))
+            .do_subscribe(&self.key, true, false, |i| deserialize::<T>(&i.data))
             .await?
             .boxed())
     }
