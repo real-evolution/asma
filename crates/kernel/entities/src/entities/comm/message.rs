@@ -1,23 +1,11 @@
 use chrono::{DateTime, Utc};
 use kernel_proc_macros::entity;
 use schemars::JsonSchema;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use crate::traits::{Entity, Key};
+use crate::{entities::link::Instance, traits::*};
 
 use super::{attachment::Attachment, chat::Chat};
-
-#[derive(Clone, Debug, JsonSchema, Serialize, Deserialize)]
-pub enum MessageModificationKind {
-    Edit(String),
-    Delete,
-}
-
-#[derive(Clone, Debug, JsonSchema, Serialize, Deserialize)]
-pub struct MessageModification {
-    pub kind: MessageModificationKind,
-    pub made_at: DateTime<Utc>,
-}
 
 #[derive(Clone, Debug, JsonSchema, Serialize, Deserialize)]
 pub enum MessageDirection {
@@ -25,12 +13,12 @@ pub enum MessageDirection {
     Outgoing,
 }
 
-#[entity(entity_type = "immutable")]
+#[entity]
 #[derive(Clone, Debug, JsonSchema)]
 pub struct Message {
     pub text: Option<String>,
-    pub changes: Option<Vec<MessageModification>>,
     pub attachments: Option<Vec<Attachment>>,
+    pub changes: Vec<String>,
     pub direction: MessageDirection,
 
     pub delivered_at: Option<DateTime<Utc>>,
