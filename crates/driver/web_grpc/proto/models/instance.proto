@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package driver_web_grpc.proto.models;
+
+message Instance {
+  message Id {
+    string value = 1;
+  }
+}

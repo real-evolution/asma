@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package driver_web_grpc.proto.services;
+
+import "models/message.proto";
+import "models/user.proto";
+
+service Chats {
+  rpc WatchUserMessages(WatchMessagesRequest) returns (stream models.Message);
+}
+
+message WatchMessagesRequest {
+  models.User.Id user_id = 1;
+  models.Message.Direction direction = 2;
+}
