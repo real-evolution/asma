@@ -1,1 +1,1 @@
-pub mod chats;
+pub(super) mod chats;
