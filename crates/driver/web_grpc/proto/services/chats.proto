@@ -6,7 +6,7 @@ import "models/message.proto";
 import "models/user.proto";
 
 service Chats {
-  rpc WatchUserMessages(WatchMessagesRequest) returns (stream models.Message);
+  rpc WatchMessages(WatchMessagesRequest) returns (stream models.Message);
 }
 
 message WatchMessagesRequest {
