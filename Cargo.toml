@@ -56,7 +56,3 @@ incremental = true
 # sqlx-optimization
 [profile.dev.package.sqlx-macros]
 opt-level = 3
-
-# mold linker
-[build]
-rustflags = ["-C", "link-arg=-fuse-ld=mold"]
