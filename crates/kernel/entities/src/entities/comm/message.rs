@@ -20,9 +20,9 @@ pub struct Message {
     pub changes: Vec<String>,
     pub attachments: Vec<Attachment>,
     pub direction: MessageDirection,
-    pub delivered_at: DateTime<Utc>,
-    pub seen_at: Option<DateTime<Utc>>,
     pub chat_id: Key<Chat>,
     pub instance_id: Key<Instance>,
+    pub delivered_at: DateTime<Utc>,
+    pub seen_at: Option<DateTime<Utc>>,
     pub deleted_at: Option<DateTime<Utc>>,
 }
