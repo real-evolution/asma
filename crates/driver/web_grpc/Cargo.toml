@@ -18,7 +18,9 @@ tonic = { version = "0", features = [
 
 # workspace dependencies
 anyhow = { workspace = true }
+async-trait = { workspace = true }
 tokio = { workspace = true }
+tokio-stream = { workspace = true }
 
 [build-dependencies]
 tonic-build = { version = "0", features = ["prost-build"] }
