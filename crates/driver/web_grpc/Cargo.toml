@@ -6,3 +6,20 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# create dependencies
+prost = "0"
+prost-types = "0"
+tonic = { version = "0", features = [
+  "transport",
+  "channel",
+  "codegen",
+  "prost",
+] }
+
+# workspace dependencies
+anyhow = { workspace = true }
+tokio = { workspace = true }
+
+[build-dependencies]
+tonic-build = { version = "0", features = ["prost-build"] }
+anyhow = { workspace = true }
