@@ -3,7 +3,7 @@ use derive_more::Constructor;
 use kernel_entities::{
     entities::{
         comm::{Chat, Message, MessageDirection},
-        link::Instance,
+        link::Instance, auth::User,
     },
     traits::Key,
 };
@@ -26,6 +26,7 @@ pub struct InsertMessage {
     pub text: Option<String>,
     pub direction: MessageDirection,
     pub delivered_at: DateTime<Utc>,
+    pub user_id: Key<User>,
     pub chat_id: Key<Chat>,
     pub instance_id: Key<Instance>,
 }
