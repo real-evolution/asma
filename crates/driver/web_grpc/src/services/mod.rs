@@ -1,1 +1,3 @@
-pub(super) mod chats;
+mod chats;
+
+pub(super) use chats::GrpcChatsService;
