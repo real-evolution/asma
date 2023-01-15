@@ -3,8 +3,10 @@
 # all interfaces. 127.0.0.1 (or ::1) can be used to only listen on the
 # loopback interface for development purposes.
 listen_address = "0.0.0.0"
-# Web server listening port.
-listen_port = 8080
+# RESTful API server listening port.
+rest_listen_port = 8080
+# gRPC server listening port.
+grpc_listen_port = 8888
 
 [log]
 # Log entires display format. This accepts the following values:
