@@ -24,7 +24,7 @@ const ENTITY_ID_FIELD: &str = "id";
 const ENTITY_CREATED_AT_FIELD: &str = "created_at";
 
 pub struct MongoDbRepo<E> {
-    database: Database,
+    pub(crate) database: Database,
     _phantom: PhantomData<E>,
 }
 
