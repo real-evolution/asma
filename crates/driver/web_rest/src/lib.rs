@@ -7,4 +7,3 @@ mod extractors;
 mod util;
 
 pub mod app;
-pub mod config;
