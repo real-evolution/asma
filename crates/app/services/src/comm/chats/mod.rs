@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use chrono::Utc;
+use futures::{stream::BoxStream, StreamExt, TryStreamExt};
 use kernel_entities::{
     entities::{
         auth::User,
@@ -13,21 +14,25 @@ use kernel_repositories::{
     comm::{InsertChat, InsertMessage},
     error::{RepoError, RepoResult},
     link::InsertInstance,
-    DataStore, DocumentStore,
+    DataStore,
+    DocumentStore,
 };
 use kernel_services::{
-    comm::chats::ChatsService,
+    comm::chats::{ChatEvent, ChatEventKind, ChatsService},
     error::AppResult,
     link::channels::{
-        ChannelPipe, ChannelsService, IncomingChannelUpdate,
-        IncomingChannelUpdateKind, IncomingMessageUpdateKind,
-        OutgoingChannelUpdate, OutgoingChannelUpdateKind,
+        ChannelPipe,
+        ChannelsService,
+        IncomingChannelUpdate,
+        IncomingChannelUpdateKind,
+        IncomingMessageUpdateKind,
+        OutgoingChannelUpdate,
+        OutgoingChannelUpdateKind,
         OutgoingMessageUpdateKind,
     },
     Service,
 };
 use tokio::sync::Mutex;
-use tokio_stream::StreamExt;
 
 pub struct AppChatsService {
     data: Arc<dyn DataStore>,
@@ -46,6 +51,35 @@ impl ChatsService for AppChatsService {
         let chat = self.docs.chats().get(chat_id).await?;
 
         self.send_update(chat, text).await
+    }
+
+    async fn watch_user_chats(
+        &self,
+        user_id: &Key<User>,
+    ) -> AppResult<BoxStream<'static, AppResult<ChatEvent>>> {
+        Ok(self
+            .docs
+            .chats()
+            .watch_all_of(user_id)
+            .await?
+            .map(|m| {
+                let message = match m {
+                    | Ok(message) => message,
+                    | Err(err) => return Err(err.into()),
+                };
+
+                Ok(ChatEvent {
+                    chat_id: message.chat_id,
+                    kind: ChatEventKind::MessageAdded {
+                        id: message.id,
+                        text: message.text,
+                        instance_id: message.instance_id,
+                        direction: message.direction,
+                        created_at: message.created_at,
+                    },
+                })
+            })
+            .boxed())
     }
 }
 
@@ -99,6 +133,7 @@ impl AppChatsService {
                 .create(InsertMessage {
                     text: Some(text.clone()),
                     direction: MessageDirection::Outgoing,
+                    user_id: chat.user_id.clone(),
                     chat_id: chat.id.clone(),
                     instance_id: instance.id,
                     delivered_at: Utc::now(),
@@ -141,6 +176,7 @@ impl AppChatsService {
                                 text: content.clone(),
                                 direction: MessageDirection::Incoming,
                                 delivered_at: timestamp,
+                                user_id: update.user_id,
                                 chat_id: instance.chat_id,
                                 instance_id: instance.id.clone(),
                             })
