@@ -8,7 +8,8 @@ use kernel_repositories::{
 use mongodb::bson::doc;
 
 use crate::{
-    repo::MongoDbRepo, traits::collection_entity::CollectionEntity,
+    repo::MongoDbRepo,
+    traits::collection_entity::CollectionEntity,
     util::error::map_mongo_error,
 };
 
@@ -46,6 +47,7 @@ impl InsertRepo<InsertMessage> for MongoDbRepo<Message> {
             direction: model.direction,
             delivered_at: model.delivered_at,
             seen_at: None,
+            user_id: model.user_id,
             chat_id: model.chat_id,
             instance_id: model.instance_id,
             deleted_at: None,
