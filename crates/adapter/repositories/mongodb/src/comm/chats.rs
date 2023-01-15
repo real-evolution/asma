@@ -1,18 +1,50 @@
 use chrono::Utc;
-use kernel_entities::entities::comm::Chat;
+use futures::{stream::BoxStream, StreamExt};
+use kernel_entities::{
+    entities::{
+        auth::User,
+        comm::{Chat, Message},
+    },
+    traits::Key,
+};
 use kernel_repositories::{
     comm::{ChatsRepo, InsertChat},
     error::RepoResult,
     traits::InsertRepo,
 };
+use mongodb::{
+    bson::{doc, Document},
+    options::{ChangeStreamOptions, FullDocumentType},
+};
 
 use crate::{
-    repo::MongoDbRepo, traits::collection_entity::CollectionEntity,
+    repo::MongoDbRepo,
+    traits::collection_entity::CollectionEntity,
     util::error::map_mongo_error,
 };
 
 #[async_trait::async_trait]
-impl ChatsRepo for MongoDbRepo<Chat> {}
+impl ChatsRepo for MongoDbRepo<Chat> {
+    async fn watch(
+        &self,
+        id: &Key<Chat>,
+    ) -> RepoResult<BoxStream<'_, RepoResult<Message>>> {
+        self.watch_messages(
+            doc! { "$match": doc!{ "fullDocument.chat_id": id.to_string()} },
+        )
+        .await
+    }
+
+    async fn watch_all_of(
+        &self,
+        user_id: &Key<User>,
+    ) -> RepoResult<BoxStream<'static, RepoResult<Message>>> {
+        self.watch_messages(
+            doc! { "$match": doc!{ "fullDocument.user_id": user_id.to_string()} },
+        )
+        .await
+    }
+}
 
 #[async_trait::async_trait]
 impl InsertRepo<InsertChat> for MongoDbRepo<Chat> {
@@ -32,6 +64,39 @@ impl InsertRepo<InsertChat> for MongoDbRepo<Chat> {
             .map_err(map_mongo_error)?;
 
         Ok(chat)
+    }
+}
+
+impl MongoDbRepo<Chat> {
+    async fn watch_messages<F: Into<Document>>(
+        &self,
+        filter: F,
+    ) -> RepoResult<BoxStream<'static, RepoResult<Message>>> {
+        let pipeline = vec![
+            doc! { "$match": doc!{ "operationType": "insert"} },
+            filter.into(),
+        ];
+
+        let opts = ChangeStreamOptions::builder()
+            .full_document(Some(FullDocumentType::Required))
+            .build();
+
+        Ok(self
+            .database
+            .collection(Message::name())
+            .watch(pipeline, opts)
+            .await
+            .map_err(map_mongo_error)?
+            .filter_map(|e| async move {
+                match e {
+                    | Ok(event) => match event.full_document {
+                        | Some(doc) => Some(Ok(doc)),
+                        | None => None,
+                    },
+                    | Err(err) => Some(Err(map_mongo_error(err))),
+                }
+            })
+            .boxed())
     }
 }
 
