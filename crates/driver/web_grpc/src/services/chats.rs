@@ -17,13 +17,13 @@ use crate::proto::{
     ProtoResult,
 };
 
-pub(super) struct ChatsServiceImpl {
 #[derive(Constructor)]
+pub(crate) struct GrpcChatsService {
     state: AppState,
 }
 
 #[tonic::async_trait]
-impl Chats for ChatsServiceImpl {
+impl Chats for GrpcChatsService {
     type WatchStream = BoxStream<WatchResponse>;
 
     async fn watch(
