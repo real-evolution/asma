@@ -26,4 +26,6 @@ pub trait AuthValidator: Sized {
     fn is(&self, account_id: &Key<Account>) -> Result<&Self, Self::Error>;
 
     fn of(&self, user_id: &Key<User>) -> Result<&Self, Self::Error>;
+
+    fn unauthorized(&self) -> Result<&Self, Self::Error>;
 }
