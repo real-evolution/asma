@@ -14,9 +14,8 @@ message Message {
   }
 
   enum Direction {
-    BOTH = 0;
-    INCOMING = 1;
-    OUTGOING = 2;
+    INCOMING = 0;
+    OUTGOING = 1;
   }
 
   Id id = 1;
