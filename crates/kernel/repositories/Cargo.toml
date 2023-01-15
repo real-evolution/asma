@@ -6,9 +6,6 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
-# crate dependencies
-futures = "0"
-
 # project dependencies
 kernel_entities = { path = "../entities" }
 
@@ -17,6 +14,8 @@ async-trait = { workspace = true }
 anyhow = { workspace = true }
 chrono = { workspace = true }
 derive_more = { workspace = true }
+futures = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+tokio = { workspace = true }
 uuid = { workspace = true }
