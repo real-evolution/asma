@@ -2,14 +2,30 @@ syntax = "proto3";
 
 package driver_web_grpc.proto.services;
 
+import "models/chat.proto";
+import "models/instance.proto";
 import "models/message.proto";
 import "models/user.proto";
 
+import "google/protobuf/timestamp.proto";
+
 service Chats {
-  rpc WatchMessages(WatchMessagesRequest) returns (stream models.Message);
+  rpc Watch(models.User.Id) returns (stream WatchResponse);
 }
 
-message WatchMessagesRequest {
-  models.User.Id user_id = 1;
-  models.Message.Direction direction = 2;
+message WatchResponse {
+  enum EventType {
+    MESSAGE_ADDED = 0;
+  }
+
+  optional MessageAddedEvent message_added = 1;
+}
+
+message MessageAddedEvent {
+  models.Message.Id         id          = 1;
+  models.Chat.Id            chat_id     = 2;
+  models.Instance.Id        instance_id = 3;
+  models.Message.Direction  direction   = 4;
+  string                    text        = 5;
+  google.protobuf.Timestamp created_at  = 6;
 }
