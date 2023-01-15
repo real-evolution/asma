@@ -16,11 +16,20 @@ tonic = { version = "0", features = [
   "prost",
 ] }
 
+# project dependencies
+driver_web_common = { path = "../web_common" }
+kernel_entities = { path = "../../kernel/entities" }
+kernel_services = { path = "../../kernel/services" }
+
 # workspace dependencies
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+async-stream = { workspace = true }
+chrono = { workspace = true }
+futures = { workspace = true }
 tokio = { workspace = true }
 tokio-stream = { workspace = true }
+tracing = { workspace = true }
 
 [build-dependencies]
 tonic-build = { version = "0", features = ["prost-build"] }
