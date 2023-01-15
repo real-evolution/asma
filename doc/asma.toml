@@ -67,11 +67,9 @@ max_sessions_count = 12
 # Generated refresh tokens lengths.
 refresh_token_length = 128
 
-[api]
+[auth.token]
 # Whether to disable root account privileges not not
 disable_root = false
-
-[api.token]
 # JWT token issuer value
 issuer = "asma.sgstel.com.ye"
 # JWT token audience value
