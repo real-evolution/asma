@@ -1,22 +1,24 @@
 use axum::extract::{Path, State};
-use driver_web_common::state::AppState;
-use kernel_entities::entities::auth::{Action, KnownRoles, Resource, Role};
-use kernel_entities::traits::Key;
+use driver_web_common::{state::AppState, auth::validator::AuthValidator};
+use kernel_entities::{
+    entities::auth::{Action, KnownRoles, Resource, Role},
+    traits::Key,
+};
 
 use super::dtos::UpdateRoleDto;
 use crate::{
-    error::ApiResult, extractors::validated_json::ValidatedJson,
-    util::claims::Claims,
+    error::ApiResult,
+    extractors::validated_json::ValidatedJson,
+    util::auth::token::RestAuthToken,
 };
 
 pub async fn update(
-    claims: Claims,
+    auth: RestAuthToken,
     role_id: Path<Key<Role>>,
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<UpdateRoleDto>,
 ) -> ApiResult<()> {
-    claims
-        .in_role(KnownRoles::Admin)?
+    auth.in_role(KnownRoles::Admin)?
         .can(&[(Resource::Roles, Action::Modify)])?;
 
     state

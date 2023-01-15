@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, Query, State},
     Json,
 };
-use driver_web_common::state::AppState;
+use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use itertools::Itertools;
 use kernel_entities::{
     entities::{auth::*, link::Channel},
@@ -14,20 +14,20 @@ use crate::{
     api::dtos::pagination::Pagination,
     error::ApiResult,
     extractors::validated_query::ValidatedQuery,
-    util::claims::Claims,
+    util::auth::token::RestAuthToken,
 };
 
 pub async fn get_all(
-    claims: Claims,
+    auth: RestAuthToken,
     ValidatedQuery(pagination): ValidatedQuery<Pagination>,
     user_id: Option<Query<Key<User>>>,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<ChannelDto>>> {
-    claims.can(&[(Resource::Channels, Action::View)])?;
+    auth.can(&[(Resource::Channels, Action::View)])?;
 
     let channels = match user_id {
         | Some(user_id) => {
-            claims.of(&user_id)?;
+            auth.of(&user_id)?;
 
             state
                 .data
@@ -42,7 +42,7 @@ pub async fn get_all(
         }
 
         | None => {
-            claims.in_role(KnownRoles::Admin)?;
+            auth.in_role(KnownRoles::Admin)?;
 
             state
                 .data
@@ -57,16 +57,16 @@ pub async fn get_all(
 }
 
 pub async fn get_by_id(
-    claims: Claims,
+    auth: RestAuthToken,
     channel_id: Path<Key<Channel>>,
     user_id: Option<Query<Key<User>>>,
     state: State<AppState>,
 ) -> ApiResult<Json<ChannelDto>> {
-    claims.can(&[(Resource::Channels, Action::View)])?;
+    auth.can(&[(Resource::Channels, Action::View)])?;
 
     let channel = match user_id {
         | Some(user_id) => {
-            claims.of(&user_id)?;
+            auth.of(&user_id)?;
 
             state
                 .data
@@ -77,7 +77,7 @@ pub async fn get_by_id(
         }
 
         | None => {
-            claims.in_role(KnownRoles::Admin)?;
+            auth.in_role(KnownRoles::Admin)?;
 
             state.data.link().channels().get(&channel_id).await?
         }

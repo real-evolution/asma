@@ -1,22 +1,27 @@
-use axum::extract::State;
-use axum::{extract::Path, Json};
-use driver_web_common::state::AppState;
+use axum::{
+    extract::{Path, State},
+    Json,
+};
+use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use itertools::Itertools;
-use kernel_entities::entities::auth::{Action, KnownRoles, Resource, Role};
-use kernel_entities::traits::Key;
+use kernel_entities::{
+    entities::auth::{Action, KnownRoles, Resource, Role},
+    traits::Key,
+};
 
 use super::dtos::{PermissionDto, RoleDto, RoleWithPermissionsDto};
-use crate::api::dtos::pagination::Pagination;
-use crate::error::ApiResult;
-use crate::util::claims::Claims;
+use crate::{
+    api::dtos::pagination::Pagination,
+    error::ApiResult,
+    util::auth::token::RestAuthToken,
+};
 
 pub async fn get_all(
-    claims: Claims,
+    auth: RestAuthToken,
     pagination: Pagination,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<RoleDto>>> {
-    claims
-        .in_role(KnownRoles::Admin)?
+    auth.in_role(KnownRoles::Admin)?
         .can(&[(Resource::Roles, Action::View)])?;
 
     let roles = state
@@ -33,11 +38,11 @@ pub async fn get_all(
 }
 
 pub async fn get_by_id(
-    claims: Claims,
+    auth: RestAuthToken,
     role_id: Path<Key<Role>>,
     state: State<AppState>,
 ) -> ApiResult<Json<RoleWithPermissionsDto>> {
-    claims.can(&[(Resource::Roles, Action::View)])?;
+    auth.can(&[(Resource::Roles, Action::View)])?;
 
     let role = state.data.auth().roles().get(&role_id).await?;
     let permissions: Vec<PermissionDto> = state

@@ -1,17 +1,16 @@
 use axum::{extract::*, Json};
-use driver_web_common::state::AppState;
+use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use kernel_entities::{entities::auth::*, traits::Key};
 
 use super::dtos::RemoveAccountFromRoleDto;
-use crate::{error::ApiResult, util::claims::Claims};
+use crate::{error::ApiResult, util::auth::token::RestAuthToken};
 
 pub async fn remove(
-    claims: Claims,
+    auth: RestAuthToken,
     role_id: Path<Key<Role>>,
     state: State<AppState>,
 ) -> ApiResult<()> {
-    claims
-        .in_role(KnownRoles::Admin)?
+    auth.in_role(KnownRoles::Admin)?
         .can(&[(Resource::Roles, Action::Remove)])?;
 
     state.data.auth().roles().remove(&role_id).await?;
@@ -20,12 +19,12 @@ pub async fn remove(
 }
 
 pub async fn remove_permission(
-    claims: Claims,
+    auth: RestAuthToken,
     role_id: Path<Key<Role>>,
     permission_id: Path<Key<Permission>>,
     state: State<AppState>,
 ) -> ApiResult<()> {
-    claims.in_role(KnownRoles::Admin)?.can(&[
+    auth.in_role(KnownRoles::Admin)?.can(&[
         (Resource::Roles, Action::Modify),
         (Resource::Permissions, Action::Remove),
     ])?;
@@ -41,20 +40,19 @@ pub async fn remove_permission(
 }
 
 pub async fn remove_from(
-    claims: Claims,
+    auth: RestAuthToken,
     role_id: Path<Key<Role>>,
     state: State<AppState>,
     Json(form): Json<RemoveAccountFromRoleDto>,
 ) -> ApiResult<()> {
-    claims
-        .in_role(KnownRoles::UserOwner)?
+    auth.in_role(KnownRoles::UserOwner)?
         .can(&[(Resource::Roles, Action::Modify)])?;
 
     let role = state.data.auth().roles().get(&role_id).await?;
-    claims.in_role(role.code.as_str())?;
+    auth.in_role(role.code.as_str())?;
 
     let account = state.data.auth().accounts().get(&form.account_id).await?;
-    claims.of(&account.user_id)?;
+    auth.of(&account.user_id)?;
 
     state
         .data

@@ -1,5 +1,5 @@
 use axum::extract::{Path, State};
-use driver_web_common::state::AppState;
+use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use kernel_entities::{entities::auth::*, traits::Key};
 use kernel_services::auth::AuthService;
 
@@ -7,16 +7,16 @@ use super::dtos::{AccountDto, AddAccountDto};
 use crate::{
     error::ApiResult,
     extractors::validated_json::ValidatedJson,
-    util::{claims::Claims, response::Created},
+    util::{auth::token::RestAuthToken, response::Created},
 };
 
 pub async fn add(
-    claims: Claims,
+    auth: RestAuthToken,
     user_id: Path<Key<User>>,
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddAccountDto>,
 ) -> ApiResult<Created<Key<Account>, AccountDto>> {
-    claims.of(&user_id)?.can(&[
+    auth.of(&user_id)?.can(&[
         (Resource::Users, Action::Modify),
         (Resource::Accounts, Action::Add),
     ])?;

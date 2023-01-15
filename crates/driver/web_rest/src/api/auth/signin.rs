@@ -1,22 +1,24 @@
 use std::net::SocketAddr;
 
-use axum::extract::{ConnectInfo, State};
-use axum::Json;
-use driver_web_common::state::AppState;
-use kernel_services::auth::AuthService;
-use kernel_services::auth::models::DeviceInfo;
+use axum::{
+    extract::{ConnectInfo, State},
+    Json,
+};
+use driver_web_common::{auth::token::AuthToken, state::AppState};
+use kernel_services::auth::{models::DeviceInfo, AuthService};
 
 use super::dtos::{TokenPair, UserCredentials};
-use crate::config::ApiConfig;
-use crate::error::ApiResult;
-use crate::extractors::validated_json::ValidatedJson;
-use crate::util::claims::Claims;
+use crate::{
+    error::ApiResult,
+    extractors::validated_json::ValidatedJson,
+    util::auth::config::RestAuthTokenConfig,
+};
 
 pub async fn signin(
     // TypedHeader(agent): TypedHeader<UserAgent>,
     ConnectInfo(ip): ConnectInfo<SocketAddr>,
     state: State<AppState>,
-    config: ApiConfig,
+    config: RestAuthTokenConfig,
     ValidatedJson(form): ValidatedJson<UserCredentials>,
 ) -> ApiResult<Json<TokenPair>> {
     // TODO:
@@ -52,7 +54,8 @@ pub async fn signin(
 
     let refresh_token = session.refresh_token.clone();
     let access_token =
-        Claims::new(user, account, session, roles, config).encode()?;
+        AuthToken::new(user, account, session, roles, config.into())
+            .encode()?;
 
     Ok(Json(TokenPair {
         access_token,

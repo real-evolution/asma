@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, State},
     Json,
 };
-use driver_web_common::state::AppState;
+use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use itertools::Itertools;
 use kernel_entities::{
     entities::auth::{Action, KnownRoles, Resource, User},
@@ -13,16 +13,15 @@ use super::dtos::UserDto;
 use crate::{
     api::dtos::pagination::Pagination,
     error::ApiResult,
-    util::claims::Claims,
+    util::auth::token::RestAuthToken,
 };
 
 pub async fn get_all(
-    claims: Claims,
+    auth: RestAuthToken,
     pagination: Pagination,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<UserDto>>> {
-    claims
-        .in_role(KnownRoles::Admin)?
+    auth.in_role(KnownRoles::Admin)?
         .can(&[(Resource::Users, Action::View)])?;
 
     let users = state
@@ -39,11 +38,11 @@ pub async fn get_all(
 }
 
 pub async fn get_by_id(
-    claims: Claims,
+    auth: RestAuthToken,
     user_id: Path<Key<User>>,
     state: State<AppState>,
 ) -> ApiResult<Json<UserDto>> {
-    claims.can(&[(Resource::Users, Action::View)])?;
+    auth.can(&[(Resource::Users, Action::View)])?;
 
     let user = state.data.auth().users().get(&user_id).await?;
 
