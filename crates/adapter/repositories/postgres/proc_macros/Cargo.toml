@@ -9,11 +9,6 @@ authors.workspace = true
 proc-macro = true
 
 [dependencies]
-common_macros = { path = "../../../../common/macros" }
-
-# workspace dependencies
-derive_more = { workspace = true }
-
 # crate dependencies
 syn = { version = "1" }
 quote = "1"

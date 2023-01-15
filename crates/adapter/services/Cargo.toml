@@ -8,7 +8,6 @@ authors.workspace = true
 [dependencies]
 # crate dependencies
 argon2 = "0"
-async-stream = "0"
 config = "0"
 deadpool-lapin = { version = "0.10.0", features = ["rt_tokio_1"] }
 directories = "4"

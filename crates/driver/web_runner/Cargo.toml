@@ -9,7 +9,6 @@ authors.workspace = true
 # crate dependencies
 async-stream = "0"
 axum = "0"
-axum_tonic = "0"
 serde-enum-str = "0"
 tower-http = { version = "0", features = [ "trace" ] }
 tracing-subscriber = { version = "0", features = ["env-filter", "json"] }

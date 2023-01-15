@@ -6,11 +6,6 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
-# crate dependencies
-convert_case = "0"
-enumflags2 = "0"
-futures = "0"
-
 # project dependencies
 kernel_entities = { path = "../entities" }
 kernel_repositories = { path = "../repositories" }
@@ -20,10 +15,7 @@ anyhow = { workspace = true }
 async-trait = { workspace = true }
 chrono = { workspace = true }
 derive_more = { workspace = true }
-itertools = { workspace = true }
-lazy_static = { workspace = true }
+futures = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
-tokio = { workspace = true }
 uuid = { workspace = true }
-validator = { workspace = true }
