@@ -1,4 +1,4 @@
-use std::{fmt::Display, marker::PhantomData};
+use std::{fmt::Display, marker::PhantomData, str::FromStr};
 
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema_repr;
@@ -31,6 +31,16 @@ impl<E, T: Clone> Key<E, T> {
 
     pub fn value(&self) -> T {
         self.0.clone()
+    }
+}
+
+impl<E> FromStr for Key<E, KeyType> {
+    type Err = uuid::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let inner = uuid::Uuid::from_str(s)?;
+
+        Ok(Self(inner, PhantomData))
     }
 }
 
