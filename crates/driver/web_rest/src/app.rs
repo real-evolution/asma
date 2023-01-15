@@ -21,7 +21,7 @@ async fn serve_api(Extension(api): Extension<OpenApi>) -> impl IntoApiResponse {
     serialize_api(&api)
 }
 
-pub fn make_app() -> AppResult<Router<AppState>> {
+pub fn make_rest_app() -> AppResult<Router<AppState>> {
     let mut api = OpenApi {
         info: Info {
             title: "asma".into(),
