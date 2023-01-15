@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use derive_more::Constructor;
 use driver_web_common::state::AppState;
 use futures::StreamExt;
 use kernel_entities::{entities::comm::MessageDirection, traits::Key};
@@ -17,6 +18,7 @@ use crate::proto::{
 };
 
 pub(super) struct ChatsServiceImpl {
+#[derive(Constructor)]
     state: AppState,
 }
 
