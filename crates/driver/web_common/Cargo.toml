@@ -6,8 +6,14 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+# crate dependencies
+jsonwebtoken = "8"
+
 # project dependencies
+common_macros = { path = "../../common/macros" }
+common_validation = { path = "../../common/validation" }
 app_services = { path = "../../app/services" }
+kernel_entities = { path = "../../kernel/entities" }
 kernel_repositories = { path = "../../kernel/repositories" }
 kernel_services = { path = "../../kernel/services" }
 adapter_repositories_postgres = { path = "../../adapter/repositories/postgres" }
@@ -16,4 +22,9 @@ adapter_services = { path = "../../adapter/services" }
 
 # workspace dependencies
 anyhow = { workspace = true }
+chrono = { workspace = true }
+itertools = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
 tracing = { workspace = true }
+validator = { workspace = true }
