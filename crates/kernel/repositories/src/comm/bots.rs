@@ -8,7 +8,7 @@ use crate::traits::*;
 
 #[async_trait::async_trait]
 pub trait BotsRepo:
-    Repo<Entity = Bot> + InsertRepo<InsertBot> + Send + Sync
+    Repo<Entity = Bot> + InsertRepo<InsertBot> + ChildRepo<User> + Send + Sync
 {
 }
 
