@@ -16,5 +16,6 @@ pub fn api_routes() -> AppResult<ApiRouter<AppState>> {
         .nest("/diag", diag::routes())
         .nest("/setup", setup::routes())
         .nest("/auth", auth::routes())
-        .nest("/link", link::routes()))
+        .nest("/link", link::routes())
+        .nest("/comm", comm::routes()))
 }
