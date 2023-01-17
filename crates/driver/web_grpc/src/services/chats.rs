@@ -1,9 +1,15 @@
 use std::str::FromStr;
 
 use derive_more::Constructor;
-use driver_web_common::state::AppState;
+use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use futures::StreamExt;
-use kernel_entities::{entities::comm::MessageDirection, traits::Key};
+use kernel_entities::{
+    entities::{
+        auth::{Action, KnownRoles, Resource},
+        comm::MessageDirection,
+    },
+    traits::Key,
+};
 use kernel_services::{
     self,
     comm::chats::{ChatEventKind, ChatsService},
@@ -11,10 +17,13 @@ use kernel_services::{
 use tonic::{codegen::BoxStream, Request, Response, Status};
 use tracing::warn;
 
-use crate::proto::{
-    models,
-    services::{chats_server::Chats, MessageAddedEvent, WatchResponse},
-    ProtoResult,
+use crate::{
+    proto::{
+        models,
+        services::{chats_server::Chats, MessageAddedEvent, WatchResponse},
+        ProtoResult,
+    },
+    util::auth::token::RequestExt,
 };
 
 #[derive(Constructor)]
@@ -30,9 +39,18 @@ impl Chats for GrpcChatsService {
         &self,
         req: Request<models::user::Id>,
     ) -> ProtoResult<Response<Self::WatchStream>> {
+        let auth = req.auth(self.state.config.clone())?;
+
         let Ok(user_id) = Key::from_str(&req.into_inner().value) else {
             return Err(Status::invalid_argument("invalid key format"));
         };
+
+        auth.can(&[
+            (Resource::Chats, Action::View),
+            (Resource::Messages, Action::View),
+        ])?
+        .of(&user_id)
+        .or_else(|_| auth.in_role(KnownRoles::Admin))?;
 
         let Ok(mut stream) = self.state.chats.watch_user_chats(&user_id).await else {
             return Err(Status::invalid_argument("could not subscribe to updates"));
