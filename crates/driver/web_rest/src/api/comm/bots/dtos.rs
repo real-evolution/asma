@@ -1,6 +1,6 @@
 use aide::OperationIo;
 use chrono::{DateTime, Utc};
-use kernel_entities::{entities::comm::Bot, traits::Key};
+use kernel_entities::{entities::{comm::Bot, auth::User}, traits::Key};
 use mapper::Mapper;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -14,6 +14,7 @@ pub struct BotDto {
     pub id: Key<Bot>,
     pub name: String,
     pub is_active: bool,
+    pub user_id: Key<User>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -24,4 +25,5 @@ pub struct BotDto {
 pub struct AddBotDto {
     pub name: String,
     pub is_active: bool,
+    pub user_id: Key<User>,
 }
