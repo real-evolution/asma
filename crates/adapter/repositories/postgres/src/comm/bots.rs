@@ -35,6 +35,8 @@ mod models {
         pub name: String,
         #[ormx(set)]
         pub is_active: bool,
+        #[ormx(get_many)]
+        pub user_id: KeyType,
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
         #[ormx(default, set)]
@@ -47,9 +49,10 @@ mod models {
                 id: uuid::Uuid::new_v4(),
                 name: val.name,
                 is_active: val.is_active,
+                user_id: val.user_id.value(),
             }
         }
     }
 
-    generate_mapping!(Bot, BotModel, 5);
+    generate_mapping!(Bot, BotModel, 6);
 }

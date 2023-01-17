@@ -1,5 +1,8 @@
 use derive_more::Constructor;
-use kernel_entities::entities::comm::Bot;
+use kernel_entities::{
+    entities::{auth::User, comm::Bot},
+    traits::Key,
+};
 
 use crate::traits::*;
 
@@ -13,4 +16,5 @@ pub trait BotsRepo:
 pub struct InsertBot {
     pub name: String,
     pub is_active: bool,
+    pub user_id: Key<User>,
 }
