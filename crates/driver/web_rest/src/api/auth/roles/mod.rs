@@ -1,8 +1,8 @@
-pub mod add;
-pub mod dtos;
-pub mod remove;
-pub mod update;
-pub mod view;
+mod add;
+mod dtos;
+mod remove;
+mod update;
+mod view;
 
 use aide::axum::{
     routing::{get, post},

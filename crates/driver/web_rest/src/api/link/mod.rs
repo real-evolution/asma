@@ -1,4 +1,4 @@
-pub mod channels;
+mod channels;
 
 use aide::axum::ApiRouter;
 use driver_web_common::state::AppState;

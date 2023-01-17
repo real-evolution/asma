@@ -1,9 +1,9 @@
-pub mod accounts;
-pub mod add;
-pub mod dtos;
-pub mod remove;
-pub mod update;
-pub mod view;
+mod accounts;
+mod add;
+mod dtos;
+mod remove;
+mod update;
+mod view;
 
 use aide::axum::{routing::get, ApiRouter};
 use driver_web_common::state::AppState;

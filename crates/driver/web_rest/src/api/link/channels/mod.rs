@@ -1,6 +1,6 @@
-pub mod add;
-pub mod dtos;
-pub mod view;
+mod add;
+mod dtos;
+mod view;
 
 use aide::axum::{routing::get, ApiRouter};
 use driver_web_common::state::AppState;
