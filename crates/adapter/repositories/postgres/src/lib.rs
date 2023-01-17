@@ -2,10 +2,16 @@ use std::sync::Arc;
 
 use auth::SqlxAuthDataStore;
 use database::SqlxPool;
-use kernel_repositories::{auth::AuthDataStore, link::LinkDataStore, *};
+use kernel_repositories::{
+    auth::AuthDataStore,
+    comm::CommDataStore,
+    link::LinkDataStore,
+    *,
+};
 use link::SqlxLinkDataStore;
 
 mod auth;
+mod comm;
 mod config;
 mod database;
 mod link;
@@ -13,10 +19,13 @@ mod util;
 
 pub use config::*;
 
+use crate::comm::SqlxCommDataStore;
+
 struct SqlxDataStore {
     pool: SqlxPool,
     auth: SqlxAuthDataStore,
     link: SqlxLinkDataStore,
+    comm: comm::SqlxCommDataStore,
 }
 
 impl DataStore for SqlxDataStore {
@@ -30,6 +39,10 @@ impl DataStore for SqlxDataStore {
 
     fn link(&self) -> &dyn LinkDataStore {
         &self.link
+    }
+
+    fn comm(&self) -> &dyn CommDataStore {
+        &self.comm
     }
 }
 
@@ -46,6 +59,7 @@ pub async fn create_datastore(
     Ok(Arc::new(SqlxDataStore {
         auth: SqlxAuthDataStore::new(pool.clone()),
         link: SqlxLinkDataStore::new(pool.clone()),
+        comm: SqlxCommDataStore::new(pool.clone()),
         pool,
     }))
 }
