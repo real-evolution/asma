@@ -33,6 +33,9 @@ pub enum Resource {
     Chats = 6,
     Peers = 7,
     Messages = 8,
+    Bots = 9,
+    MessageTemplate = 10,
+    Menu = 11,
 }
 
 #[EnumRepr(type = "i32")]
