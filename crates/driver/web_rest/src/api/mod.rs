@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod comm;
 pub mod diag;
 pub mod dtos;
 pub mod link;
