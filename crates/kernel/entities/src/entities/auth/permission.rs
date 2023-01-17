@@ -30,6 +30,9 @@ pub enum Resource {
     Roles = 3,
     Permissions = 4,
     Channels = 5,
+    Chats = 6,
+    Peers = 7,
+    Messages = 8,
 }
 
 #[EnumRepr(type = "i32")]
