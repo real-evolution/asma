@@ -1,3 +1,4 @@
+use derive_more::{From, Into};
 use enum_repr::EnumRepr;
 use kernel_proc_macros::entity;
 use schemars::{JsonSchema, JsonSchema_repr};
@@ -7,7 +8,7 @@ use super::Bot;
 use crate::traits::*;
 
 #[EnumRepr(type = "i32")]
-#[derive(Clone, Copy, Debug, JsonSchema_repr, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, From, JsonSchema_repr, Deserialize, Serialize)]
 pub enum TriggerMatchingStrategy {
     Full = 0,
     SubString = 1,
@@ -15,7 +16,7 @@ pub enum TriggerMatchingStrategy {
 }
 
 #[entity]
-#[derive(Clone, Debug, JsonSchema)]
+#[derive(Clone, Debug, From, Into, JsonSchema)]
 pub struct Menu {
     title: String,
     content: Option<String>,
