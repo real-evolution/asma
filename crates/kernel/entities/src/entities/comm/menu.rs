@@ -24,4 +24,14 @@ pub struct Menu {
     matching_strategy: TriggerMatchingStrategy,
     parent_menu_id: Option<Key<Menu>>,
     bot_id: Key<Bot>,
+impl From<i32> for TriggerMatchingStrategy {
+    fn from(value: i32) -> Self {
+        Self::from_repr(value).unwrap_or(TriggerMatchingStrategy::Full)
+    }
+}
+
+impl From<TriggerMatchingStrategy> for i32 {
+    fn from(val: TriggerMatchingStrategy) -> Self {
+        val.repr()
+    }
 }
