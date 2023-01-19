@@ -3,7 +3,7 @@ use axum::{
     Json,
 };
 use driver_web_common::{auth::validator::AuthValidator, state::AppState};
-use kernel_entities::{entities::auth::*, traits::Key};
+use kernel_entities::{entities::auth::*, traits::Key, util::ResourceEntity};
 use kernel_repositories::auth::InsertRole;
 
 use super::dtos::{AddAccountToRoleDto, AddPermissionDto, AddRoleDto};
@@ -21,8 +21,7 @@ pub async fn add(
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddRoleDto>,
 ) -> ApiResult<EntityCreated<Role>> {
-    auth.in_role(KnownRoles::Admin)?
-        .can(&[(Resource::Role, Action::Add)])?;
+    auth.is_root()?;
 
     let role = state
         .data
@@ -61,13 +60,19 @@ pub async fn add_to(
     state: State<AppState>,
     Json(form): Json<AddAccountToRoleDto>,
 ) -> ApiResult<()> {
-    auth.in_role(KnownRoles::UserOwner)?;
+    auth.of(&form.user_id)?
+        .in_role(KnownRoles::UserOwner)?
+        .can(&[(Account::resource(), Action::Modify)])?;
 
     let role = state.data.auth().roles().get(&role_id).await?;
     auth.in_role(role.code.as_str())?;
 
-    let account = state.data.auth().accounts().get(&form.account_id).await?;
-    auth.of(&account.user_id)?;
+    let account = state
+        .data
+        .auth()
+        .accounts()
+        .get_of(&form.user_id, &form.account_id)
+        .await?;
 
     state
         .data

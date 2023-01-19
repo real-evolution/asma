@@ -3,7 +3,7 @@ use axum::{
     Json,
 };
 use driver_web_common::{
-    auth::{util::AuthedRepoExts, validator::AuthValidator},
+    auth::{util::RepoExt, validator::AuthValidator},
     state::AppState,
 };
 use kernel_entities::{
