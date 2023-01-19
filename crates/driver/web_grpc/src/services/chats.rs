@@ -46,8 +46,8 @@ impl Chats for GrpcChatsService {
         };
 
         auth.can(&[
-            (Resource::Chats, Action::View),
-            (Resource::Messages, Action::View),
+            (Resource::Chat, Action::View),
+            (Resource::Message, Action::View),
         ])?
         .of(&user_id)
         .or_else(|_| auth.in_role(KnownRoles::Admin))?;
