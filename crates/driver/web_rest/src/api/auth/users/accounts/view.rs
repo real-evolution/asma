@@ -2,7 +2,7 @@ use axum::{
     extract::{Path, State},
     Json,
 };
-use driver_web_common::{state::AppState, auth::validator::AuthValidator};
+use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use itertools::Itertools;
 use kernel_entities::{entities::auth::*, traits::Key};
 

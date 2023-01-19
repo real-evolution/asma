@@ -1,3 +1,3 @@
-mod authorized_repo;
+mod authed_repo;
 
-pub use authorized_repo::*;
+pub use authed_repo::*;
