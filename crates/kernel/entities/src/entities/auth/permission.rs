@@ -24,18 +24,23 @@ use crate::traits::*;
     Serialize_repr,
 )]
 pub enum Resource {
+    // auth
     Unknown = 0,
-    Users = 1,
-    Accounts = 2,
-    Roles = 3,
-    Permissions = 4,
-    Channels = 5,
-    Chats = 6,
-    Peers = 7,
-    Messages = 8,
-    Bots = 9,
-    MessageTemplate = 10,
-    Menu = 11,
+    User = 1,
+    Account = 2,
+    Role = 3,
+    Permission = 4,
+    Session = 5,
+
+    // link
+    Channel = 6,
+    Instance = 7,
+    InstanceGroup = 8,
+
+    // comm
+    Chat = 9,
+    Message = 10,
+    Bot = 11,
 }
 
 #[EnumRepr(type = "i32")]
