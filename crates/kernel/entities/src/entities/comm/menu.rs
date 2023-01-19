@@ -18,12 +18,15 @@ pub enum TriggerMatchingStrategy {
 #[entity]
 #[derive(Clone, Debug, From, Into, JsonSchema)]
 pub struct Menu {
-    title: String,
-    content: Option<String>,
-    trigger: String,
-    matching_strategy: TriggerMatchingStrategy,
-    parent_menu_id: Option<Key<Menu>>,
-    bot_id: Key<Bot>,
+    pub title: String,
+    pub content: Option<String>,
+    pub menu_trigger: String,
+    pub matching_strategy: TriggerMatchingStrategy,
+    pub is_active: bool,
+    pub parent_menu_id: Key<Menu>,
+    pub bot_id: Key<Bot>,
+}
+
 impl From<i32> for TriggerMatchingStrategy {
     fn from(value: i32) -> Self {
         Self::from_repr(value).unwrap_or(TriggerMatchingStrategy::Full)
