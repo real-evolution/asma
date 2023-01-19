@@ -120,14 +120,19 @@ mod models {
 
     impl From<InsertMenu> for InsertMenuModel {
         fn from(val: InsertMenu) -> Self {
+            let id = uuid::Uuid::new_v4();
+
             Self {
-                id: uuid::Uuid::new_v4(),
+                id,
                 title: val.title,
                 content: val.content,
                 menu_trigger: val.menu_trigger,
                 matching_strategy: val.matching_strategy.repr(),
                 is_active: val.is_active,
-                parent_menu_id: val.parent_menu_id.value(),
+                parent_menu_id: val
+                    .parent_menu_id
+                    .map(|v| v.value())
+                    .unwrap_or(id),
                 bot_id: val.bot_id.value(),
             }
         }
