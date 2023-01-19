@@ -2,7 +2,7 @@ CREATE TABLE bots
 (
     id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
 
-    name VARCHAR NOT NULL UNIQUE,
+    name VARCHAR NOT NULL,
     is_active BOOLEAN DEFAULT FALSE NOT NULL,
     user_id UUID NOT NULL,
 
