@@ -19,6 +19,6 @@ pub struct InsertMenu {
     pub menu_trigger: String,
     pub matching_strategy: TriggerMatchingStrategy,
     pub is_active: bool,
-    pub parent_menu_id: Key<Menu>,
+    pub parent_menu_id: Option<Key<Menu>>,
     pub bot_id: Key<Bot>,
 }
