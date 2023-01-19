@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     Json,
 };
 use driver_web_common::{auth::validator::AuthValidator, state::AppState};
@@ -21,7 +21,7 @@ pub async fn get_all(
     state: State<AppState>,
     pagination: Pagination,
 ) -> ApiResult<Json<Vec<BotDto>>> {
-    auth.can(&[(Resource::Bots, Action::View)])?;
+    auth.can(&[(Resource::Bot, Action::View)])?;
 
     let bots = state
         .data
@@ -41,20 +41,26 @@ pub async fn get_all(
 }
 
 pub async fn get_by_id(
-    claims: RestAuthToken,
+    auth: RestAuthToken,
     bot_id: Path<Key<Bot>>,
+    user_id: Option<Query<Key<User>>>,
     state: State<AppState>,
 ) -> ApiResult<Json<BotDto>> {
-    claims.can(&[
-        (Resource::Users, Action::View),
-        (Resource::Accounts, Action::View),
-    ])?;
+    auth.can(&[(Resource::Bot, Action::View)])?;
 
-    let bot = state.data.comm().bots().get(&bot_id).await?;
+    let bot = match user_id {
+        | Some(user_id) => {
+            auth.of(&user_id)
+                .or_else(|_| auth.in_role(KnownRoles::Admin))?;
 
-    claims
-        .of(&bot.user_id)
-        .or_else(|_| claims.in_role(KnownRoles::Admin))?;
+            state.data.comm().bots().get_of(&user_id, &bot_id).await
+        }
+        | None => {
+            auth.in_role(KnownRoles::Admin)?;
+
+            state.data.comm().bots().get(&bot_id).await
+        }
+    }?;
 
     Ok(Json(bot.into()))
 }

@@ -19,7 +19,7 @@ pub async fn add(
     ValidatedJson(form): ValidatedJson<AddUserDto>,
 ) -> ApiResult<EntityCreated<User>> {
     auth.in_role(KnownRoles::Admin)?
-        .can(&[(Resource::Users, Action::Add)])?;
+        .can(&[(Resource::User, Action::Add)])?;
 
     let user = state
         .data

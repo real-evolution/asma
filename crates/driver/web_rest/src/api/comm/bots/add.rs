@@ -18,7 +18,7 @@ pub async fn add(
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddBotDto>,
 ) -> ApiResult<EntityCreated<Bot>> {
-    auth.can(&[(Resource::Roles, Action::Add)])?
+    auth.can(&[(Resource::Role, Action::Add)])?
         .of(&form.user_id)
         .or_else(|_| auth.in_role(KnownRoles::Admin))?;
 

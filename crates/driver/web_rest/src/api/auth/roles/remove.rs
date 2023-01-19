@@ -11,7 +11,7 @@ pub async fn remove(
     state: State<AppState>,
 ) -> ApiResult<()> {
     auth.in_role(KnownRoles::Admin)?
-        .can(&[(Resource::Roles, Action::Remove)])?;
+        .can(&[(Resource::Role, Action::Remove)])?;
 
     state.data.auth().roles().remove(&role_id).await?;
 
@@ -25,8 +25,8 @@ pub async fn remove_permission(
     state: State<AppState>,
 ) -> ApiResult<()> {
     auth.in_role(KnownRoles::Admin)?.can(&[
-        (Resource::Roles, Action::Modify),
-        (Resource::Permissions, Action::Remove),
+        (Resource::Role, Action::Modify),
+        (Resource::Permission, Action::Remove),
     ])?;
 
     state
@@ -46,7 +46,7 @@ pub async fn remove_from(
     Json(form): Json<RemoveAccountFromRoleDto>,
 ) -> ApiResult<()> {
     auth.in_role(KnownRoles::UserOwner)?
-        .can(&[(Resource::Roles, Action::Modify)])?;
+        .can(&[(Resource::Role, Action::Modify)])?;
 
     let role = state.data.auth().roles().get(&role_id).await?;
     auth.in_role(role.code.as_str())?;

@@ -19,7 +19,7 @@ pub async fn add(
     ValidatedJson(form): ValidatedJson<AddChannelDto>,
 ) -> ApiResult<EntityCreated<Channel>> {
     auth.of(&form.user_id)?
-        .can(&[(Resource::Channels, Action::Add)])?;
+        .can(&[(Resource::Channel, Action::Add)])?;
 
     let channel = state
         .data

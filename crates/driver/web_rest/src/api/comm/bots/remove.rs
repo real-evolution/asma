@@ -10,16 +10,24 @@ use crate::{error::ApiResult, util::auth::token::RestAuthToken};
 pub async fn remove(
     auth: RestAuthToken,
     bot_id: Path<Key<Bot>>,
+    user_id: Option<Query<Key<User>>>,
     state: State<AppState>,
 ) -> ApiResult<()> {
-    auth.can(&[(Resource::Bots, Action::Remove)])?;
+    auth.can(&[(Resource::Bot, Action::Remove)])?;
 
-    let bot = state.data.comm().bots().get(&bot_id).await?;
+    match user_id {
+        | Some(user_id) => {
+            auth.of(&user_id)
+                .or_else(|_| auth.in_role(KnownRoles::Admin))?;
 
-    auth.of(&bot.user_id)
-        .or_else(|_| auth.in_role(KnownRoles::Admin))?;
+            state.data.comm().bots().remove_of(&user_id, &bot_id).await
+        }
+        | None => {
+            auth.in_role(KnownRoles::Admin)?;
 
-    state.data.comm().bots().remove(&bot_id).await?;
+            state.data.comm().bots().remove(&bot_id).await
+        }
+    }?;
 
     Ok(())
 }

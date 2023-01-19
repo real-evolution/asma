@@ -22,7 +22,7 @@ pub async fn get_all(
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<UserDto>>> {
     auth.in_role(KnownRoles::Admin)?
-        .can(&[(Resource::Users, Action::View)])?;
+        .can(&[(Resource::User, Action::View)])?;
 
     let users = state
         .data
@@ -42,7 +42,7 @@ pub async fn get_by_id(
     user_id: Path<Key<User>>,
     state: State<AppState>,
 ) -> ApiResult<Json<UserDto>> {
-    auth.can(&[(Resource::Users, Action::View)])?;
+    auth.can(&[(Resource::User, Action::View)])?;
 
     let user = state.data.auth().users().get(&user_id).await?;
 

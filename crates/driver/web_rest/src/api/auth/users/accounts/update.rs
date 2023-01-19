@@ -21,7 +21,7 @@ pub async fn update_password(
     ValidatedJson(form): ValidatedJson<UpdateAccountPasswordDto>,
 ) -> ApiResult<()> {
     auth.is(&account_id)?
-        .can(&[(Resource::Accounts, Action::Modify)])?;
+        .can(&[(Resource::Account, Action::Modify)])?;
 
     state
         .auth

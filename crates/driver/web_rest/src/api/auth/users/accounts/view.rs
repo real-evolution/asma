@@ -20,8 +20,8 @@ pub async fn get_all(
     pagination: Pagination,
 ) -> ApiResult<Json<Vec<AccountDto>>> {
     auth.can(&[
-        (Resource::Users, Action::View),
-        (Resource::Accounts, Action::View),
+        (Resource::User, Action::View),
+        (Resource::Account, Action::View),
     ])?
     .of(&user_id)
     .or_else(|_| auth.in_role(KnownRoles::Admin))?;
@@ -46,8 +46,8 @@ pub async fn get_by_id(
 ) -> ApiResult<Json<AccountDto>> {
     claims
         .can(&[
-            (Resource::Users, Action::View),
-            (Resource::Accounts, Action::View),
+            (Resource::User, Action::View),
+            (Resource::Account, Action::View),
         ])?
         .of(&user_id)
         .or_else(|_| claims.in_role(KnownRoles::Admin))?;

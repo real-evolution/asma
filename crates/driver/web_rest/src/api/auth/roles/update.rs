@@ -19,7 +19,7 @@ pub async fn update(
     ValidatedJson(form): ValidatedJson<UpdateRoleDto>,
 ) -> ApiResult<()> {
     auth.in_role(KnownRoles::Admin)?
-        .can(&[(Resource::Roles, Action::Modify)])?;
+        .can(&[(Resource::Role, Action::Modify)])?;
 
     state
         .data

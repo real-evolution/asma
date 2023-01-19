@@ -11,8 +11,8 @@ pub async fn remove(
     state: State<AppState>,
 ) -> ApiResult<()> {
     auth.of(&user_id)?.can(&[
-        (Resource::Users, Action::Modify),
-        (Resource::Accounts, Action::Remove),
+        (Resource::User, Action::Modify),
+        (Resource::Account, Action::Remove),
     ])?;
 
     state

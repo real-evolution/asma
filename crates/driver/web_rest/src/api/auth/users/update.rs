@@ -1,5 +1,5 @@
 use axum::extract::{Path, State};
-use driver_web_common::{state::AppState, auth::validator::AuthValidator};
+use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use kernel_entities::{
     entities::auth::{Action, KnownRoles, Resource, User},
     traits::Key,
@@ -19,7 +19,7 @@ pub async fn update(
     ValidatedJson(form): ValidatedJson<UpdateUserDto>,
 ) -> ApiResult<()> {
     auth.in_role(KnownRoles::Admin)?
-        .can(&[(Resource::Users, Action::Modify)])?;
+        .can(&[(Resource::User, Action::Modify)])?;
 
     state
         .data

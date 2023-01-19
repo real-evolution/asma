@@ -22,7 +22,7 @@ pub async fn get_all(
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<RoleDto>>> {
     auth.in_role(KnownRoles::Admin)?
-        .can(&[(Resource::Roles, Action::View)])?;
+        .can(&[(Resource::Role, Action::View)])?;
 
     let roles = state
         .data
@@ -42,7 +42,7 @@ pub async fn get_by_id(
     role_id: Path<Key<Role>>,
     state: State<AppState>,
 ) -> ApiResult<Json<RoleWithPermissionsDto>> {
-    auth.can(&[(Resource::Roles, Action::View)])?;
+    auth.can(&[(Resource::Role, Action::View)])?;
 
     let role = state.data.auth().roles().get(&role_id).await?;
     let permissions: Vec<PermissionDto> = state

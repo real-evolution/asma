@@ -23,7 +23,7 @@ pub async fn get_all(
     user_id: Option<Query<Key<User>>>,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<ChannelDto>>> {
-    auth.can(&[(Resource::Channels, Action::View)])?;
+    auth.can(&[(Resource::Channel, Action::View)])?;
 
     let channels = match user_id {
         | Some(user_id) => {
@@ -62,7 +62,7 @@ pub async fn get_by_id(
     user_id: Option<Query<Key<User>>>,
     state: State<AppState>,
 ) -> ApiResult<Json<ChannelDto>> {
-    auth.can(&[(Resource::Channels, Action::View)])?;
+    auth.can(&[(Resource::Channel, Action::View)])?;
 
     let channel = match user_id {
         | Some(user_id) => {
