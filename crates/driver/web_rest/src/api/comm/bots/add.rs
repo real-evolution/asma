@@ -18,7 +18,7 @@ pub async fn add(
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddBotDto>,
 ) -> ApiResult<EntityCreated<Bot>> {
-    auth.can(&[(Resource::Role, Action::Add)])?
+    auth.can(&[(Resource::Bot, Action::Add)])?
         .of(&form.user_id)
         .or_else(|_| auth.in_role(KnownRoles::Admin))?;
 
@@ -29,5 +29,5 @@ pub async fn add(
         .create(InsertBot::new(form.name, form.is_active, form.user_id))
         .await?;
 
-    Ok(Created::new("/api/auth/roles", bot).into())
+    Ok(Created::new("/api/comm/bots", bot).into())
 }
