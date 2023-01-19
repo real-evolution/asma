@@ -37,3 +37,4 @@ create_mapping!(link::InstanceGroup => Resource::InstanceGroup);
 create_mapping!(comm::Chat => Resource::Chat);
 create_mapping!(comm::Message => Resource::Message);
 create_mapping!(comm::Bot => Resource::Bot);
+create_mapping!(comm::Menu => Resource::Menu);
