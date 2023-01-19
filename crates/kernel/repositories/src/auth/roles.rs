@@ -6,9 +6,7 @@ use kernel_entities::{entities::auth::*, traits::Key};
 use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
-pub trait RolesRepo:
-    Repo<Entity = Role> + InsertRepo<InsertRole> + Send + Sync
-{
+pub trait RolesRepo: Repo<Entity = Role> + InsertRepo<InsertRole> {
     async fn get_permissions_of(
         &self,
         role_id: &Key<Role>,

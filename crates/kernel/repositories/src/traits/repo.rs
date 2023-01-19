@@ -4,7 +4,7 @@ use kernel_entities::traits::{Entity, Key};
 use crate::error::RepoResult;
 
 #[async_trait::async_trait]
-pub trait Repo {
+pub trait Repo: Send + Sync {
     type Entity: Entity;
 
     async fn get(&self, key: &Key<Self::Entity>) -> RepoResult<Self::Entity>;
