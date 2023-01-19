@@ -7,7 +7,7 @@ use kernel_entities::{
 
 use super::token::AuthToken;
 
-pub trait AuthValidator: Sized {
+pub trait AuthValidator: Send + Sync + Sized {
     type Error;
 
     fn require<F: FnOnce() -> bool>(
@@ -40,7 +40,7 @@ pub trait FallbackValidator: Sized {
 
 impl<T, E> AuthValidator for T
 where
-    T: Deref<Target = AuthToken> + FallbackValidator<Error = E>,
+    T: Deref<Target = AuthToken> + FallbackValidator<Error = E> + Send + Sync,
 {
     type Error = E;
 
