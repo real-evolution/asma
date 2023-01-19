@@ -1,3 +1,3 @@
-mod resource_mapping;
+mod resource_entity;
 
-pub use resource_mapping::*;
+pub use resource_entity::*;

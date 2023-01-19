@@ -1,12 +1,15 @@
-use crate::entities::{
-    auth::{self, Resource},
-    comm,
-    link,
+use crate::{
+    entities::{
+        auth::{self, Resource},
+        comm,
+        link,
+    },
+    traits::Entity,
 };
 
 macro_rules! create_mapping {
     ($entity:ty => $res:expr) => {
-        impl EntityResourceExt for $entity {
+        impl ResourceEntity for $entity {
             fn resource() -> Resource {
                 $res
             }
@@ -14,7 +17,7 @@ macro_rules! create_mapping {
     };
 }
 
-pub trait EntityResourceExt {
+pub trait ResourceEntity: Entity {
     fn resource() -> Resource;
 }
 
