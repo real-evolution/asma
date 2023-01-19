@@ -1,5 +1,5 @@
 use axum::extract::State;
-use driver_web_common::{state::AppState, auth::validator::AuthValidator};
+use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use kernel_entities::entities::auth::*;
 use kernel_repositories::auth::InsertUser;
 

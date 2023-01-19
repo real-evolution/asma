@@ -2,8 +2,10 @@ use axum::{
     extract::{Path, State},
     Json,
 };
-use driver_web_common::{auth::validator::AuthValidator, state::AppState};
-use itertools::Itertools;
+use driver_web_common::{
+    auth::{util::AuthedRepoExts, validator::AuthValidator},
+    state::AppState,
+};
 use kernel_entities::{
     entities::auth::{Action, KnownRoles, Resource, User},
     traits::Key,
@@ -21,18 +23,17 @@ pub async fn get_all(
     pagination: Pagination,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<UserDto>>> {
-    auth.in_role(KnownRoles::Admin)?
-        .can(&[(Resource::User, Action::View)])?;
+    auth.in_role(KnownRoles::Admin)?;
 
     let users = state
         .data
         .auth()
         .users()
-        .get_paginated(&pagination.before, pagination.page_size)
+        .get_paginated_authed(&pagination.before, pagination.page_size, &auth)
         .await?
         .into_iter()
         .map(|user| UserDto { user })
-        .collect_vec();
+        .collect::<Vec<_>>();
 
     Ok(Json(users))
 }
