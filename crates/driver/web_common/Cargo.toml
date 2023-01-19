@@ -22,6 +22,7 @@ adapter_services = { path = "../../adapter/services" }
 
 # workspace dependencies
 anyhow = { workspace = true }
+async-trait = { workspace = true }
 chrono = { workspace = true }
 itertools = { workspace = true }
 rand = { workspace = true }
