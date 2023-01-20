@@ -16,6 +16,8 @@ pub trait MenusRepo:
         &self,
         id: &Key<Menu>,
     ) -> RepoResult<(Menu, Vec<Menu>)>;
+
+    async fn get_entry_menu_of(&self, bot_id: &Key<Bot>) -> RepoResult<Menu>;
 }
 
 #[derive(Constructor)]
