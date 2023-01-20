@@ -32,7 +32,7 @@ impl MenuTraverser {
     }
 
     pub(super) async fn process(&self, msg: &str) -> AppResult<bool> {
-        if let Some(next_id) = self.get_next_menu(msg.into()).await {
+        if let Some(next_id) = self.get_next_menu(msg).await {
             *self.current.write().await =
                 Self::get_hierarchy(&next_id, &self.data).await?;
 
