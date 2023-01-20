@@ -1,22 +1,27 @@
 use std::sync::Arc;
 
 use adapter_repositories_mongodb::{
-    create_doc_store, DocumentStoreConfig, DOC_STORE_CONFIG_SECTION,
+    create_doc_store,
+    DocumentStoreConfig,
+    DOC_STORE_CONFIG_SECTION,
 };
 use adapter_repositories_postgres::*;
 use adapter_services::{
-    config::TomlConfigService, crypto::hash::Argon2CryptoHashService,
+    config::TomlConfigService,
+    crypto::hash::Argon2CryptoHashService,
     entropy::SecureEntropyService,
     link::message_passing::RabbitMqMessagePassingService,
 };
 use app_services::{
-    auth::AppAuthService, comm::chats::AppChatsService,
-    link::channels::AppChannelsService, setup::AppSetupService,
+    auth::AppAuthService,
+    comm::{bots::AppBotsService, chats::AppChatsService},
+    link::channels::AppChannelsService,
+    setup::AppSetupService,
 };
 use kernel_repositories::{DataStore, DocumentStore};
 use kernel_services::{
     auth::AuthService,
-    comm::chats::ChatsService,
+    comm::{bots::BotsService, chats::ChatsService},
     config::ConfigService,
     crypto::hash::CryptoHashService,
     entropy::EntropyService,
@@ -35,6 +40,7 @@ pub type AppState = Arc<
         AppSetupService,
         AppChannelsService<RabbitMqMessagePassingService>,
         AppChatsService,
+        AppBotsService,
     >,
 >;
 
@@ -47,6 +53,7 @@ pub struct AppStateImpl<
     Setup: SetupService,
     Channels: ChannelsService,
     Chats: ChatsService,
+    Bots: BotsService,
 > {
     pub data: Arc<dyn DataStore>,
     pub docs: Arc<dyn DocumentStore>,
@@ -58,6 +65,7 @@ pub struct AppStateImpl<
     pub setup: Arc<Setup>,
     pub channels: Arc<Channels>,
     pub chats: Arc<Chats>,
+    pub bots: Arc<Bots>,
 }
 
 pub async fn get_config_service() -> anyhow::Result<Arc<TomlConfigService>> {
@@ -98,6 +106,7 @@ pub async fn create_state<'a>(
             .await?,
     )
     .await?;
+    let bots = init(AppBotsService::new(data.clone(), chats.clone())).await?;
 
     debug!("building application state");
     Ok(Arc::new(AppStateImpl {
@@ -111,6 +120,7 @@ pub async fn create_state<'a>(
         setup,
         channels,
         chats,
+        bots,
     }))
 }
 
