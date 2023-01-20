@@ -66,6 +66,7 @@ impl Chats for GrpcChatsService {
 
         let output = async_stream::stream! {
             while let Some(event) = stream.next().await {
+
                 let event = match event {
                     Ok(event) => event,
                     Err(err) => {
@@ -76,6 +77,8 @@ impl Chats for GrpcChatsService {
                         return ();
                     }
                 };
+
+                error!("EVENT: {event:#?}");
 
                 match event.kind {
                     | ChatEventKind::MessageAdded {

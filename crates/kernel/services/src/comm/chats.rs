@@ -24,6 +24,7 @@ pub trait ChatsService: Send + Sync {
     ) -> AppResult<BoxStream<'static, AppResult<ChatEvent>>>;
 }
 
+#[derive(Debug)]
 pub enum ChatEventKind {
     MessageAdded {
         id: Key<Message>,
@@ -34,6 +35,7 @@ pub enum ChatEventKind {
     },
 }
 
+#[derive(Debug)]
 pub struct ChatEvent {
     pub chat_id: Key<Chat>,
     pub kind: ChatEventKind,
