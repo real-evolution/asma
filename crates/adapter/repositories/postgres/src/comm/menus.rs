@@ -34,7 +34,9 @@ impl MenusRepo for SqlxMenusRepo {
                 models::MenuModel,
                 r#"
                 SELECT * FROM menus
-                WHERE parent_menu_id = $1 AND parent_menu_id != id
+                WHERE parent_menu_id = $1 AND
+                      parent_menu_id != id AND
+                      is_active = TRUE
                 "#,
                 id.value_ref(),
             )
