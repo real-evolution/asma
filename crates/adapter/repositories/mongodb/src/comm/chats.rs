@@ -29,18 +29,32 @@ impl ChatsRepo for MongoDbRepo<Chat> {
         &self,
         id: &Key<Chat>,
     ) -> RepoResult<BoxStream<'_, RepoResult<Message>>> {
-        self.watch_messages(doc! { "fullDocument.chat_id": id.to_string() })
-            .await
+        let filter = doc! {
+            "$match": {
+                "$and": [
+                    { "fullDocument.chat_id": id.to_string() },
+                    { "operationType": "insert" }
+                ]
+            }
+        };
+
+        self.watch_messages(filter).await
     }
 
     async fn watch_all_of(
         &self,
         user_id: &Key<User>,
     ) -> RepoResult<BoxStream<'static, RepoResult<Message>>> {
-        self.watch_messages(
-            doc! { "fullDocument.user_id": user_id.to_string() },
-        )
-        .await
+        let filter = doc! {
+            "$match": {
+                "$and": [
+                    { "fullDocument.user_id": user_id.to_string() },
+                    { "operationType": "insert" }
+                ]
+            }
+        };
+
+        self.watch_messages(filter).await
     }
 }
 
@@ -70,15 +84,6 @@ impl MongoDbRepo<Chat> {
         &self,
         filter: F,
     ) -> RepoResult<BoxStream<'static, RepoResult<Message>>> {
-        let pipeline = vec![doc! {
-            "$match": {
-                "$and": [
-                    filter.into(),
-                    { "operationType": "insert" }
-                ]
-            }
-        }];
-
         let opts = ChangeStreamOptions::builder()
             .full_document(Some(FullDocumentType::Required))
             .build();
@@ -86,7 +91,7 @@ impl MongoDbRepo<Chat> {
         Ok(self
             .database
             .collection(Message::name())
-            .watch(pipeline, opts)
+            .watch(vec![filter.into()], opts)
             .await
             .map_err(map_mongo_error)?
             .filter_map(|e| async move {
