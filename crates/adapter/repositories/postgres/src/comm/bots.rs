@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use futures::{stream::BoxStream, StreamExt, TryStreamExt};
 use kernel_entities::{
     entities::{auth::User, comm::Bot},
     traits::Key,
@@ -27,7 +28,18 @@ use crate::{
 pub(crate) struct SqlxBotsRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
-impl BotsRepo for SqlxBotsRepo {}
+impl BotsRepo for SqlxBotsRepo {
+    fn stream_active(&self) -> BoxStream<'_, RepoResult<Bot>> {
+        sqlx::query_as!(
+            models::BotModel,
+            "SELECT * FROM bots WHERE is_active = TRUE"
+        )
+        .fetch(self.0.get())
+        .map_ok(Into::into)
+        .map_err(map_sqlx_error)
+        .boxed()
+    }
+}
 
 #[async_trait::async_trait]
 impl ChildRepo<User> for SqlxBotsRepo {
