@@ -20,6 +20,8 @@ pub struct DocumentStoreConfig {
     pub port: Option<u16>,
     #[validate(custom = "identifier")]
     pub database: String,
+    #[validate(custom = "identifier")]
+    pub repl_name: Option<String>,
     #[validate]
     pub pool: PoolConfig,
 }
@@ -59,6 +61,7 @@ impl DocumentStoreConfig {
         opts.app_name = Some("asma".to_owned());
         opts.max_pool_size = self.pool.max_connections;
         opts.min_pool_size = self.pool.min_connections;
+        opts.repl_set_name = self.repl_name;
         opts.max_idle_time =
             self.pool.max_lifetime_ms.map(Duration::from_millis);
 
