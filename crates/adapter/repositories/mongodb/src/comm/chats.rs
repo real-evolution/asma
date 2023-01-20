@@ -29,10 +29,8 @@ impl ChatsRepo for MongoDbRepo<Chat> {
         &self,
         id: &Key<Chat>,
     ) -> RepoResult<BoxStream<'_, RepoResult<Message>>> {
-        self.watch_messages(
-            doc! { "$match": doc!{ "fullDocument.chat_id": id.to_string()} },
-        )
-        .await
+        self.watch_messages(doc! { "fullDocument.chat_id": id.to_string() })
+            .await
     }
 
     async fn watch_all_of(
@@ -40,7 +38,7 @@ impl ChatsRepo for MongoDbRepo<Chat> {
         user_id: &Key<User>,
     ) -> RepoResult<BoxStream<'static, RepoResult<Message>>> {
         self.watch_messages(
-            doc! { "$match": doc!{ "fullDocument.user_id": user_id.to_string()} },
+            doc! { "fullDocument.user_id": user_id.to_string() },
         )
         .await
     }
@@ -72,10 +70,14 @@ impl MongoDbRepo<Chat> {
         &self,
         filter: F,
     ) -> RepoResult<BoxStream<'static, RepoResult<Message>>> {
-        let pipeline = vec![
-            doc! { "$match": doc!{ "operationType": "insert"} },
-            filter.into(),
-        ];
+        let pipeline = vec![doc! {
+            "$match": {
+                "$and": [
+                    filter.into(),
+                    { "operationType": "insert" }
+                ]
+            }
+        }];
 
         let opts = ChangeStreamOptions::builder()
             .full_document(Some(FullDocumentType::Required))
