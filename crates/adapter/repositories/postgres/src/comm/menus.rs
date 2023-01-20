@@ -27,7 +27,29 @@ use crate::{
 pub(crate) struct SqlxMenusRepo(pub SqlxPool);
 
 #[async_trait::async_trait]
-impl MenusRepo for SqlxMenusRepo {}
+impl MenusRepo for SqlxMenusRepo {
+    async fn get_submenus(&self, id: &Key<Menu>) -> RepoResult<Vec<Menu>> {
+        sqlx_vec_ok!(
+            sqlx::query_as!(
+                models::MenuModel,
+                r#"
+                SELECT * FROM menus
+                WHERE parent_menu_id = $1 AND parent_menu_id != id
+                "#,
+                id.value_ref(),
+            )
+            .fetch_all(self.0.get())
+            .await
+        )
+    }
+
+    async fn get_with_submenus(
+        &self,
+        id: &Key<Menu>,
+    ) -> RepoResult<(Menu, Vec<Menu>)> {
+        Ok((self.get(id).await?, self.get_submenus(id).await?))
+    }
+}
 
 #[async_trait::async_trait]
 impl ChildRepo<Bot> for SqlxMenusRepo {
