@@ -110,7 +110,7 @@ lazy = true
 
 [docs]
 # Documents store (NoSQL) connection driver. Supported drivers are: mongodb
-driver = "mongodx"
+driver = "mongodb"
 # Document store server address
 host = "localhost"
 # Document store server listening port
@@ -121,6 +121,8 @@ port = 5432
 #password = "123"
 # Document store to be used by the system
 database = "asma_test"
+# MongoDB replica set name
+repl_name = "rs0"
 
 [docs.pool]
 # Minumum number of connections to be opened & pooled to the database server
