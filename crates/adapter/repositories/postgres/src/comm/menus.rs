@@ -51,6 +51,21 @@ impl MenusRepo for SqlxMenusRepo {
     ) -> RepoResult<(Menu, Vec<Menu>)> {
         Ok((self.get(id).await?, self.get_submenus(id).await?))
     }
+
+    async fn get_entry_menu_of(&self, bot_id: &Key<Bot>) -> RepoResult<Menu> {
+        sqlx_ok!(
+            sqlx::query_as!(
+                models::MenuModel,
+                r#"
+                SELECT * FROM menus
+                WHERE bot_id = $1 AND parent_menu_id = id AND is_active = TRUE 
+                "#,
+                bot_id.value_ref()
+            )
+            .fetch_one(self.0.get())
+            .await
+        )
+    }
 }
 
 #[async_trait::async_trait]
