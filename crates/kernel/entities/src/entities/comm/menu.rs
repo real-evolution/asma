@@ -12,7 +12,6 @@ use crate::traits::*;
 pub enum TriggerMatchingStrategy {
     Full = 0,
     SubString = 1,
-    RegEx = 2,
 }
 
 #[entity]
