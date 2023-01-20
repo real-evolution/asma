@@ -12,10 +12,7 @@ use kernel_repositories::{
     error::RepoResult,
     traits::InsertRepo,
 };
-use mongodb::{
-    bson::{doc, Document},
-    options::{ChangeStreamOptions, FullDocumentType},
-};
+use mongodb::bson::{doc, Document};
 
 use crate::{
     repo::MongoDbRepo,
@@ -77,14 +74,10 @@ impl MongoDbRepo<Chat> {
             filter.into(),
         ];
 
-        let opts = ChangeStreamOptions::builder()
-            .full_document(Some(FullDocumentType::Required))
-            .build();
-
         Ok(self
             .database
             .collection(Message::name())
-            .watch(pipeline, opts)
+            .watch(pipeline, None)
             .await
             .map_err(map_mongo_error)?
             .filter_map(|e| async move {
