@@ -52,8 +52,16 @@ impl Chats for GrpcChatsService {
         .of(&user_id)
         .or_else(|_| auth.in_role(KnownRoles::Admin))?;
 
-        let Ok(mut stream) = self.state.chats.watch_user_chats(&user_id).await else {
-            return Err(Status::invalid_argument("could not subscribe to updates"));
+        let mut stream = match self.state.chats.watch_user_chats(&user_id).await
+        {
+            | Ok(stream) => stream,
+            | Err(err) => {
+                error!("an error occured during updates subscription: {err}");
+
+                return Err(Status::invalid_argument(
+                    "could not subscribe to updates",
+                ));
+            }
         };
 
         let output = async_stream::stream! {
