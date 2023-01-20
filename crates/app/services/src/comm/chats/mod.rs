@@ -254,7 +254,7 @@ impl Service for AppChatsService {
 
         let this = self.clone();
 
-        *self.clone().read_task.lock().await = Some(tokio::spawn(async move {
+        *self.read_task.lock().await = Some(tokio::spawn(async move {
             let mut stream = match rx.subscribe_manual().await {
                 | Ok(stream) => stream,
                 | Err(err) => {
