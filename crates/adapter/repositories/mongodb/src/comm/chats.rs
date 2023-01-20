@@ -40,7 +40,7 @@ impl ChatsRepo for MongoDbRepo<Chat> {
         user_id: &Key<User>,
     ) -> RepoResult<BoxStream<'static, RepoResult<Message>>> {
         self.watch_messages(
-            doc! { "$match": doc!{ "fullDocument.user_id": user_id.to_string()} },
+            doc! { "$match": { "fullDocument.user_id": user_id.to_string()} },
         )
         .await
     }
@@ -73,8 +73,14 @@ impl MongoDbRepo<Chat> {
         filter: F,
     ) -> RepoResult<BoxStream<'static, RepoResult<Message>>> {
         let pipeline = vec![
-            doc! { "$match": doc!{ "operationType": "insert"} },
-            filter.into(),
+            doc! {
+                "$match": {
+                    "$and": [
+                        filter.into(),
+                        { "operationType": "insert"}
+                    ]
+                }
+            }
         ];
 
         let opts = ChangeStreamOptions::builder()
