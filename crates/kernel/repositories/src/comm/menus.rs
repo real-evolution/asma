@@ -4,12 +4,18 @@ use kernel_entities::{
     traits::Key,
 };
 
-use crate::traits::*;
+use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait MenusRepo:
     Repo<Entity = Menu> + InsertRepo<InsertMenu> + ChildRepo<Bot> + Send + Sync
 {
+    async fn get_submenus(&self, id: &Key<Menu>) -> RepoResult<Vec<Menu>>;
+
+    async fn get_with_submenus(
+        &self,
+        id: &Key<Menu>,
+    ) -> RepoResult<(Menu, Vec<Menu>)>;
 }
 
 #[derive(Constructor)]
