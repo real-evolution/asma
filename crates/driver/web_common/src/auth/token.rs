@@ -64,7 +64,7 @@ impl AuthToken {
             .into_group_map()
             .into_iter()
             .filter_map(|(res, v)| {
-                let Some(actions) = v.into_iter().fold1(|lhs, rhs| lhs | rhs) else {
+                let Some(actions) = v.into_iter().reduce(|acc, a| acc | a) else {
                     return None;
                 };
 
