@@ -41,7 +41,11 @@ impl Chats for GrpcChatsService {
     ) -> ProtoResult<Response<Self::WatchStream>> {
         let auth = req.auth(self.state.config.clone())?;
 
-        let Ok(user_id) = Key::from_str(&req.into_inner().value) else {
+        let key_value = req.into_inner().value;
+
+        let Ok(user_id) = Key::from_str(&key_value) else {
+            error!("chats.watch: user #{} sent an invalid key: {}", auth.user_id, key_value);
+
             return Err(Status::invalid_argument("invalid key format"));
         };
 
@@ -77,8 +81,6 @@ impl Chats for GrpcChatsService {
                         return ();
                     }
                 };
-
-                error!("EVENT: {event:#?}");
 
                 match event.kind {
                     | ChatEventKind::MessageAdded {
