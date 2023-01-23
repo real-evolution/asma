@@ -8,8 +8,8 @@ use kernel_entities::{entities::auth::*, traits::Key};
 
 use super::dtos::AccountDto;
 use crate::{
-    api::dtos::pagination::Pagination,
     error::ApiResult,
+    extractors::pagination::QueryPagination,
     util::auth::token::RestAuthToken,
 };
 
@@ -17,7 +17,7 @@ pub async fn get_all(
     auth: RestAuthToken,
     user_id: Path<Key<User>>,
     state: State<AppState>,
-    pagination: Pagination,
+    pagination: QueryPagination,
 ) -> ApiResult<Json<Vec<AccountDto>>> {
     auth.can(&[
         (Resource::User, Action::View),

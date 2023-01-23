@@ -11,15 +11,15 @@ use kernel_entities::{
 
 use super::dtos::BotDto;
 use crate::{
-    api::dtos::pagination::Pagination,
     error::ApiResult,
+    extractors::pagination::QueryPagination,
     util::auth::token::RestAuthToken,
 };
 
 pub async fn get_all(
     auth: RestAuthToken,
     state: State<AppState>,
-    pagination: Pagination,
+    pagination: QueryPagination,
 ) -> ApiResult<Json<Vec<BotDto>>> {
     auth.can(&[(Resource::Bot, Action::View)])?;
 

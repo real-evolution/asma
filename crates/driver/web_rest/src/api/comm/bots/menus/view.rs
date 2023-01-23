@@ -14,16 +14,15 @@ use kernel_entities::{
 
 use super::dtos::MenuDto;
 use crate::{
-    api::dtos::pagination::Pagination,
     error::ApiResult,
-    util::auth::token::RestAuthToken,
+    util::auth::token::RestAuthToken, extractors::pagination::QueryPagination,
 };
 
 pub async fn get_all(
     auth: RestAuthToken,
     state: State<AppState>,
     bot_id: Path<Key<Bot>>,
-    pagination: Pagination,
+    pagination: QueryPagination,
 ) -> ApiResult<Json<Vec<MenuDto>>> {
     auth.can(&[(Resource::Menu, Action::View)])?;
 

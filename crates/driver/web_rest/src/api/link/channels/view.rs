@@ -3,7 +3,6 @@ use axum::{
     Json,
 };
 use driver_web_common::{auth::validator::AuthValidator, state::AppState};
-use itertools::Itertools;
 use kernel_entities::{
     entities::{auth::*, link::Channel},
     traits::Key,
@@ -11,15 +10,14 @@ use kernel_entities::{
 
 use super::dtos::ChannelDto;
 use crate::{
-    api::dtos::pagination::Pagination,
     error::ApiResult,
-    extractors::validated_query::ValidatedQuery,
+    extractors::pagination::QueryPagination,
     util::auth::token::RestAuthToken,
 };
 
 pub async fn get_all(
     auth: RestAuthToken,
-    ValidatedQuery(pagination): ValidatedQuery<Pagination>,
+    pagination: QueryPagination,
     user_id: Option<Query<Key<User>>>,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<ChannelDto>>> {
@@ -53,7 +51,7 @@ pub async fn get_all(
         }
     };
 
-    Ok(Json(channels.into_iter().map(|c| c.into()).collect_vec()))
+    Ok(Json(channels.into_iter().map(|c| c.into()).collect()))
 }
 
 pub async fn get_by_id(

@@ -13,15 +13,11 @@ use kernel_entities::{
 };
 
 use super::dtos::{PermissionDto, RoleDto, RoleWithPermissionsDto};
-use crate::{
-    api::dtos::pagination::Pagination,
-    error::ApiResult,
-    util::auth::token::RestAuthToken,
-};
+use crate::{error::ApiResult, util::auth::token::RestAuthToken, extractors::pagination::QueryPagination};
 
 pub async fn get_all(
     auth: RestAuthToken,
-    pagination: Pagination,
+    pagination: QueryPagination,
     state: State<AppState>,
 ) -> ApiResult<Json<Vec<RoleDto>>> {
     auth.in_role(KnownRoles::Admin)?;
