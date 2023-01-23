@@ -1,12 +1,20 @@
-use axum::extract::{FromRequestParts, Query};
-use axum::http::request::Parts;
+use aide::OperationIo;
+use axum::{
+    extract::{FromRequestParts, Query},
+    http::request::Parts,
+};
+use derive_more::{Deref, From, Into};
+use driver_web_common::value_types::Pagination;
 use validator::Validate;
 
-use crate::api::dtos::pagination::Pagination;
 use crate::error::{ApiError, ApiResult};
 
+#[derive(Clone, Debug, Deref, Into, From, OperationIo)]
+#[aide(input)]
+pub struct QueryPagination(Pagination);
+
 #[async_trait::async_trait]
-impl<S> FromRequestParts<S> for Pagination
+impl<S> FromRequestParts<S> for QueryPagination
 where
     S: Send + Sync,
 {
@@ -21,6 +29,6 @@ where
 
         pagination.validate()?;
 
-        Ok(pagination)
+        Ok(Self(pagination))
     }
 }
