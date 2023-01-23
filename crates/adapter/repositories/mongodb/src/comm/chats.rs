@@ -32,7 +32,7 @@ impl ChatsRepo for MongoDbRepo<Chat> {
         let filter = doc! {
             "$match": {
                 "$and": [
-                    { "fullDocument.chat_id": id.to_string() },
+                    { "fullDocument.chat_id": id.value_ref() },
                     { "operationType": "insert" }
                 ]
             }
@@ -48,7 +48,7 @@ impl ChatsRepo for MongoDbRepo<Chat> {
         let filter = doc! {
             "$match": {
                 "$and": [
-                    { "fullDocument.user_id": user_id.to_string() },
+                    { "fullDocument.user_id": user_id.value_ref() },
                     { "operationType": "insert" }
                 ]
             }

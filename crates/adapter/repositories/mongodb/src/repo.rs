@@ -106,7 +106,7 @@ impl<E: CollectionEntity> Repo for MongoDbRepo<E> {
     type Entity = E;
 
     async fn get(&self, key: &Key<Self::Entity>) -> RepoResult<Self::Entity> {
-        self.find_one(doc! {ENTITY_ID_FIELD: key.to_string()}, None)
+        self.find_one(doc! {ENTITY_ID_FIELD: key.value_ref()}, None)
             .await
     }
 
@@ -130,7 +130,7 @@ impl<E: CollectionEntity> Repo for MongoDbRepo<E> {
     async fn exists(&self, key: &Key<Self::Entity>) -> RepoResult<bool> {
         let count = self
             .collection()
-            .count_documents(doc! { ENTITY_ID_FIELD: key.to_string()}, None)
+            .count_documents(doc! { ENTITY_ID_FIELD: key.value_ref()}, None)
             .await
             .unwrap_or(0);
 
@@ -142,7 +142,7 @@ impl<E: CollectionEntity> Repo for MongoDbRepo<E> {
     async fn remove(&self, key: &Key<Self::Entity>) -> RepoResult<()> {
         let ret = self
             .collection()
-            .delete_one(doc! { ENTITY_ID_FIELD: key.to_string()}, None)
+            .delete_one(doc! { ENTITY_ID_FIELD: key.value_ref()}, None)
             .await
             .map_err(map_mongo_error)?;
 
