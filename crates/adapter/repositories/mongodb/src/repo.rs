@@ -20,8 +20,8 @@ use crate::{
     util::{error::map_mongo_error, index},
 };
 
-const ENTITY_ID_FIELD: &str = "id";
-const ENTITY_CREATED_AT_FIELD: &str = "created_at";
+pub(crate) const ENTITY_ID_FIELD: &str = "id";
+pub(crate) const ENTITY_CREATED_AT_FIELD: &str = "created_at";
 
 pub struct MongoDbRepo<E> {
     pub(crate) database: Database,
