@@ -6,11 +6,18 @@ import "models/chat.proto";
 import "models/instance.proto";
 import "models/message.proto";
 import "models/user.proto";
+import "value_types/pagination.proto";
 
 import "google/protobuf/timestamp.proto";
 
 service Chats {
+  rpc GetMessages(GetMessagesRequest) returns (stream models.Message);
   rpc Watch(models.User.Id) returns (stream WatchResponse);
+}
+
+message GetMessagesRequest {
+  models.Chat.Id             chat_id = 1;
+  value_types.TimePagination pagination = 2;
 }
 
 message WatchResponse {
