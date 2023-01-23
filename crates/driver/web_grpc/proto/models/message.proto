@@ -3,11 +3,12 @@ syntax = "proto3";
 package driver_web_grpc.proto.models;
 
 import "models/chat.proto";
+import "models/user.proto";
 import "models/instance.proto";
 import "google/protobuf/timestamp.proto";
 
 message Message {
-  reserved 4 to 8;
+  reserved 4 to 7;
 
   message Id {
     string Value = 1;
@@ -22,6 +23,7 @@ message Message {
   string text = 2;
   Direction direction = 3;
 
+  User.Id user_id = 8;
   Chat.Id chat_id = 9;
   Instance.Id instance_id = 10;
 
