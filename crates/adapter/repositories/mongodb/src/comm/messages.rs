@@ -1,14 +1,18 @@
-use chrono::Utc;
-use kernel_entities::{entities::comm::Message, traits::Key};
+use chrono::{DateTime, Utc};
+use kernel_entities::{
+    entities::comm::{Chat, Message},
+    traits::Key,
+};
 use kernel_repositories::{
     comm::{InsertMessage, MessagesRepo},
-    error::RepoResult,
-    traits::{InsertRepo, Repo},
+    error::{RepoError, RepoResult},
+    traits::{ChildRepo, InsertRepo, Repo},
 };
-use mongodb::bson::doc;
+use mongodb::{bson::doc, options::FindOptions};
+use tokio_stream::StreamExt;
 
 use crate::{
-    repo::MongoDbRepo,
+    repo::{MongoDbRepo, ENTITY_CREATED_AT_FIELD, ENTITY_ID_FIELD},
     traits::collection_entity::CollectionEntity,
     util::error::map_mongo_error,
 };
@@ -61,6 +65,54 @@ impl InsertRepo<InsertMessage> for MongoDbRepo<Message> {
             .map_err(map_mongo_error)?;
 
         Ok(message)
+    }
+}
+
+#[async_trait::async_trait]
+impl ChildRepo<Chat> for MongoDbRepo<Message> {
+    async fn get_paginated_of(
+        &self,
+        parent_key: &Key<Chat>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Self::Entity>> {
+        self.find_stream(
+            doc! {ENTITY_CREATED_AT_FIELD: {"$lt": before}, "chat_id": parent_key.value_ref()},
+            FindOptions::builder()
+                .sort(doc! { ENTITY_CREATED_AT_FIELD: -1})
+                .build(),
+        )
+        .await?
+        .take(limit)
+        .collect()
+        .await
+    }
+
+    async fn get_of(
+        &self,
+        parent_key: &Key<Chat>,
+        key: &Key<Self::Entity>,
+    ) -> RepoResult<Self::Entity> {
+        self.find_one(doc! {ENTITY_ID_FIELD: key.value_ref(), "chat_id": parent_key.value_ref()}, None)
+            .await
+    }
+
+    async fn remove_of(
+        &self,
+        parent_key: &Key<Chat>,
+        key: &Key<Self::Entity>,
+    ) -> RepoResult<()> {
+        let ret = self
+            .collection()
+            .delete_one(doc! { ENTITY_ID_FIELD: key.value_ref(), "chat_id": parent_key.value_ref()}, None)
+            .await
+            .map_err(map_mongo_error)?;
+
+        if ret.deleted_count != 1 {
+            return Err(RepoError::NotFound);
+        }
+
+        Ok(())
     }
 }
 
