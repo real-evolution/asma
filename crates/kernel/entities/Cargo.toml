@@ -14,6 +14,7 @@ schemars = { version = "0", features = ["chrono", "uuid1"] }
 kernel_proc_macros = { path = "../proc_macros" }
 
 # workspace dependencies
+bson = { workspace = true }
 chrono = { workspace = true }
 derive_more = { workspace = true }
 serde = { workspace = true }

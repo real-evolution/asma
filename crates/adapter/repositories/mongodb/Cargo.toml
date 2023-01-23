@@ -8,8 +8,6 @@ authors.workspace = true
 [dependencies]
 # crate dependencies
 mongodb = { version = "2", features = [
-  "bson-uuid-0_8",
-  "bson-chrono-0_4",
   "bson-serde_with",
 ] }
 
@@ -21,6 +19,7 @@ kernel_repositories = { path = "../../../kernel/repositories" }
 # workspace dependencies
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+bson = { workspace = true }
 chrono = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true }

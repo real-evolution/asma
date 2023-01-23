@@ -19,6 +19,7 @@ authors = ["Ayman Al-Qadhi <alqd@protonmail.com>"]
 anyhow = "1"
 async-trait = "0"
 async-stream = "0"
+bson = { version = "2", features = ["chrono-0_4", "uuid-1"] }
 chrono = { version = "0", features = ["serde"] }
 derive_more = "0"
 enumflags2 = "0"
