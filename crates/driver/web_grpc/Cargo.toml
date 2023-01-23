@@ -9,6 +9,8 @@ authors.workspace = true
 # create dependencies
 prost = "0"
 prost-types = "0"
+prost-wkt = "0"
+prost-wkt-types = "0"
 tonic = { version = "0", features = [
   "transport",
   "channel",
@@ -19,6 +21,7 @@ tonic = { version = "0", features = [
 # project dependencies
 driver_web_common = { path = "../web_common" }
 kernel_entities = { path = "../../kernel/entities" }
+kernel_repositories = { path = "../../kernel/repositories" }
 kernel_services = { path = "../../kernel/services" }
 
 # workspace dependencies
@@ -28,10 +31,13 @@ async-stream = { workspace = true }
 chrono = { workspace = true }
 derive_more = { workspace = true }
 futures = { workspace = true }
+serde = { workspace = true }
 tokio = { workspace = true }
 tokio-stream = { workspace = true }
 tracing = { workspace = true }
 
 [build-dependencies]
-tonic-build = { version = "0", features = ["prost-build"] }
 anyhow = { workspace = true }
+prost-build = "0"
+prost-wkt-build = "0"
+tonic-build = { version = "0", features = ["prost-build"] }
