@@ -18,23 +18,36 @@ pub trait MutableEntity: Entity {
 #[derive(Clone, Copy, Debug, JsonSchema_repr, Serialize, Deserialize)]
 #[repr(transparent)]
 #[serde(transparent)]
-pub struct Key<E, T = KeyType>(T, #[serde(skip)] PhantomData<E>);
+pub struct Key<E>(
+    #[serde(
+        serialize_with = "bson::serde_helpers::uuid_1_as_binary::serialize",
+        deserialize_with = "bson::serde_helpers::uuid_1_as_binary::deserialize"
+    )]
+    KeyType,
+    #[serde(skip)] PhantomData<E>,
+);
 
-impl<E, T: Clone> Key<E, T> {
-    pub fn new(inner: T) -> Self {
+impl<E> Key<E> {
+    pub fn new(inner: uuid::Uuid) -> Self {
         Self(inner, Default::default())
     }
 
-    pub fn value_ref(&self) -> &T {
+    pub fn value_ref(&self) -> &uuid::Uuid {
         &self.0
     }
 
-    pub fn value(&self) -> T {
-        self.0.clone()
+    pub fn value(&self) -> uuid::Uuid {
+        self.0
     }
 }
 
-impl<E> FromStr for Key<E, KeyType> {
+impl<E> From<KeyType> for Key<E> {
+    fn from(value: KeyType) -> Self {
+        Self(value, Default::default())
+    }
+}
+
+impl<E> FromStr for Key<E> {
     type Err = uuid::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -44,34 +57,28 @@ impl<E> FromStr for Key<E, KeyType> {
     }
 }
 
-impl<E, T: Clone> From<T> for Key<E, T> {
-    fn from(value: T) -> Self {
-        Self::new(value)
-    }
-}
-
 impl<E> From<Key<E>> for KeyType {
     fn from(val: Key<E>) -> Self {
         val.value()
     }
 }
 
-impl<E, T: Display> Display for Key<E, T> {
+impl<E> Display for Key<E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl<E, T: std::hash::Hash> std::hash::Hash for Key<E, T> {
+impl<E> std::hash::Hash for Key<E> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.hash(state);
     }
 }
 
-impl<E, T: PartialEq> PartialEq for Key<E, T> {
+impl<E> PartialEq for Key<E> {
     fn eq(&self, other: &Self) -> bool {
         self.0.eq(&other.0)
     }
 }
 
-impl<E, T: Eq> Eq for Key<E, T> {}
+impl<E> Eq for Key<E> {}
