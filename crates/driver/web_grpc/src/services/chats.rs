@@ -20,10 +20,19 @@ use tracing::warn;
 use crate::{
     proto::{
         models,
-        services::{chats_server::Chats, MessageAddedEvent, WatchResponse},
+        services::{
+            self,
+            chats_server::Chats,
+            MessageAddedEvent,
+            WatchResponse,
+        },
         ProtoResult,
     },
-    util::auth::token::RequestExt,
+    util::{
+        auth::token::RequestExt,
+        convert::TryConvertInto,
+        error::IntoStatusResult,
+    },
 };
 
 #[derive(Constructor)]
@@ -33,7 +42,75 @@ pub(crate) struct GrpcChatsService {
 
 #[tonic::async_trait]
 impl Chats for GrpcChatsService {
+    type GetMessagesStream = BoxStream<models::Message>;
     type WatchStream = BoxStream<WatchResponse>;
+
+    async fn get_messages(
+        &self,
+        req: Request<services::GetMessagesRequest>,
+    ) -> ProtoResult<Response<Self::GetMessagesStream>> {
+        let auth = req.auth(self.state.config.clone())?;
+        let req = req.into_inner();
+
+        let chat_id = req.chat_id.map(|i| i.value).try_convert()?;
+        let pagination = req.pagination.try_convert()?;
+
+        auth.can(&[
+            (Resource::Chat, Action::View),
+            (Resource::Message, Action::View),
+        ])?;
+
+        let chat = self
+            .state
+            .docs
+            .chats()
+            .get(&chat_id)
+            .await
+            .into_status_result()?;
+
+        auth.of(&chat.user_id)
+            .or_else(|_| auth.in_role(KnownRoles::Admin))?;
+
+        let messages = self
+            .state
+            .docs
+            .messages()
+            .get_paginated_of(
+                &chat_id,
+                &pagination.before,
+                pagination.page_size,
+            )
+            .await
+            .into_status_result()?
+            .into_iter()
+            .map(|m| {
+                let direction: models::message::Direction = m.direction.into();
+
+                Ok(crate::proto::models::Message {
+                    id: Some(models::message::Id {
+                        value: m.id.to_string(),
+                    }),
+                    text: m.text.unwrap_or_default(),
+                    direction: direction.into(),
+                    user_id: Some(models::user::Id {
+                        value: m.user_id.to_string(),
+                    }),
+                    chat_id: Some(models::chat::Id {
+                        value: m.chat_id.to_string(),
+                    }),
+                    instance_id: Some(models::instance::Id {
+                        value: m.instance_id.to_string(),
+                    }),
+                    delivered_at: Some(m.delivered_at.into()),
+                    seen_at: m.seen_at.map(Into::into),
+                    deleted_at_at: m.deleted_at.map(Into::into),
+                    created_at: Some(m.created_at.into()),
+                    updated_at: Some(m.updated_at.into()),
+                })
+            });
+
+        Ok(Response::new(tokio_stream::iter(messages).boxed()))
+    }
 
     async fn watch(
         &self,
@@ -42,10 +119,8 @@ impl Chats for GrpcChatsService {
         let auth = req.auth(self.state.config.clone())?;
 
         let key_value = req.into_inner().value;
-
         let Ok(user_id) = Key::from_str(&key_value) else {
-            error!("chats.watch: user #{} sent an invalid key: {}", auth.user_id, key_value);
-
+            error!("user #{} sent an invalid key: {}", auth.user_id, key_value);
             return Err(Status::invalid_argument("invalid key format"));
         };
 
@@ -106,10 +181,7 @@ impl Chats for GrpcChatsService {
                                 }),
                                 direction: direction.into(),
                                 text: text.unwrap_or_default(),
-                                created_at: Some(prost_types::Timestamp {
-                                    seconds: created_at.timestamp(),
-                                    nanos: created_at.timestamp_nanos() as i32,
-                                }),
+                                created_at: Some(created_at.into()),
                             }),
                         });
                     }
