@@ -2,8 +2,9 @@ use chrono::{DateTime, Utc};
 use derive_more::Constructor;
 use kernel_entities::{
     entities::{
+        auth::User,
         comm::{Chat, Message, MessageDirection},
-        link::Instance, auth::User,
+        link::Instance,
     },
     traits::Key,
 };
@@ -12,7 +13,11 @@ use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait MessagesRepo:
-    Repo<Entity = Message> + InsertRepo<InsertMessage> + Send + Sync
+    Repo<Entity = Message>
+    + InsertRepo<InsertMessage>
+    + ChildRepo<Chat>
+    + Send
+    + Sync
 {
     async fn update_text(
         &self,
