@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package driver_web_grpc.proto.value_types;
+
+import "google/protobuf/timestamp.proto";
+
+message TimePagination {
+  google.protobuf.Timestamp before = 1;
+  uint64                    page_size = 2;
+}
