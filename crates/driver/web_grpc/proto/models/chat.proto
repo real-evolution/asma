@@ -2,8 +2,29 @@ syntax = "proto3";
 
 package driver_web_grpc.proto.models;
 
+import "models/user.proto";
+import "google/protobuf/timestamp.proto";
+
+
 message Chat {
+  reserved 5 to 13;
+
   message Id {
     string value = 1;
   }
+
+  enum State {
+      ACTIVE = 0;
+      ARCHIVED = 1;
+      CLOSED = 2;
+  }
+
+  Id      id      = 1;
+  State   state   = 2;
+  User.Id user_id = 3;
+
+  optional string label = 4;
+
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
 }
