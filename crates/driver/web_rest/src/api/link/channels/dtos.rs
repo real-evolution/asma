@@ -8,6 +8,7 @@ use kernel_entities::{
     },
     traits::Key,
 };
+use kernel_repositories::link::UpdateChannel;
 use mapper::Mapper;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -38,6 +39,19 @@ pub struct AddChannelDto {
     #[validate(length(min = 4, max = 32))]
     pub name: String,
     pub platform: ChannelPlatform,
+    pub api_key: String,
+    #[validate(custom = "in_future")]
+    pub valid_until: Option<DateTime<Utc>>,
+    pub is_active: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate, JsonSchema, OperationIo, Mapper)]
+#[serde(rename_all = "camelCase")]
+#[from(UpdateChannel)]
+#[aide(input)]
+pub struct UpdateChannelDto {
+    #[validate(length(min = 4, max = 32))]
+    pub name: String,
     pub api_key: String,
     #[validate(custom = "in_future")]
     pub valid_until: Option<DateTime<Utc>>,
