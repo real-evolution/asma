@@ -1,5 +1,5 @@
-use chrono::Utc;
-use futures::{stream::BoxStream, StreamExt};
+use chrono::{DateTime, Utc};
+use futures::stream::BoxStream;
 use kernel_entities::{
     entities::{
         auth::User,
@@ -9,16 +9,17 @@ use kernel_entities::{
 };
 use kernel_repositories::{
     comm::{ChatsRepo, InsertChat},
-    error::RepoResult,
-    traits::InsertRepo,
+    error::{RepoError, RepoResult},
+    traits::{ChildRepo, InsertRepo},
 };
 use mongodb::{
     bson::{doc, Document},
-    options::{ChangeStreamOptions, FullDocumentType},
+    options::{ChangeStreamOptions, FindOptions, FullDocumentType},
 };
+use tokio_stream::StreamExt;
 
 use crate::{
-    repo::MongoDbRepo,
+    repo::{MongoDbRepo, ENTITY_CREATED_AT_FIELD, ENTITY_ID_FIELD},
     traits::collection_entity::CollectionEntity,
     util::error::map_mongo_error,
 };
@@ -79,6 +80,54 @@ impl InsertRepo<InsertChat> for MongoDbRepo<Chat> {
     }
 }
 
+#[async_trait::async_trait]
+impl ChildRepo<User> for MongoDbRepo<Chat> {
+    async fn get_paginated_of(
+        &self,
+        parent_key: &Key<User>,
+        before: &DateTime<Utc>,
+        limit: usize,
+    ) -> RepoResult<Vec<Self::Entity>> {
+        self.find_stream(
+            doc! {ENTITY_CREATED_AT_FIELD: {"$lt": before}, "user_id": parent_key.value_ref()},
+            FindOptions::builder()
+                .sort(doc! { ENTITY_CREATED_AT_FIELD: -1})
+                .build(),
+        )
+        .await?
+        .take(limit)
+        .collect()
+        .await
+    }
+
+    async fn get_of(
+        &self,
+        parent_key: &Key<User>,
+        key: &Key<Self::Entity>,
+    ) -> RepoResult<Self::Entity> {
+        self.find_one(doc! {ENTITY_ID_FIELD: key.value_ref(), "user_id": parent_key.value_ref()}, None)
+            .await
+    }
+
+    async fn remove_of(
+        &self,
+        parent_key: &Key<User>,
+        key: &Key<Self::Entity>,
+    ) -> RepoResult<()> {
+        let ret = self
+            .collection()
+            .delete_one(doc! { ENTITY_ID_FIELD: key.value_ref(), "user_id": parent_key.value_ref()}, None)
+            .await
+            .map_err(map_mongo_error)?;
+
+        if ret.deleted_count != 1 {
+            return Err(RepoError::NotFound);
+        }
+
+        Ok(())
+    }
+}
+
 impl MongoDbRepo<Chat> {
     async fn watch_messages<F: Into<Document>>(
         &self,
@@ -88,13 +137,13 @@ impl MongoDbRepo<Chat> {
             .full_document(Some(FullDocumentType::Required))
             .build();
 
-        Ok(self
-            .database
-            .collection(Message::name())
-            .watch(vec![filter.into()], opts)
-            .await
-            .map_err(map_mongo_error)?
-            .filter_map(|e| async move {
+        Ok(futures::StreamExt::boxed(futures::StreamExt::filter_map(
+            self.database
+                .collection(Message::name())
+                .watch(vec![filter.into()], opts)
+                .await
+                .map_err(map_mongo_error)?,
+            |e| async move {
                 match e {
                     | Ok(event) => match event.full_document {
                         | Some(doc) => Some(Ok(doc)),
@@ -102,8 +151,8 @@ impl MongoDbRepo<Chat> {
                     },
                     | Err(err) => Some(Err(map_mongo_error(err))),
                 }
-            })
-            .boxed())
+            },
+        )))
     }
 }
 
