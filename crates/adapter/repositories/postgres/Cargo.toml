@@ -9,7 +9,7 @@ authors.workspace = true
 # crate dependencies
 async-stream = "0"
 futures = "0"
-ormx = { git = "https://github.com/clouds56/ormx", features = ["postgres"] }
+ormx = { git = "https://github.com/NyxCode/ormx", features = ["postgres"] }
 seq-macro = "0"
 
 # project dependencies
