@@ -1,6 +1,9 @@
-use std::sync::{
-    atomic::{AtomicI32, Ordering},
-    Arc,
+use std::{
+    sync::{
+        atomic::{AtomicI32, Ordering},
+        Arc,
+    },
+    time::Duration,
 };
 
 use common_async_utils::queue::BoundedQueue;
@@ -9,8 +12,10 @@ use kernel_services::{
     error::AppResult,
     link::{
         channels::{
-            IncomingChannelUpdateKind, IncomingMessageUpdateKind,
-            OutgoingChannelUpdateKind, OutgoingMessageUpdateKind,
+            IncomingChannelUpdateKind,
+            IncomingMessageUpdateKind,
+            OutgoingChannelUpdateKind,
+            OutgoingMessageUpdateKind,
         },
         error::LinkError,
     },
@@ -43,8 +48,16 @@ impl ChannelStream for TelegramStream {
 
 impl TelegramStream {
     pub(crate) fn new(channel: &Channel) -> AppResult<Arc<Self>> {
+        let client = teloxide::net::default_reqwest_settings()
+            .timeout(Duration::from_secs(180))
+            .connect_timeout(Duration::from_secs(300))
+            .build()
+            .map_err(|err| LinkError::Communication(err.to_string()))?;
+
+        let bot = Bot::with_client(&channel.api_key, client);
+
         Ok(Arc::new(Self {
-            bot: Bot::new(&channel.api_key),
+            bot,
             update_idx: 0.into(),
             in_buf: BoundedQueue::new(1024),
         }))
@@ -108,8 +121,7 @@ impl TelegramStream {
                 Err(LinkError::Communication(err.to_string()).into())
             }
             | _ => Err(LinkError::UnsupportedEvent(format!(
-                "unsupported telegram update: {:#?}",
-                update
+                "unsupported telegram update: {update:#?}"
             ))
             .into()),
         }
