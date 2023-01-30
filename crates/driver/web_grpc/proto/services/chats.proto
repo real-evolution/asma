@@ -13,13 +13,19 @@ import "google/protobuf/timestamp.proto";
 
 service Chats {
   rpc GetChat(models.Chat.Id) returns (models.Chat);
+  rpc GetChats(GetChatsRequest) returns (stream models.Chat);
   rpc GetMessages(GetMessagesRequest) returns (stream models.Message);
   rpc Watch(models.User.Id) returns (stream WatchResponse);
   rpc Send(SendMessageRequest) returns (google.protobuf.Empty);
 }
 
+message GetChatsRequest {
+  models.User.Id             user_id    = 1;
+  value_types.TimePagination pagination = 2;
+}
+
 message GetMessagesRequest {
-  models.Chat.Id             chat_id = 1;
+  models.Chat.Id             chat_id    = 1;
   value_types.TimePagination pagination = 2;
 }
 
