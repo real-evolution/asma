@@ -6,7 +6,7 @@ use futures::StreamExt;
 use kernel_entities::{
     entities::{
         auth::{Action, KnownRoles, Resource},
-        comm::MessageDirection,
+        comm::{Message, MessageDirection},
     },
     traits::Key,
 };
@@ -194,6 +194,40 @@ impl Chats for GrpcChatsService {
 
         Ok(Response::new(output))
     }
+
+    async fn send(
+        &self,
+        req: Request<services::SendMessageRequest>,
+    ) -> ProtoResult<Response<()>> {
+        let auth = req.auth(self.state.config.clone())?;
+        let req = req.into_inner();
+
+        let chat_id = req.chat_id.map(|i| i.value).try_convert()?;
+
+        auth.can(&[
+            (Resource::Chat, Action::View),
+            (Resource::Message, Action::View),
+        ])?;
+
+        let chat = self
+            .state
+            .docs
+            .chats()
+            .get(&chat_id)
+            .await
+            .into_status_result()?;
+
+        auth.of(&chat.user_id)
+            .or_else(|_| auth.in_role(KnownRoles::Admin))?;
+
+        self.state
+            .chats
+            .send_message(&chat_id, req.text)
+            .await
+            .into_status_result()?;
+
+        Ok(Response::new(()))
+    }
 }
 
 impl From<MessageDirection> for models::message::Direction {
@@ -201,6 +235,34 @@ impl From<MessageDirection> for models::message::Direction {
         match value {
             | MessageDirection::Incoming => Self::Incoming,
             | MessageDirection::Outgoing => Self::Outgoing,
+        }
+    }
+}
+
+impl From<Message> for models::Message {
+    fn from(m: Message) -> Self {
+        let direction: models::message::Direction = m.direction.into();
+
+        Self {
+            id: Some(models::message::Id {
+                value: m.id.to_string(),
+            }),
+            text: m.text.unwrap_or_default(),
+            direction: direction.into(),
+            user_id: Some(models::user::Id {
+                value: m.user_id.to_string(),
+            }),
+            chat_id: Some(models::chat::Id {
+                value: m.chat_id.to_string(),
+            }),
+            instance_id: Some(models::instance::Id {
+                value: m.instance_id.to_string(),
+            }),
+            delivered_at: Some(m.delivered_at.into()),
+            seen_at: m.seen_at.map(Into::into),
+            deleted_at_at: m.deleted_at.map(Into::into),
+            created_at: Some(m.created_at.into()),
+            updated_at: Some(m.updated_at.into()),
         }
     }
 }
