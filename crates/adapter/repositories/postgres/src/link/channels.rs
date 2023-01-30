@@ -6,7 +6,7 @@ use kernel_entities::{
     traits::Key,
 };
 use kernel_repositories::{error::RepoResult, link::*, traits::*};
-use ormx::{Delete, Table};
+use ormx::{Delete, Patch, Table};
 use proc_macros::Repo;
 
 use crate::{
@@ -25,9 +25,9 @@ use crate::{
 )]
 pub(crate) struct SqlxChannelsRepo(pub SqlxPool);
 
+#[async_trait::async_trait]
 impl ChannelsRepo for SqlxChannelsRepo {
-    fn stream_active(& self) -> BoxStream<'_, RepoResult<Channel>> {
-        
+    fn stream_active(&self) -> BoxStream<'_, RepoResult<Channel>> {
         sqlx_stream_ok!(sqlx::query_as!(
             models::ChannelModel,
             r#"
@@ -56,6 +56,22 @@ impl ChannelsRepo for SqlxChannelsRepo {
             user_id.value(),
         )
         .fetch(self.0.get()))
+    }
+
+    async fn update(
+        &self,
+        id: &Key<Channel>,
+        model: UpdateChannel,
+    ) -> RepoResult<()> {
+        models::UpdateChannelModel {
+            name: model.name,
+            api_key: model.api_key,
+            valid_until: model.valid_until,
+            is_active: model.is_active,
+        }
+        .patch_row(self.0.get(), id.value())
+        .await
+        .map_err(map_sqlx_error)
     }
 }
 
@@ -133,6 +149,7 @@ mod models {
     #[derive(Clone, Debug, From, Into, Table)]
     #[ormx(table = "channels", id = id, insertable, deletable)]
     pub struct ChannelModel {
+        #[ormx(default)]
         pub id: KeyType,
         pub name: String,
         pub platform: i32,
@@ -149,10 +166,18 @@ mod models {
         pub updated_at: DateTime<Utc>,
     }
 
+    #[derive(ormx::Patch)]
+    #[ormx(table_name = "channels", table = ChannelModel, id = "id")]
+    pub struct UpdateChannelModel {
+        pub name: String,
+        pub api_key: String,
+        pub valid_until: Option<DateTime<Utc>>,
+        pub is_active: bool,
+    }
+
     impl From<InsertChannel> for InsertChannelModel {
         fn from(val: InsertChannel) -> Self {
             InsertChannelModel {
-                id: uuid::Uuid::new_v4(),
                 user_id: val.user_id.into(),
                 name: val.name,
                 platform: val.platform.into(),
