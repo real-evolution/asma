@@ -36,8 +36,53 @@ pub(crate) struct GrpcChatsService {
 
 #[tonic::async_trait]
 impl Chats for GrpcChatsService {
+    type GetChatsStream = BoxStream<models::Chat>;
     type GetMessagesStream = BoxStream<models::Message>;
     type WatchStream = BoxStream<WatchResponse>;
+
+    async fn get_chat(
+        &self,
+        req: Request<models::chat::Id>,
+    ) -> ProtoResult<Response<models::Chat>> {
+        let auth = req.auth(self.state.config.clone())?;
+        let chat = self.get_chat_by_id(&auth, Some(req.into_inner())).await?;
+
+        Ok(Response::new(chat.into()))
+    }
+
+    async fn get_chats(
+        &self,
+        req: Request<services::GetChatsRequest>,
+    ) -> ProtoResult<Response<Self::GetChatsStream>> {
+        let auth = req.auth(self.state.config.clone())?;
+        let services::GetChatsRequest {
+            user_id,
+            pagination,
+        } = req.into_inner();
+
+        auth.can(&[(Resource::Chat, Action::View)])?;
+
+        let user_id = user_id.try_convert()?;
+        let pagination = pagination.try_convert()?;
+
+        auth.of(&user_id).or(auth.in_role(KnownRoles::Admin))?;
+
+        let chats = self
+            .state
+            .docs
+            .chats()
+            .get_paginated_of(
+                &user_id,
+                &pagination.before,
+                pagination.page_size,
+            )
+            .await
+            .into_status_result()?
+            .into_iter()
+            .map(|c| Ok(c.into()));
+
+        Ok(Response::new(tokio_stream::iter(chats).boxed()))
+    }
 
     async fn get_messages(
         &self,
@@ -145,16 +190,6 @@ impl Chats for GrpcChatsService {
             .into_status_result()?;
 
         Ok(Response::new(()))
-    }
-
-    async fn get_chat(
-        &self,
-        req: Request<models::chat::Id>,
-    ) -> ProtoResult<Response<models::Chat>> {
-        let auth = req.auth(self.state.config.clone())?;
-        let chat = self.get_chat_by_id(&auth, Some(req.into_inner())).await?;
-
-        Ok(Response::new(chat.into()))
     }
 }
 
