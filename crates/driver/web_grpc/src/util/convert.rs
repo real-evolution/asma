@@ -1,10 +1,39 @@
 use std::str::FromStr;
 
 use driver_web_common::value_types::Pagination;
-use kernel_entities::traits::Key;
+use kernel_entities::{
+    entities::{
+        auth::User,
+        comm::{Chat, Message}, link::Instance,
+    },
+    traits::Key,
+};
 use tonic::Status;
 
 use crate::proto::value_types::TimePagination;
+
+macro_rules! impl_into_proto_id {
+    ($entity:ty => $proto_id:ty) => {
+        impl TryConvertInto<Key<$entity>> for $proto_id {
+            fn try_convert(self) -> Result<Key<$entity>, Status> {
+                self.value.try_convert()
+            }
+        }
+
+        impl From<Key<$entity>> for $proto_id {
+            fn from(value: Key<$entity>) -> Self {
+                let value = value.to_string();
+
+                Self { value }
+            }
+        }
+    };
+}
+
+impl_into_proto_id!(User => crate::proto::models::user::Id);
+impl_into_proto_id!(Chat => crate::proto::models::chat::Id);
+impl_into_proto_id!(Instance => crate::proto::models::instance::Id);
+impl_into_proto_id!(Message => crate::proto::models::message::Id);
 
 pub(crate) trait TryConvertInto<T> {
     fn try_convert(self) -> Result<T, Status>;
