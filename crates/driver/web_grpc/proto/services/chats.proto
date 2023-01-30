@@ -8,11 +8,13 @@ import "models/message.proto";
 import "models/user.proto";
 import "value_types/pagination.proto";
 
+import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 service Chats {
   rpc GetMessages(GetMessagesRequest) returns (stream models.Message);
   rpc Watch(models.User.Id) returns (stream WatchResponse);
+  rpc Send(SendMessageRequest) returns (google.protobuf.Empty);
 }
 
 message GetMessagesRequest {
@@ -26,6 +28,11 @@ message WatchResponse {
   }
 
   optional MessageAddedEvent message_added = 1;
+}
+
+message SendMessageRequest {
+  models.Chat.Id chat_id = 1;
+  string         text    = 2;
 }
 
 message MessageAddedEvent {
