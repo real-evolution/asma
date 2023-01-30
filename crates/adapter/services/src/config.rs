@@ -208,8 +208,8 @@ fn map_config_error(err: config::ConfigError) -> ConfigError {
             expected,
             key,
         } => ConfigError::ValueParse(format!(
-            "key: {:?}, origin: {:?}, expected: {}, got: {}",
-            key, origin, expected, unexpected
+            "key: {key:?}, origin: {origin:?}, expected: {expected}, got: \
+             {unexpected}"
         )),
 
         | config::ConfigError::Foreign(err) => {

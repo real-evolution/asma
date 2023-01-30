@@ -48,7 +48,7 @@ impl MenuTraverser {
         let mut message = format!("- {}\n", current.menu.title);
 
         if let Some(ref content) = current.menu.content {
-            message += &format!("  {}\n", content);
+            message += &format!("  {content}\n");
         }
 
         if !current.sub.is_empty() {
