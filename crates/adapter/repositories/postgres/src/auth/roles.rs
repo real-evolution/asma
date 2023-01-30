@@ -208,6 +208,7 @@ mod models {
     #[derive(Clone, Debug, From, Into, ormx::Table)]
     #[ormx(table = "roles", id = id, insertable, deletable)]
     pub struct RoleModel {
+        #[ormx(default)]
         pub id: KeyType,
         #[ormx(get_one, get_optional = by_code_optional)]
         pub code: String,
@@ -255,7 +256,6 @@ mod models {
     impl From<InsertRole> for InsertRoleModel {
         fn from(val: InsertRole) -> Self {
             InsertRoleModel {
-                id: uuid::Uuid::new_v4(),
                 code: val.code,
                 friendly_name: val.friendly_name,
                 is_active: true,

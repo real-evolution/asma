@@ -77,6 +77,7 @@ mod models {
     #[derive(Clone, Debug, From, Into, Table)]
     #[ormx(table = "instances", id = id, insertable, deletable)]
     pub struct InstanceModel {
+        #[ormx(default)]
         pub id: KeyType,
         pub platform_identifier: i64,
         #[ormx(default, set)]
@@ -100,7 +101,6 @@ mod models {
     impl From<InsertInstance> for InsertInstanceModel {
         fn from(val: InsertInstance) -> Self {
             InsertInstanceModel {
-                id: uuid::Uuid::new_v4(),
                 platform_identifier: val.platform_identifier,
                 chat_id: val.chat_id.value(),
                 channel_id: val.channel_id.value(),

@@ -230,6 +230,7 @@ mod models {
     #[derive(Clone, Debug, From, Into, ormx::Table)]
     #[ormx(table = "accounts", id = id, insertable, deletable)]
     pub struct AccountModel {
+        #[ormx(default)]
         pub id: KeyType,
         #[ormx(get_one)]
         pub account_name: String,
@@ -271,7 +272,6 @@ mod models {
     impl From<InsertAccount> for InsertAccountModel {
         fn from(val: InsertAccount) -> Self {
             InsertAccountModel {
-                id: uuid::Uuid::new_v4(),
                 user_id: val.user_id.into(),
                 account_name: val.account_name,
                 holder_name: val.holder_name,

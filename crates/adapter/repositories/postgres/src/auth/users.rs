@@ -49,6 +49,7 @@ mod models {
     #[derive(Clone, Debug, From, Into, ormx::Table, sqlx::FromRow)]
     #[ormx(table = "users", id = id, insertable, deletable)]
     pub struct UserModel {
+        #[ormx(default)]
         pub id: KeyType,
         #[ormx(set)]
         pub display_name: String,
@@ -71,7 +72,6 @@ mod models {
     impl From<InsertUser> for InsertUserModel {
         fn from(val: InsertUser) -> Self {
             InsertUserModel {
-                id: uuid::Uuid::new_v4(),
                 username: val.username,
                 display_name: val.display_name,
                 is_active: val.is_active,

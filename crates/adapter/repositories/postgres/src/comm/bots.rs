@@ -114,6 +114,7 @@ mod models {
     #[derive(Clone, Debug, From, Into, ormx::Table)]
     #[ormx(table = "bots", id = id, insertable, deletable)]
     pub struct BotModel {
+        #[ormx(default)]
         pub id: KeyType,
         pub name: String,
         #[ormx(set)]
@@ -129,7 +130,6 @@ mod models {
     impl From<InsertBot> for InsertBotModel {
         fn from(val: InsertBot) -> Self {
             Self {
-                id: uuid::Uuid::new_v4(),
                 name: val.name,
                 is_active: val.is_active,
                 user_id: val.user_id.value(),
