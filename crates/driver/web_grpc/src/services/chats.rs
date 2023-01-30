@@ -1,21 +1,15 @@
-use std::str::FromStr;
-
 use derive_more::Constructor;
 use driver_web_common::{auth::validator::AuthValidator, state::AppState};
-use futures::StreamExt;
-use kernel_entities::{
-    entities::{
-        auth::{Action, KnownRoles, Resource},
-        comm::{Message, MessageDirection},
-    },
-    traits::Key,
+use futures::{StreamExt, TryStreamExt};
+use kernel_entities::entities::{
+    auth::{Action, KnownRoles, Resource},
+    comm::{Chat, ChatState, Message, MessageDirection},
 };
 use kernel_services::{
     self,
     comm::chats::{ChatEventKind, ChatsService},
 };
-use tonic::{codegen::BoxStream, Request, Response, Status};
-use tracing::warn;
+use tonic::{codegen::BoxStream, Request, Response};
 
 use crate::{
     proto::{
@@ -29,9 +23,9 @@ use crate::{
         ProtoResult,
     },
     util::{
-        auth::token::RequestExt,
+        auth::token::{GrpcAuthToken, RequestExt},
         convert::TryConvertInto,
-        error::IntoStatusResult,
+        error::{IntoStatus, IntoStatusResult},
     },
 };
 
@@ -50,64 +44,29 @@ impl Chats for GrpcChatsService {
         req: Request<services::GetMessagesRequest>,
     ) -> ProtoResult<Response<Self::GetMessagesStream>> {
         let auth = req.auth(self.state.config.clone())?;
-        let req = req.into_inner();
+        let services::GetMessagesRequest {
+            chat_id,
+            pagination,
+        } = req.into_inner();
 
-        let chat_id = req.chat_id.map(|i| i.value).try_convert()?;
-        let pagination = req.pagination.try_convert()?;
+        auth.can(&[(Resource::Message, Action::View)])?;
 
-        auth.can(&[
-            (Resource::Chat, Action::View),
-            (Resource::Message, Action::View),
-        ])?;
-
-        let chat = self
-            .state
-            .docs
-            .chats()
-            .get(&chat_id)
-            .await
-            .into_status_result()?;
-
-        auth.of(&chat.user_id)
-            .or_else(|_| auth.in_role(KnownRoles::Admin))?;
+        let pagination = pagination.try_convert()?;
+        let chat = self.get_chat_by_id(&auth, chat_id).await?;
 
         let messages = self
             .state
             .docs
             .messages()
             .get_paginated_of(
-                &chat_id,
+                &chat.id,
                 &pagination.before,
                 pagination.page_size,
             )
             .await
             .into_status_result()?
             .into_iter()
-            .map(|m| {
-                let direction: models::message::Direction = m.direction.into();
-
-                Ok(crate::proto::models::Message {
-                    id: Some(models::message::Id {
-                        value: m.id.to_string(),
-                    }),
-                    text: m.text.unwrap_or_default(),
-                    direction: direction.into(),
-                    user_id: Some(models::user::Id {
-                        value: m.user_id.to_string(),
-                    }),
-                    chat_id: Some(models::chat::Id {
-                        value: m.chat_id.to_string(),
-                    }),
-                    instance_id: Some(models::instance::Id {
-                        value: m.instance_id.to_string(),
-                    }),
-                    delivered_at: Some(m.delivered_at.into()),
-                    seen_at: m.seen_at.map(Into::into),
-                    deleted_at_at: m.deleted_at.map(Into::into),
-                    created_at: Some(m.created_at.into()),
-                    updated_at: Some(m.updated_at.into()),
-                })
-            });
+            .map(|m| Ok(m.into()));
 
         Ok(Response::new(tokio_stream::iter(messages).boxed()))
     }
@@ -117,12 +76,7 @@ impl Chats for GrpcChatsService {
         req: Request<models::user::Id>,
     ) -> ProtoResult<Response<Self::WatchStream>> {
         let auth = req.auth(self.state.config.clone())?;
-
-        let key_value = req.into_inner().value;
-        let Ok(user_id) = Key::from_str(&key_value) else {
-            error!("user #{} sent an invalid key: {}", auth.user_id, key_value);
-            return Err(Status::invalid_argument("invalid key format"));
-        };
+        let user_id = req.into_inner().value.try_convert()?;
 
         auth.can(&[
             (Resource::Chat, Action::View),
@@ -131,32 +85,16 @@ impl Chats for GrpcChatsService {
         .of(&user_id)
         .or_else(|_| auth.in_role(KnownRoles::Admin))?;
 
-        let mut stream = match self.state.chats.watch_user_chats(&user_id).await
-        {
-            | Ok(stream) => stream,
-            | Err(err) => {
-                error!("an error occured during updates subscription: {err}");
-
-                return Err(Status::invalid_argument(
-                    "could not subscribe to updates",
-                ));
-            }
-        };
+        let mut stream = self
+            .state
+            .chats
+            .watch_user_chats(&user_id)
+            .await
+            .into_status_result()?
+            .map_err(IntoStatus::into_status);
 
         let output = async_stream::stream! {
-            while let Some(event) = stream.next().await {
-
-                let event = match event {
-                    Ok(event) => event,
-                    Err(err) => {
-                        warn!("an error occured while reading event: {err:#?}");
-
-                        yield Err(Status::internal("could not read event"));
-
-                        return ();
-                    }
-                };
-
+            while let Some(event) = stream.try_next().await? {
                 match event.kind {
                     | ChatEventKind::MessageAdded {
                         id,
@@ -170,15 +108,9 @@ impl Chats for GrpcChatsService {
 
                         yield Ok(WatchResponse {
                             message_added: Some(MessageAddedEvent {
-                                id: Some(models::message::Id {
-                                    value: id.to_string(),
-                                }),
-                                chat_id: Some(models::chat::Id {
-                                    value: event.chat_id.to_string(),
-                                }),
-                                instance_id: Some(models::instance::Id {
-                                    value: instance_id.to_string(),
-                                }),
+                                id: Some(id.into()),
+                                chat_id: Some(event.chat_id.into()),
+                                instance_id: Some(instance_id.into()),
                                 direction: direction.into(),
                                 text: text.unwrap_or_default(),
                                 created_at: Some(created_at.into()),
@@ -200,33 +132,52 @@ impl Chats for GrpcChatsService {
         req: Request<services::SendMessageRequest>,
     ) -> ProtoResult<Response<()>> {
         let auth = req.auth(self.state.config.clone())?;
-        let req = req.into_inner();
+        let services::SendMessageRequest { chat_id, text } = req.into_inner();
 
-        let chat_id = req.chat_id.map(|i| i.value).try_convert()?;
+        auth.can(&[(Resource::Message, Action::Add)])?;
 
-        auth.can(&[
-            (Resource::Chat, Action::View),
-            (Resource::Message, Action::View),
-        ])?;
+        let chat = self.get_chat_by_id(&auth, chat_id).await?;
+
+        self.state
+            .chats
+            .send_message(&chat.id, text)
+            .await
+            .into_status_result()?;
+
+        Ok(Response::new(()))
+    }
+
+    async fn get_chat(
+        &self,
+        req: Request<models::chat::Id>,
+    ) -> ProtoResult<Response<models::Chat>> {
+        let auth = req.auth(self.state.config.clone())?;
+        let chat = self.get_chat_by_id(&auth, Some(req.into_inner())).await?;
+
+        Ok(Response::new(chat.into()))
+    }
+}
+
+impl GrpcChatsService {
+    async fn get_chat_by_id(
+        &self,
+        auth: &GrpcAuthToken,
+        chat_id: Option<models::chat::Id>,
+    ) -> ProtoResult<Chat> {
+        auth.can(&[(Resource::Chat, Action::View)])?;
 
         let chat = self
             .state
             .docs
             .chats()
-            .get(&chat_id)
+            .get(&chat_id.try_convert()?)
             .await
             .into_status_result()?;
 
         auth.of(&chat.user_id)
             .or_else(|_| auth.in_role(KnownRoles::Admin))?;
 
-        self.state
-            .chats
-            .send_message(&chat_id, req.text)
-            .await
-            .into_status_result()?;
-
-        Ok(Response::new(()))
+        Ok(chat)
     }
 }
 
@@ -239,30 +190,47 @@ impl From<MessageDirection> for models::message::Direction {
     }
 }
 
+impl From<ChatState> for models::chat::State {
+    fn from(value: ChatState) -> Self {
+        match value {
+            | ChatState::Active => Self::Active,
+            | ChatState::Archived => Self::Archived,
+            | ChatState::Closed => Self::Closed,
+        }
+    }
+}
+
 impl From<Message> for models::Message {
-    fn from(m: Message) -> Self {
-        let direction: models::message::Direction = m.direction.into();
+    fn from(value: Message) -> Self {
+        let direction: models::message::Direction = value.direction.into();
 
         Self {
-            id: Some(models::message::Id {
-                value: m.id.to_string(),
-            }),
-            text: m.text.unwrap_or_default(),
+            id: Some(value.id.into()),
+            text: value.text.unwrap_or_default(),
             direction: direction.into(),
-            user_id: Some(models::user::Id {
-                value: m.user_id.to_string(),
-            }),
-            chat_id: Some(models::chat::Id {
-                value: m.chat_id.to_string(),
-            }),
-            instance_id: Some(models::instance::Id {
-                value: m.instance_id.to_string(),
-            }),
-            delivered_at: Some(m.delivered_at.into()),
-            seen_at: m.seen_at.map(Into::into),
-            deleted_at_at: m.deleted_at.map(Into::into),
-            created_at: Some(m.created_at.into()),
-            updated_at: Some(m.updated_at.into()),
+            user_id: Some(value.user_id.into()),
+            chat_id: Some(value.chat_id.into()),
+            instance_id: Some(value.instance_id.into()),
+            delivered_at: Some(value.delivered_at.into()),
+            seen_at: value.seen_at.map(Into::into),
+            deleted_at_at: value.deleted_at.map(Into::into),
+            created_at: Some(value.created_at.into()),
+            updated_at: Some(value.updated_at.into()),
+        }
+    }
+}
+
+impl From<Chat> for models::Chat {
+    fn from(value: Chat) -> Self {
+        let state: models::chat::State = value.state.into();
+
+        Self {
+            id: Some(value.id.into()),
+            label: value.label,
+            state: state.into(),
+            user_id: Some(value.user_id.into()),
+            created_at: Some(value.created_at.into()),
+            updated_at: Some(value.updated_at.into()),
         }
     }
 }
