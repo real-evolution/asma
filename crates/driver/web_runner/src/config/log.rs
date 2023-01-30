@@ -99,9 +99,7 @@ impl From<LogLevel> for LevelFilter {
     }
 }
 
-pub fn configure_logger_with<'a, C: ConfigService + ?Sized>(
-    svc: &'a C,
-) -> Result<()> {
+pub fn configure_logger_with<C: ConfigService + ?Sized>(svc: &C) -> Result<()> {
     let mut result = Ok(());
 
     let conf: LogConfig = svc.get_section(CONFIG_SECTION).unwrap_or_else(|e| {
