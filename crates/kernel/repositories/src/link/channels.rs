@@ -8,6 +8,7 @@ use kernel_entities::{
 
 use crate::{error::RepoResult, traits::*};
 
+#[async_trait::async_trait]
 pub trait ChannelsRepo:
     Repo<Entity = Channel>
     + InsertRepo<InsertChannel>
@@ -20,6 +21,12 @@ pub trait ChannelsRepo:
         &self,
         user_id: Key<User>,
     ) -> BoxStream<'_, RepoResult<Channel>>;
+
+    async fn update(
+        &self,
+        id: &Key<Channel>,
+        model: UpdateChannel,
+    ) -> RepoResult<()>;
 }
 
 #[derive(Constructor)]
@@ -27,6 +34,14 @@ pub struct InsertChannel {
     pub user_id: Key<User>,
     pub name: String,
     pub platform: ChannelPlatform,
+    pub api_key: String,
+    pub valid_until: Option<DateTime<Utc>>,
+    pub is_active: bool,
+}
+
+#[derive(Constructor)]
+pub struct UpdateChannel {
+    pub name: String,
     pub api_key: String,
     pub valid_until: Option<DateTime<Utc>>,
     pub is_active: bool,
