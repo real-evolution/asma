@@ -1,6 +1,7 @@
 mod add;
 mod dtos;
 mod remove;
+mod update;
 mod view;
 
 use aide::axum::{routing::get, ApiRouter};
@@ -13,5 +14,6 @@ pub fn routes() -> ApiRouter<AppState> {
             "/:channel_id",
             get(view::get_by_id)
                 .delete(remove::remove)
+                .patch(update::update),
         )
 }
