@@ -1,6 +1,7 @@
+use chrono::{DateTime, Utc};
 use derive_more::Constructor;
 use kernel_entities::{
-    entities::{comm::Chat, link::*},
+    entities::{auth::User, comm::Chat, link::*},
     traits::Key,
 };
 
@@ -21,10 +22,8 @@ pub trait InstancesRepo:
         identifier: i64,
     ) -> RepoResult<Instance>;
 
-    async fn get_all(
     async fn get_of_user(
         &self,
-        channel_id: &Key<Channel>,
         user_id: &Key<User>,
         instance_id: &Key<Instance>,
     ) -> RepoResult<Instance>;
@@ -36,6 +35,11 @@ pub trait InstancesRepo:
         limit: usize,
     ) -> RepoResult<Vec<Instance>>;
 
+    async fn update(
+        &self,
+        id: &Key<Instance>,
+        model: UpdateInstance,
+    ) -> RepoResult<()>;
 }
 
 #[derive(Constructor)]
@@ -46,4 +50,10 @@ pub struct InsertInstance {
     pub phone_number: Option<String>,
     pub chat_id: Key<Chat>,
     pub channel_id: Key<Channel>,
+}
+
+#[derive(Constructor)]
+pub struct UpdateInstance {
+    pub display_name: Option<String>,
+    pub phone_number: Option<String>,
 }

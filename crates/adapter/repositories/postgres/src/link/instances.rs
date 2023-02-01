@@ -1,13 +1,17 @@
+use chrono::{DateTime, Utc};
 use kernel_entities::{
-    entities::{comm::Chat, link::*},
+    entities::{auth::User, comm::Chat, link::*},
     traits::Key,
 };
 use kernel_repositories::{error::RepoResult, link::*, traits::*};
-use ormx::{Delete, Table};
+use ormx::{Delete, Table, Patch};
 use proc_macros::Repo;
 
 use crate::{
-    database::SqlxPool, sqlx_ok, sqlx_vec_ok, util::error::map_sqlx_error,
+    database::SqlxPool,
+    sqlx_ok,
+    sqlx_vec_ok,
+    util::error::map_sqlx_error,
 };
 
 #[derive(Repo)]
@@ -51,10 +55,8 @@ impl InstancesRepo for SqlxInstancesRepo {
         )
     }
 
-    async fn get_all(
     async fn get_of_user(
         &self,
-        channel_id: &Key<Channel>,
         user_id: &Key<User>,
         instance_id: &Key<Instance>,
     ) -> RepoResult<Instance> {
@@ -81,9 +83,6 @@ impl InstancesRepo for SqlxInstancesRepo {
         limit: usize,
     ) -> RepoResult<Vec<Instance>> {
         sqlx_vec_ok!(
-            models::InstanceModel::by_channel_id(
-                self.0.get(),
-                channel_id.value_ref(),
             sqlx::query_as!(
                 models::InstanceModel,
                 r#"
@@ -100,6 +99,21 @@ impl InstancesRepo for SqlxInstancesRepo {
             .fetch_all(self.0.get())
             .await
         )
+    }
+
+    async fn update(
+        &self,
+        id: &Key<Instance>,
+        model: UpdateInstance,
+    ) -> RepoResult<()> {
+        models::UpdateInstanceModel {
+            display_name: model.display_name,
+            phone_number: model.phone_number,
+            updated_at: Utc::now(),
+        }
+        .patch_row(self.0.get(), id.value())
+        .await
+        .map_err(map_sqlx_error)
     }
 }
 
@@ -133,6 +147,14 @@ mod models {
         #[ormx(default)]
         pub created_at: DateTime<Utc>,
         #[ormx(default)]
+        pub updated_at: DateTime<Utc>,
+    }
+
+    #[derive(ormx::Patch)]
+    #[ormx(table_name = "instances", table = InstanceModel, id = "id")]
+    pub struct UpdateInstanceModel {
+        pub display_name: Option<String>,
+        pub phone_number: Option<String>,
         pub updated_at: DateTime<Utc>,
     }
 
