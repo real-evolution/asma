@@ -52,14 +52,52 @@ impl InstancesRepo for SqlxInstancesRepo {
     }
 
     async fn get_all(
+    async fn get_of_user(
         &self,
         channel_id: &Key<Channel>,
+        user_id: &Key<User>,
+        instance_id: &Key<Instance>,
+    ) -> RepoResult<Instance> {
+        sqlx_ok!(
+            sqlx::query_as!(
+                models::InstanceModel,
+                r#"
+                SELECT instances.* FROM instances
+                INNER JOIN channels ON channels.user_id = $1
+                WHERE instances.id = $2
+                "#,
+                user_id.value_ref(),
+                instance_id.value_ref()
+            )
+            .fetch_one(self.0.get())
+            .await
+        )
+    }
+
+    async fn get_by_user_paginated(
+        &self,
+        user_id: &Key<User>,
+        before: &DateTime<Utc>,
+        limit: usize,
     ) -> RepoResult<Vec<Instance>> {
         sqlx_vec_ok!(
             models::InstanceModel::by_channel_id(
                 self.0.get(),
                 channel_id.value_ref(),
+            sqlx::query_as!(
+                models::InstanceModel,
+                r#"
+                SELECT instances.* FROM instances
+                INNER JOIN channels ON channels.user_id = $1
+                WHERE instances.created_at <= $2
+                ORDER BY instances.created_at
+                LIMIT $3
+                "#,
+                user_id.value_ref(),
+                before,
+                limit as i64
             )
+            .fetch_all(self.0.get())
             .await
         )
     }

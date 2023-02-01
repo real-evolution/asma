@@ -22,9 +22,20 @@ pub trait InstancesRepo:
     ) -> RepoResult<Instance>;
 
     async fn get_all(
+    async fn get_of_user(
         &self,
         channel_id: &Key<Channel>,
+        user_id: &Key<User>,
+        instance_id: &Key<Instance>,
+    ) -> RepoResult<Instance>;
+
+    async fn get_by_user_paginated(
+        &self,
+        user_id: &Key<User>,
+        before: &DateTime<Utc>,
+        limit: usize,
     ) -> RepoResult<Vec<Instance>>;
+
 }
 
 #[derive(Constructor)]
