@@ -30,3 +30,14 @@ pub struct InstanceDto {
     pub updated_at: DateTime<Utc>,
 }
 
+#[derive(
+    Debug, Deserialize, Serialize, Validate, JsonSchema, OperationIo, Mapper,
+)]
+#[serde(rename_all = "camelCase")]
+#[from(UpdateInstance)]
+#[aide(input)]
+pub struct UpdateInstanceDto {
+    pub display_name: Option<String>,
+    #[validate(custom = "common_validation::phone_number")]
+    pub phone_number: Option<String>,
+}
