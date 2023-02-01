@@ -1,8 +1,8 @@
-use crate::patterns::*;
+use std::net::IpAddr;
 
 use validators::prelude::*;
 
-use std::net::IpAddr;
+use crate::patterns::*;
 
 #[derive(Validator)]
 #[validator(host(local(Allow), port(Allow)))]
@@ -36,3 +36,7 @@ pub struct Identifier(pub String);
 #[derive(Validator)]
 #[validator(regex(RE_USERNAME))]
 pub struct Username(pub String);
+
+#[derive(Validator)]
+#[validator(phone)]
+pub struct PhoneNumber(pub validators::phonenumber::PhoneNumber);

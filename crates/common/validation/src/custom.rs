@@ -29,6 +29,10 @@ pub fn username(value: &str) -> Result<(), ValidationError> {
     validate::<Username>("username", value)
 }
 
+pub fn phone_number(value: &str) -> Result<(), ValidationError> {
+    validate::<PhoneNumber>("phone_number", value)
+}
+
 pub fn supported_data_driver(value: &str) -> Result<(), ValidationError> {
     validate_with("supported_data_driver", value, |v| {
         SUPPORTED_DATA_DRIVERS.contains(&v)
