@@ -68,6 +68,7 @@ impl ChannelsRepo for SqlxChannelsRepo {
             api_key: model.api_key,
             valid_until: model.valid_until,
             is_active: model.is_active,
+            updated_at: Utc::now(),
         }
         .patch_row(self.0.get(), id.value())
         .await
@@ -173,6 +174,7 @@ mod models {
         pub api_key: String,
         pub valid_until: Option<DateTime<Utc>>,
         pub is_active: bool,
+        pub updated_at: DateTime<Utc>,
     }
 
     impl From<InsertChannel> for InsertChannelModel {
