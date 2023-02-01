@@ -15,8 +15,9 @@ pub enum MessageDirection {
     Outgoing,
 }
 
-#[entity]
-#[derive(Clone, Debug, JsonSchema)]
+#[entity(bson_compat = true)]
+#[serde_with::serde_as]
+#[derive(Clone, Debug)]
 pub struct Message {
     pub text: Option<String>,
     pub changes: Vec<String>,
@@ -25,7 +26,10 @@ pub struct Message {
     pub user_id: Key<User>,
     pub chat_id: Key<Chat>,
     pub instance_id: Key<Instance>,
+    #[serde(with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]
     pub delivered_at: DateTime<Utc>,
+    #[serde_as(as = "Option<bson::DateTime>")]
     pub seen_at: Option<DateTime<Utc>>,
+    #[serde_as(as = "Option<bson::DateTime>")]
     pub deleted_at: Option<DateTime<Utc>>,
 }

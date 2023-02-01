@@ -9,6 +9,7 @@ authors.workspace = true
 # crate dependencies
 enum-repr = "0"
 schemars = { version = "0", features = ["chrono", "uuid1"] }
+serde_with = { version = "2", features = ["chrono_0_4"] }
 
 # project dependencies
 kernel_proc_macros = { path = "../proc_macros" }

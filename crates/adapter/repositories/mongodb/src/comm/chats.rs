@@ -89,7 +89,10 @@ impl ChildRepo<User> for MongoDbRepo<Chat> {
         limit: usize,
     ) -> RepoResult<Vec<Self::Entity>> {
         self.find_stream(
-            doc! {ENTITY_CREATED_AT_FIELD: {"$lt": before}, "user_id": parent_key.value_ref()},
+            doc! {
+                ENTITY_CREATED_AT_FIELD: {"$lt": before},
+                "user_id": parent_key.value_ref()
+            },
             FindOptions::builder()
                 .sort(doc! { ENTITY_CREATED_AT_FIELD: -1})
                 .build(),
