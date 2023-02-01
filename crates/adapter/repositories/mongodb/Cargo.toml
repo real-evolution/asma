@@ -7,9 +7,7 @@ authors.workspace = true
 
 [dependencies]
 # crate dependencies
-mongodb = { version = "2", features = [
-  "bson-serde_with",
-] }
+mongodb = { version = "2", features = ["bson-serde_with", "bson-chrono-0_4"] }
 
 # project dependencies
 common_validation = { path = "../../../common/validation" }
