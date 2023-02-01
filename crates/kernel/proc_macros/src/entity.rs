@@ -4,9 +4,24 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{parse::*, *};
 
+macro_rules! field_bson {
+    ($id:ident: $type:ty) => {{
+        let field = Field::parse_named
+            .parse2(quote! {
+                #[serde(
+                    serialize_with = "bson::serde_helpers::chrono_datetime_as_bson_datetime::serialize",
+                    deserialize_with = "bson::serde_helpers::chrono_datetime_as_bson_datetime::deserialize"
+                )]
+                pub $id: $type
+            })
+            .unwrap();
+
+        field
+    }};
+}
 macro_rules! field {
-    ($($tt:tt)*) => {
-        Field::parse_named.parse2(quote!(pub $($tt)*)).unwrap().into()
+    ($id:ident: $($tt:tt)*) => {
+        Field::parse_named.parse2(quote!(pub $id: $($tt)*)).unwrap()
     };
 }
 
@@ -22,6 +37,8 @@ pub enum EntityType {
 pub struct EntityOptions {
     #[darling(default)]
     pub entity_type: EntityType,
+    #[darling(default)]
+    pub bson_compat: Option<bool>,
 }
 
 pub fn expand_entity(
@@ -33,7 +50,12 @@ pub fn expand_entity(
     let fields = &mut extract_named_fields(extract_struct(&mut input)).named;
 
     fields.insert(0, field!(id: Key<#type_ident>));
-    fields.push(field!(created_at: chrono::DateTime<chrono::Utc>));
+
+    if args.bson_compat.unwrap_or_default() {
+        fields.push(field_bson!(created_at: chrono::DateTime<chrono::Utc>));
+    } else {
+        fields.push(field!(created_at: chrono::DateTime<chrono::Utc>));
+    }
 
     let mut impls: TokenStream = quote! {
         impl Entity for #type_ident{
@@ -48,7 +70,11 @@ pub fn expand_entity(
     };
 
     if let EntityType::Mutable = args.entity_type {
-        fields.push(field!(updated_at: chrono::DateTime<chrono::Utc>));
+        if args.bson_compat.unwrap_or_default() {
+            fields.push(field_bson!(updated_at: chrono::DateTime<chrono::Utc>));
+        } else {
+            fields.push(field!(updated_at: chrono::DateTime<chrono::Utc>));
+        }
 
         impls.extend(quote! {
             impl MutableEntity for #type_ident {
