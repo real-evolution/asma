@@ -1,10 +1,11 @@
+use derive_more::Display;
 use kernel_proc_macros::entity;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{entities::auth::User, traits::*};
 
-#[derive(Clone, Debug, JsonSchema, Serialize, Deserialize)]
+#[derive(Clone, Debug, JsonSchema, Serialize, Deserialize, Display)]
 pub enum ChatState {
     Active,
     Archived,
