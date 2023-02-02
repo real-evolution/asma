@@ -103,6 +103,32 @@ impl ChildRepo<User> for SqlxBotsRepo {
     }
 }
 
+#[async_trait::async_trait()]
+impl StatsRepo<User> for SqlxBotsRepo {
+    async fn get_stats_for(
+        &self,
+        parent_key: &Key<User>,
+    ) -> RepoResult<StatsPair> {
+        sqlx::query!(
+            r#"
+            SELECT
+                COUNT(id) AS "total!",
+                (
+                    SELECT COUNT(id) FROM bots
+                    WHERE user_id = $1 AND is_active = TRUE
+                ) AS "active!"
+            FROM bots
+            WHERE user_id = $1
+            "#,
+            parent_key.value_ref(),
+        )
+        .fetch_one(self.0.get())
+        .await
+        .map_err(map_sqlx_error)
+        .map(|r| StatsPair::new(r.total as u64, r.active as u64))
+    }
+}
+
 mod models {
     use chrono::{DateTime, Utc};
     use derive_more::{From, Into};

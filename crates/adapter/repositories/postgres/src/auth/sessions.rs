@@ -1,12 +1,9 @@
-use proc_macros::Repo;
 use chrono::{Duration, Utc};
 use derive_more::Constructor;
-use kernel_entities::entities::auth::*;
-use kernel_entities::traits::*;
-use kernel_repositories::auth::*;
-use kernel_repositories::error::RepoResult;
-use kernel_repositories::traits::*;
+use kernel_entities::{entities::auth::*, traits::*};
+use kernel_repositories::{auth::*, error::RepoResult, traits::*};
 use ormx::{Delete, Patch, Table};
+use proc_macros::Repo;
 
 use crate::{database::SqlxPool, util::error::map_sqlx_error};
 
@@ -115,6 +112,37 @@ impl SessionsRepo for SqlxSessionsRepo {
         .map_err(map_sqlx_error)?;
 
         Ok(())
+    }
+}
+
+#[async_trait::async_trait]
+impl StatsRepo<User> for SqlxSessionsRepo {
+    async fn get_stats_for(
+        &self,
+        parent_key: &Key<User>,
+    ) -> RepoResult<StatsPair> {
+        sqlx::query!(
+            r#"
+            SELECT
+                COUNT(sessions.id) AS "total!",
+                (
+                    SELECT COUNT(sessions.id) FROM sessions
+                    INNER JOIN accounts
+                          ON accounts.user_id = $1 AND
+                             accounts.id = sessions.account_id
+                    WHERE COALESCE(expires_at, 'infinity') > now()
+                ) AS "active!"
+            FROM sessions
+                INNER JOIN accounts
+                    ON accounts.user_id = $1 AND
+                       accounts.id = sessions.account_id
+            "#,
+            parent_key.value_ref(),
+        )
+        .fetch_one(self.0.get())
+        .await
+        .map_err(map_sqlx_error)
+        .map(|r| StatsPair::new(r.total as u64, r.active as u64))
     }
 }
 

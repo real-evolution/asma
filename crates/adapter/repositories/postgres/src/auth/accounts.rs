@@ -1,14 +1,14 @@
 use chrono::{DateTime, Utc};
 use kernel_entities::{entities::auth::*, traits::Key};
-use kernel_repositories::auth::{AccountsRepo, InsertAccount};
-use kernel_repositories::error::RepoResult;
-use kernel_repositories::traits::*;
+use kernel_repositories::{
+    auth::{AccountsRepo, InsertAccount},
+    error::RepoResult,
+    traits::*,
+};
 use ormx::{Delete, Patch, Table};
 use proc_macros::Repo;
 
-use crate::database::SqlxPool;
-use crate::util::error::map_sqlx_error;
-use crate::*;
+use crate::{database::SqlxPool, util::error::map_sqlx_error, *};
 
 #[derive(Repo)]
 #[repo(
@@ -216,6 +216,33 @@ impl ChildRepo<User> for SqlxAccountsRepo {
         .map_err(map_sqlx_error)?;
 
         Ok(())
+    }
+}
+
+#[async_trait::async_trait()]
+impl StatsRepo<User> for SqlxAccountsRepo {
+    async fn get_stats_for(
+        &self,
+        parent_key: &Key<User>,
+    ) -> RepoResult<StatsPair> {
+        sqlx::query!(
+            r#"
+            SELECT
+                COUNT(id) AS "total!",
+                (
+                    SELECT COUNT(id) FROM accounts
+                    WHERE user_id = $1 AND state = $2
+                ) AS "active!"
+            FROM accounts
+            WHERE user_id = $1
+            "#,
+            parent_key.value_ref(),
+            AccountState::Active.repr()
+        )
+        .fetch_one(self.0.get())
+        .await
+        .map_err(map_sqlx_error)
+        .map(|r| StatsPair::new(r.total as u64, r.active as u64))
     }
 }
 

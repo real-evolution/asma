@@ -31,11 +31,11 @@ impl ChannelsRepo for SqlxChannelsRepo {
         sqlx_stream_ok!(sqlx::query_as!(
             models::ChannelModel,
             r#"
-                SELECT * FROM channels
-                WHERE is_active = TRUE AND
-                      COALESCE(valid_until, 'infinity') > now()
-                ORDER BY created_at
-                "#
+            SELECT * FROM channels
+            WHERE is_active = TRUE AND
+                  COALESCE(valid_until, 'infinity') > now()
+            ORDER BY created_at
+            "#
         )
         .fetch(self.0.get()))
     }
@@ -52,7 +52,7 @@ impl ChannelsRepo for SqlxChannelsRepo {
                       is_active = TRUE AND
                       COALESCE(valid_until, 'infinity') > now()
                 ORDER BY created_at
-                "#,
+            "#,
             user_id.value(),
         )
         .fetch(self.0.get()))
@@ -135,6 +135,32 @@ impl ChildRepo<User> for SqlxChannelsRepo {
         .map_err(map_sqlx_error)?;
 
         Ok(())
+    }
+}
+
+#[async_trait::async_trait]
+impl StatsRepo<User> for SqlxChannelsRepo {
+    async fn get_stats_for(
+        &self,
+        parent_id: &Key<User>,
+    ) -> RepoResult<StatsPair> {
+        sqlx::query!(
+            r#"
+            SELECT
+                COUNT(id) AS "total!",
+                (
+                    SELECT COUNT(id) FROM channels
+                    WHERE user_id = $1 AND is_active = TRUE
+                ) AS "active!"
+            FROM channels
+            WHERE user_id = $1
+            "#,
+            parent_id.value_ref(),
+        )
+        .fetch_one(self.0.get())
+        .await
+        .map_err(map_sqlx_error)
+        .map(|r| StatsPair::new(r.total as u64, r.active as u64))
     }
 }
 
