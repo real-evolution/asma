@@ -29,6 +29,7 @@ fn main() -> anyhow::Result<()> {
                 "proto/models/message.proto",
                 // services
                 "proto/services/chats.proto",
+                "proto/services/stats.proto",
             ],
             &["proto/"],
         )?;
