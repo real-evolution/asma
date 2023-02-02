@@ -3,14 +3,14 @@ use futures::stream::BoxStream;
 use kernel_entities::{
     entities::{
         auth::User,
-        comm::{Chat, Message},
+        comm::{Chat, ChatState, Message},
     },
     traits::Key,
 };
 use kernel_repositories::{
     comm::{ChatsRepo, InsertChat},
     error::{RepoError, RepoResult},
-    traits::{ChildRepo, InsertRepo},
+    traits::{ChildRepo, InsertRepo, StatsPair, StatsRepo},
 };
 use mongodb::{
     bson::{doc, Document},
@@ -128,6 +128,34 @@ impl ChildRepo<User> for MongoDbRepo<Chat> {
         }
 
         Ok(())
+    }
+}
+
+#[async_trait::async_trait]
+impl StatsRepo<User> for MongoDbRepo<Chat> {
+    async fn get_stats_for(
+        &self,
+        user_id: &Key<User>,
+    ) -> RepoResult<StatsPair> {
+        let total = self
+            .collection()
+            .count_documents(None, None)
+            .await
+            .map_err(map_mongo_error)?;
+
+        let active = self
+            .collection()
+            .count_documents(
+                doc! {
+                    "user_id": user_id.value_ref(),
+                    "state": ChatState::Active.to_string()
+                },
+                None,
+            )
+            .await
+            .map_err(map_mongo_error)?;
+
+        Ok(StatsPair::new(total, active))
     }
 }
 
