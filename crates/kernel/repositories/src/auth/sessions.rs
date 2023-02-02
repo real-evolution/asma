@@ -5,7 +5,11 @@ use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait SessionsRepo:
-    Repo<Entity = Session> + InsertRepo<InsertSession> + Send + Sync
+    Repo<Entity = Session>
+    + InsertRepo<InsertSession>
+    + StatsRepo<User>
+    + Send
+    + Sync
 {
     async fn get_all_for(
         &self,

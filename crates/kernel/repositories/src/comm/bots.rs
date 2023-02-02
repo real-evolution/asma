@@ -9,7 +9,12 @@ use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait BotsRepo:
-    Repo<Entity = Bot> + InsertRepo<InsertBot> + ChildRepo<User> + Send + Sync
+    Repo<Entity = Bot>
+    + InsertRepo<InsertBot>
+    + ChildRepo<User>
+    + StatsRepo<User>
+    + Send
+    + Sync
 {
     fn stream_active(&self) -> BoxStream<'_, RepoResult<Bot>>;
 }

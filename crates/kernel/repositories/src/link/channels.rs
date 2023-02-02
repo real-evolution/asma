@@ -13,6 +13,7 @@ pub trait ChannelsRepo:
     Repo<Entity = Channel>
     + InsertRepo<InsertChannel>
     + ChildRepo<User>
+    + StatsRepo<User>
     + Send
     + Sync
 {

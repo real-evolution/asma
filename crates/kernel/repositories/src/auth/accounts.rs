@@ -9,6 +9,7 @@ pub trait AccountsRepo:
     Repo<Entity = Account>
     + InsertRepo<InsertAccount>
     + ChildRepo<User>
+    + StatsRepo<User>
     + Send
     + Sync
 {

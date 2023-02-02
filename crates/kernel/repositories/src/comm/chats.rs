@@ -12,7 +12,12 @@ use crate::{error::RepoResult, traits::*};
 
 #[async_trait::async_trait]
 pub trait ChatsRepo:
-    Repo<Entity = Chat> + InsertRepo<InsertChat> + ChildRepo<User> + Send + Sync
+    Repo<Entity = Chat>
+    + InsertRepo<InsertChat>
+    + ChildRepo<User>
+    + StatsRepo<User>
+    + Send
+    + Sync
 {
     async fn watch(
         &self,
