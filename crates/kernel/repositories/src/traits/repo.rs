@@ -1,5 +1,7 @@
 use chrono::{DateTime, Utc};
+use derive_more::Constructor;
 use kernel_entities::traits::{Entity, Key};
+use serde::{Deserialize, Serialize};
 
 use crate::error::RepoResult;
 
@@ -43,4 +45,16 @@ pub trait ChildRepo<P: Entity>: Repo {
         parent_key: &Key<P>,
         key: &Key<Self::Entity>,
     ) -> RepoResult<()>;
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Constructor)]
+pub struct StatsPair {
+    pub total: u64,
+    pub active: u64,
+}
+
+#[async_trait::async_trait]
+pub trait StatsRepo<P: Entity>: Repo {
+    async fn get_stats_for(&self, parent_key: &Key<P>)
+        -> RepoResult<StatsPair>;
 }
