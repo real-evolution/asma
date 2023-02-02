@@ -15,6 +15,7 @@ use serde::{Deserialize, Serialize};
 use super::config::AuthTokenConfig;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AuthToken {
     pub sub: Key<Session>,
     pub exp: i64,
