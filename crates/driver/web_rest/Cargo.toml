@@ -30,6 +30,7 @@ driver_web_common = { path = "../../driver/web_common" }
 # workspace dependencies
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+bson = { workspace = true }
 chrono = { workspace = true }
 derive_more = { workspace = true }
 itertools = { workspace = true }
