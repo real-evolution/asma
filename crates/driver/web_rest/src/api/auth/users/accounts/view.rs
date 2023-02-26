@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use axum::{
     extract::{Path, State},
     Json,
@@ -60,4 +62,30 @@ pub async fn get_by_id(
         .await?;
 
     Ok(Json(account.into()))
+}
+
+pub async fn get_roles_and_permissions(
+    auth: RestAuthToken,
+    Path((user_id, account_id)): Path<(Key<User>, Key<Account>)>,
+    state: State<AppState>,
+) -> ApiResult<Json<HashMap<String, Vec<(Resource, Actions)>>>> {
+    auth.can(&[(Resource::Role, Action::View)])?
+        .of(&user_id)
+        .or_else(|_| auth.in_role(KnownRoles::Admin))?;
+
+    let account = state
+        .data
+        .auth()
+        .accounts()
+        .get_of(&user_id, &account_id)
+        .await?;
+
+    let roles = state
+        .data
+        .auth()
+        .roles()
+        .get_roles_with_permissions_for(&account_id)
+        .await?;
+
+    Ok(Json(roles))
 }
