@@ -5,7 +5,7 @@ mod update;
 mod view;
 
 use aide::axum::{
-    routing::{get, post},
+    routing::{delete, get, post},
     ApiRouter,
 };
 use driver_web_common::state::AppState;
@@ -19,9 +19,15 @@ pub fn routes() -> ApiRouter<AppState> {
                 .delete(remove::remove)
                 .patch(update::update),
         )
-        .api_route("/accounts", post(add::add_to).delete(remove::remove_from))
         .api_route(
-            "/permissions/:permission_id",
-            post(add::add_permission).delete(remove::remove_permission),
+            "/:role_id/accounts",
+            get(view::get_accounts)
+                .post(add::add_to)
+                .delete(remove::remove_from),
+        )
+        .api_route("/:role_id/permissions", post(add::add_permission))
+        .api_route(
+            "/:role_id/permissions/:permission_id",
+            delete(remove::remove_permission),
         )
 }

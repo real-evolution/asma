@@ -13,7 +13,12 @@ use kernel_entities::{
 };
 
 use super::dtos::{PermissionDto, RoleDto, RoleWithPermissionsDto};
-use crate::{error::ApiResult, util::auth::token::RestAuthToken, extractors::pagination::QueryPagination};
+use crate::{
+    api::auth::users::AccountDto,
+    error::ApiResult,
+    extractors::pagination::QueryPagination,
+    util::auth::token::RestAuthToken,
+};
 
 pub async fn get_all(
     auth: RestAuthToken,
@@ -61,4 +66,25 @@ pub async fn get_by_id(
         role: role.into(),
         permissions,
     }))
+}
+
+pub async fn get_accounts(
+    auth: RestAuthToken,
+    role_id: Path<Key<Role>>,
+    pagination: QueryPagination,
+    state: State<AppState>,
+) -> ApiResult<Json<Vec<AccountDto>>> {
+    auth.in_role(KnownRoles::Admin)?;
+
+    let accounts = state
+        .data
+        .auth()
+        .accounts()
+        .get_in_role(&role_id, &pagination.before, pagination.page_size)
+        .await?
+        .into_iter()
+        .map(|a| a.into())
+        .collect_vec();
+
+    Ok(Json(accounts))
 }
