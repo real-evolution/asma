@@ -5,6 +5,8 @@ mod remove;
 mod update;
 mod view;
 
+pub use accounts::dtos::*;
+
 use aide::axum::{routing::get, ApiRouter};
 use driver_web_common::state::AppState;
 
