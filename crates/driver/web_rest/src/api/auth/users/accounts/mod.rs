@@ -14,5 +14,5 @@ pub fn routes() -> ApiRouter<AppState> {
     ApiRouter::new()
         .api_route("/", get(view::get_all).post(add::add))
         .api_route("/:account_id", get(view::get_by_id).delete(remove::remove))
-        .api_route("/password", put(update::update_password))
+        .api_route("/:account_id/password", put(update::update_password))
 }
