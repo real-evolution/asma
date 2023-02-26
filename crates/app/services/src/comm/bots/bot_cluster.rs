@@ -8,7 +8,7 @@ use kernel_entities::{
     },
     traits::Key,
 };
-use kernel_repositories::DataStore;
+use kernel_repositories::{error::RepoError, DataStore};
 use kernel_services::{
     comm::chats::{ChatEventKind, ChatsService},
     error::AppResult,
@@ -49,7 +49,20 @@ impl BotCluster {
             return Ok(());
         }
 
-        let entry = self.data.comm().menus().get_entry_menu_of(&bot.id).await?;
+        let entry =
+            match self.data.comm().menus().get_entry_menu_of(&bot.id).await {
+                | Ok(entry) => entry,
+                | Err(err) => {
+                    return match err {
+                        | RepoError::NotFound => {
+                            warn!("bot #{} has no menu, skipping", bot.id);
+                            Ok(())
+                        }
+                        | _ => Err(err.into()),
+                    };
+                }
+            };
+
         let context = BotContext::new(entry, self.data.clone());
 
         info!(
