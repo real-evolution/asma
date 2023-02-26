@@ -84,7 +84,7 @@ pub async fn get_roles_and_permissions(
         .data
         .auth()
         .roles()
-        .get_roles_with_permissions_for(&account_id)
+        .get_roles_with_permissions_for(&account.id)
         .await?;
 
     Ok(Json(roles))
