@@ -2,9 +2,7 @@ use std::sync::Arc;
 
 use argon2::{
     password_hash::{Error, SaltString},
-    PasswordHash,
-    PasswordHasher,
-    PasswordVerifier,
+    PasswordHash, PasswordHasher, PasswordVerifier,
 };
 use kernel_services::{
     crypto::hash::CryptoHashService,
@@ -55,20 +53,19 @@ fn map_hash_error(err: Error) -> CryptoError {
         | Error::Algorithm | Error::Version => CryptoError::Unsupported,
         | Error::B64Encoding(err) => CryptoError::Encoding(err.to_string()),
         | Error::Crypto => CryptoError::Format("crypto error".into()),
-        | Error::OutputTooShort => CryptoError::InputTooShort,
-        | Error::OutputTooLong => CryptoError::InputTooLong,
         | Error::ParamNameDuplicated
         | Error::ParamNameInvalid
         | Error::ParamValueInvalid(_)
-        | Error::PhcStringInvalid
-        | Error::PhcStringTooShort
-        | Error::PhcStringTooLong
+        | Error::PhcStringField
+        | Error::PhcStringTrailingData
         | Error::ParamsMaxExceeded => CryptoError::InvalidInput,
         | Error::Password => CryptoError::Verification(
             "hash does not corrospond to the input".into(),
         ),
         | Error::SaltInvalid(err) => CryptoError::Salt(err.to_string()),
-
+        | Error::OutputSize { provided, expected } => {
+            CryptoError::MismatchingOutputLength { provided, expected }
+        }
         | _ => CryptoError::Hash("unknown error".into()),
     }
 }

@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -16,6 +18,9 @@ pub enum CryptoError {
 
     #[error("invalid input")]
     InvalidInput,
+
+    #[error("invalid output size: provided {provided:?}, expected {expected}")]
+    MismatchingOutputLength { provided: Ordering, expected: usize },
 
     #[error("format error: {0}")]
     Format(String),
