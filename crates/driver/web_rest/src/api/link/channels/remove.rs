@@ -7,6 +7,7 @@ use kernel_entities::{
     },
     traits::Key,
 };
+use kernel_services::link::channels::ChannelsService;
 
 use crate::{error::ApiResult, util::auth::token::RestAuthToken};
 
@@ -20,7 +21,8 @@ pub async fn remove(
     auth.can(&[(Resource::Channel, Action::Remove)])?
         .of(&channel.user_id)?;
 
-    state.data.link().channels().remove(&channel_id).await?;
+    state.data.link().channels().remove(&channel.id).await?;
+    state.channels.stop_channel(&channel.user_id, &channel.id).await?;
 
     Ok(())
 }
