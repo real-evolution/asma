@@ -17,7 +17,9 @@ CREATE TABLE instances
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
 
     CONSTRAINT chat_fk UNIQUE (chat_id),
-    CONSTRAINT channel_fk FOREIGN KEY (channel_id) REFERENCES channels(id)
+    CONSTRAINT channel_fk FOREIGN KEY (channel_id)
+                          REFERENCES channels(id)
+                          ON DELETE CASCADE
 );
 
 CREATE INDEX instances_created_at_idx ON channels USING btree (created_at);
