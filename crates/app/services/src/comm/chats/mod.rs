@@ -12,22 +12,17 @@ use kernel_entities::{
 };
 use kernel_repositories::{
     comm::{InsertChat, InsertMessage},
-    error::{RepoError, RepoResult},
+    error::RepoError,
     link::InsertInstance,
-    DataStore,
-    DocumentStore,
+    DataStore, DocumentStore,
 };
 use kernel_services::{
     comm::chats::{ChatEvent, ChatEventKind, ChatsService},
     error::AppResult,
     link::channels::{
-        ChannelPipe,
-        ChannelsService,
-        IncomingChannelUpdate,
-        IncomingChannelUpdateKind,
-        IncomingMessageUpdateKind,
-        OutgoingChannelUpdate,
-        OutgoingChannelUpdateKind,
+        ChannelPipe, ChannelsService, IncomingChannelUpdate,
+        IncomingChannelUpdateKind, IncomingMessageUpdateKind,
+        OutgoingChannelUpdate, OutgoingChannelUpdateKind,
         OutgoingMessageUpdateKind,
     },
     Service,
@@ -167,6 +162,10 @@ impl AppChatsService {
                     )
                     .await?;
 
+                let Some(instance) = instance else {
+                    return Ok(());
+                };
+
                 match kind {
                     | IncomingMessageUpdateKind::New { content } => {
                         let message = self
@@ -199,7 +198,7 @@ impl AppChatsService {
         user_id: &Key<User>,
         channel_id: &Key<Channel>,
         identifier: i64,
-    ) -> RepoResult<Instance> {
+    ) -> AppResult<Option<Instance>> {
         let ret = self
             .data
             .link()
@@ -209,6 +208,12 @@ impl AppChatsService {
 
         if let Err(RepoError::NotFound) = ret {
             info!("a new instance was detected on channel #{channel_id}");
+
+            if !self.data.link().channels().exists(channel_id).await? {
+                warn!("could not create instance because channel #{} of user #{} does not exist", channel_id, user_id);
+                return Ok(None);
+            }
+
             debug!("creating a chat for the new instance");
 
             let chat = self
@@ -237,10 +242,10 @@ impl AppChatsService {
                 })
                 .await?;
 
-            return Ok(instance);
+            return Ok(Some(instance));
         }
 
-        ret
+        Ok(Some(ret?))
     }
 }
 
