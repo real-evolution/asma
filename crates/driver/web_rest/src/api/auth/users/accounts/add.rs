@@ -16,10 +16,11 @@ pub async fn add(
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddAccountDto>,
 ) -> ApiResult<Created<Key<Account>, AccountDto>> {
-    auth.of(&user_id)?.can(&[
-        (Resource::User, Action::Modify),
-        (Resource::Account, Action::Add),
-    ])?;
+    auth.of(&user_id)?
+        .can(&[
+            (Resource::User, Action::Modify),
+            (Resource::Account, Action::Add),
+        ])?;
 
     let account: AccountDto = state
         .auth

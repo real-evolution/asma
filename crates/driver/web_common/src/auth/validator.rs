@@ -100,6 +100,8 @@ where
 
     #[inline]
     fn of(&self, user_id: &Key<User>) -> Result<&Self, Self::Error> {
-        self.require(|| self.user_id.value_ref() == user_id.value_ref())
+        self.is_root().or_else(|_| {
+            self.require(|| self.user_id.value_ref() == user_id.value_ref())
+        })
     }
 }
