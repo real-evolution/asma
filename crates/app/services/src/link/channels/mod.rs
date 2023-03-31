@@ -69,7 +69,7 @@ impl<Ipc: MessagePassingService> ChannelsService for AppChannelsService<Ipc> {
                         yield (channel_id.clone(), state.into());
                     }
                 }
-                | None => return ()
+                | None => ()
             }
         }
         .boxed()
@@ -105,7 +105,7 @@ impl<Ipc: MessagePassingService> ChannelsService for AppChannelsService<Ipc> {
             let mut states = self.states.write().await;
 
             let Some(user_states) = states.get_mut(&user_id) else {
-                return ();
+                return ;
             };
 
             for (channel_id, state) in user_states.drain() {
@@ -130,6 +130,46 @@ impl<Ipc: MessagePassingService> ChannelsService for AppChannelsService<Ipc> {
             states.remove(&user_id);
         }
         .boxed()
+    }
+
+    async fn start_channel(
+        &self,
+        user_id: &Key<User>,
+        channel_id: &Key<Channel>,
+    ) -> AppResult<()> {
+        let channel = self
+            .data
+            .link()
+            .channels()
+            .get_of(user_id, channel_id)
+            .await?;
+
+        self.start_channel(channel).await
+    }
+
+    async fn stop_channel(
+        &self,
+        user_id: &Key<User>,
+        channel_id: &Key<Channel>,
+    ) -> AppResult<()> {
+        let Some(state) = self.remove_state(user_id, channel_id).await else {
+            debug!(
+                "channel #{} of #{} is not running, skipping",
+                channel_id, user_id
+            );
+
+            return Ok(());
+        };
+
+        debug!("stopping channel #{} of #{}", channel_id, user_id,);
+
+        match state.stop().await {
+            | Ok(()) => Ok(()),
+            | Err(err) => {
+                warn!("could not stop channel #{}: {err}", channel_id);
+                Err(err)
+            }
+        }
     }
 
     async fn get_pipe_of(
@@ -173,6 +213,40 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
         }
     }
 
+    async fn start_channel(&self, channel: Channel) -> AppResult<()> {
+        if self.has_state(&channel.user_id, &channel.id).await {
+            debug!(
+                "channel #{} of #{} ({}) is already running, skipping",
+                channel.id, channel.user_id, channel.name,
+            );
+
+            return Ok(());
+        }
+        debug!(
+            "starting {:?} channel #{} of#{} ({})",
+            channel.platform, channel.id, channel.user_id, channel.name,
+        );
+
+        let pipe = self
+            .create_reverse_pipe(&channel.user_id, &channel.id)
+            .await?;
+        let state = ChannelState::new(channel, pipe)?;
+
+        match state.run().await {
+            | Ok(_) => {
+                self.append_state(&state.channel().user_id.clone(), state)
+                    .await;
+
+                Ok(())
+            }
+
+            | Err(err) => {
+                warn!("could not start channel: {err}");
+                Err(err)
+            }
+        }
+    }
+
     fn start_channels_stream<'a, S>(
         &'a self,
         channels: S,
@@ -190,32 +264,7 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
                     }
                 };
 
-                debug!(
-                    "starting {:?} channel #{} of#{} ({})",
-                    channel.platform, channel.id, channel.user_id, channel.name,
-                );
-
-                let pipe = self
-                    .create_reverse_pipe(&channel.user_id, &channel.id)
-                    .await?;
-                let state = ChannelState::new(channel, pipe)?;
-
-                match state.run().await {
-                    | Ok(_) => {
-                        self.append_state(
-                            &state.channel().user_id.clone(),
-                            state,
-                        )
-                        .await;
-
-                        Ok(())
-                    }
-
-                    | Err(err) => {
-                        warn!("could not start channel: {err}");
-                        Err(err)
-                    }
-                }
+                self.start_channel(channel).await
             })
             .boxed()
     }
@@ -234,6 +283,33 @@ impl<IPC: MessagePassingService> AppChannelsService<IPC> {
 
                 states.insert(user_id.clone(), user_states);
             }
+        }
+    }
+
+    async fn remove_state(
+        &self,
+        user_id: &Key<User>,
+        channel_id: &Key<Channel>,
+    ) -> Option<ChannelState> {
+        let mut states = self.states.write().await;
+
+        if let Some(user_states) = states.get_mut(user_id) {
+            return user_states.remove(channel_id);
+        }
+
+        None
+    }
+
+    async fn has_state(
+        &self,
+        user_id: &Key<User>,
+        channel_id: &Key<Channel>,
+    ) -> bool {
+        let states = self.states.read().await;
+
+        match states.get(user_id) {
+            | Some(channels) => channels.contains_key(channel_id),
+            | None => false,
         }
     }
 

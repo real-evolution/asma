@@ -36,6 +36,18 @@ pub trait ChannelsService: Send + Sync {
         user_id: Key<User>,
     ) -> BoxStream<'_, AppResult<()>>;
 
+    async fn start_channel(
+        &self,
+        user_id: &Key<User>,
+        channel_id: &Key<Channel>,
+    ) -> AppResult<()>;
+
+    async fn stop_channel(
+        &self,
+        user_id: &Key<User>,
+        channel_id: &Key<Channel>,
+    ) -> AppResult<()>;
+
     async fn get_pipe_of(
         &self,
         user_id: &Key<User>,
