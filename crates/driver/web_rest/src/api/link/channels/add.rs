@@ -2,6 +2,7 @@ use axum::extract::State;
 use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use kernel_entities::entities::{auth::*, link::Channel};
 use kernel_repositories::link::InsertChannel;
+use kernel_services::link::channels::ChannelsService;
 
 use super::dtos::AddChannelDto;
 use crate::{
@@ -34,6 +35,17 @@ pub async fn add(
             form.is_active,
         ))
         .await?;
+
+    state
+        .channels
+        .start_channel(&channel.user_id, &channel.id)
+        .await
+        .unwrap_or_else(|err| {
+            warn!(
+                "could not start channel #{} of user #{}: {err}",
+                channel.id, channel.user_id
+            )
+        });
 
     Ok(Created::new("/api/link/channels", channel).into())
 }
