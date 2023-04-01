@@ -3,10 +3,11 @@ use aide::{
     openapi::{Info, OpenApi},
     redoc::Redoc,
 };
-use axum::{Extension, Router};
+use axum::{Extension, Router, http::Method};
 use cached::proc_macro::once;
 use driver_web_common::state::AppState;
 use kernel_services::error::AppResult;
+use tower_http::cors::{CorsLayer, Any};
 
 use crate::api;
 
@@ -32,6 +33,16 @@ pub fn make_rest_app() -> AppResult<Router<AppState>> {
         ..Default::default()
     };
 
+    let cors = CorsLayer::new()
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::PATCH,
+            Method::DELETE,
+        ])
+        .allow_origin(Any);
+
     Ok(ApiRouter::new()
         .route(
             "/redoc",
@@ -42,5 +53,6 @@ pub fn make_rest_app() -> AppResult<Router<AppState>> {
         .nest("/api", api::api_routes()?)
         .route(OPENAPI_PATH, get(serve_api))
         .finish_api(&mut api)
-        .layer(Extension(api)))
+        .layer(Extension(api))
+        .layer(cors))
 }

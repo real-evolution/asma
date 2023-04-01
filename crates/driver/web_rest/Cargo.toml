@@ -18,6 +18,7 @@ axum = { version = "0", features = ["macros", "headers"] }
 cached = "0"
 mapper = { git = "https://github.com/kumarmo2/mapper.git", branch = "v0.1" }
 schemars = { version = "0", features = ["chrono", "uuid"] }
+tower-http = { version = "0", features = ["cors"] }
 
 # project dependencies
 common_macros = { path = "../../common/macros" }
