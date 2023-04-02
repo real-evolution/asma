@@ -3,11 +3,11 @@ use aide::{
     openapi::{Info, OpenApi},
     redoc::Redoc,
 };
-use axum::{Extension, Router, http::Method};
+use axum::{Extension, Router};
 use cached::proc_macro::once;
 use driver_web_common::state::AppState;
 use kernel_services::error::AppResult;
-use tower_http::cors::{CorsLayer, Any};
+use tower_http::cors::{Any, CorsLayer};
 
 use crate::api;
 
@@ -34,13 +34,8 @@ pub fn make_rest_app() -> AppResult<Router<AppState>> {
     };
 
     let cors = CorsLayer::new()
-        .allow_methods([
-            Method::GET,
-            Method::POST,
-            Method::PUT,
-            Method::PATCH,
-            Method::DELETE,
-        ])
+        .allow_methods(Any)
+        .allow_headers(Any)
         .allow_origin(Any);
 
     Ok(ApiRouter::new()
