@@ -1,12 +1,36 @@
-[web]
-# Web server listening address. 0.0.0.0 (or :: for IPv6) means listening on
-# all interfaces. 127.0.0.1 (or ::1) can be used to only listen on the
-# loopback interface for development purposes.
-listen_address = "0.0.0.0"
-# RESTful API server listening port.
-rest_listen_port = 8080
-# gRPC server listening port.
-grpc_listen_port = 8888
+[web.rest]
+# RESTful API listening endpoint.IPv4 and IPv6 are supported. The address and
+# the port are delimited by a colon (:). If the port is omitted, the default
+# port (3434) will be used.
+listen_on = "127.0.0.1:3434"
+
+[web.rest.cors]
+# Allowed Cross-Origin Resource Sharing (CORS) methods. This can be either:
+# - any or '*': Allow all methods
+# Or a list of allowed HTTP methods
+allowed_methods = "*"
+# Allowed Cross-Origin Resource Sharing (CORS) headers.
+allowed_headers = "*"
+# Allowed Cross-Origin Resource Sharing (CORS) origins.
+allowed_origins = "*"
+
+[web.grpc]
+# gRPC API listening endpoint.IPv4 and IPv6 are supported. The address and
+# the port are delimited by a colon (:). If the port is omitted, the default
+# port (8080) will be used.
+listen_on = "127.0.0.1:8080"
+# Whether to enable HTTP/1.1 support or not. This is required for gRPC-Web
+enable_http1 = true
+
+[web.grpc.cors]
+# Allowed Cross-Origin Resource Sharing (CORS) methods. This can be either:
+# - any: Allow all methods
+# Or a list of allowed HTTP methods
+allowed_methods = "any"
+# Allowed Cross-Origin Resource Sharing (CORS) headers.
+allowed_headers = "any"
+# Allowed Cross-Origin Resource Sharing (CORS) origins.
+allowed_origins = "any"
 
 [log]
 # Log entires display format. This accepts the following values:
@@ -114,7 +138,7 @@ driver = "mongodb"
 # Document store server address
 host = "localhost"
 # Document store server listening port
-port = 5432
+port = 27017
 # Document store server username
 #username = "postgres"
 # Document store server password
