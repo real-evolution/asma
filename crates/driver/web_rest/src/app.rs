@@ -7,7 +7,6 @@ use axum::{Extension, Router};
 use cached::proc_macro::once;
 use driver_web_common::state::AppState;
 use kernel_services::error::AppResult;
-use tower_http::cors::{Any, CorsLayer};
 
 use crate::api;
 
@@ -33,11 +32,6 @@ pub fn make_rest_app() -> AppResult<Router<AppState>> {
         ..Default::default()
     };
 
-    let cors = CorsLayer::new()
-        .allow_methods(Any)
-        .allow_headers(Any)
-        .allow_origin(Any);
-
     Ok(ApiRouter::new()
         .route(
             "/redoc",
@@ -48,6 +42,5 @@ pub fn make_rest_app() -> AppResult<Router<AppState>> {
         .nest("/api", api::api_routes()?)
         .route(OPENAPI_PATH, get(serve_api))
         .finish_api(&mut api)
-        .layer(Extension(api))
-        .layer(cors))
+        .layer(Extension(api)))
 }
