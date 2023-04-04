@@ -6,8 +6,11 @@ use crate::{
     services::{GrpcChatsService, GrpcStatsService},
 };
 
-pub fn make_grpc_app(state: AppState) -> Router {
-    Server::builder()
+pub fn add_grpc_services<T>(mut server: Server<T>, state: AppState) -> Router<T>
+where
+    T: Clone,
+{
+    server
         .add_service(ChatsServer::new(GrpcChatsService::new(state.clone())))
         .add_service(StatsServer::new(GrpcStatsService::new(state)))
 }
