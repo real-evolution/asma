@@ -1,45 +1,129 @@
-use std::net::SocketAddr;
+use std::{
+    net::{Ipv4Addr, SocketAddr},
+    str::FromStr,
+};
 
 use anyhow::Result;
-use common_validation::*;
-use kernel_services::config::ConfigService;
 use serde::Deserialize;
+use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
 use validator::Validate;
 
-const CONFIG_SECTION: &str = "web";
+pub(crate) const WEB_CONFIG_SECTION: &str = "web";
 
-into_fn!(default_ip: String  => "127.0.0.1");
-into_fn!(default_rest_port: const u16 => 3434u16);
-into_fn!(default_grpc_port: const u16 => 3435u16);
+into_fn!(default_rest_address: SocketAddr => SocketAddr::new(Ipv4Addr::LOCALHOST.into(), 3434));
+into_fn!(default_grpc_address: SocketAddr => SocketAddr::new(Ipv4Addr::LOCALHOST.into(), 8080));
 
 #[derive(Debug, Deserialize, Validate)]
-struct LanuchConfig {
-    #[validate(custom = "ip_endpoint")]
-    #[serde(default = "default_ip")]
-    listen_address: String,
+pub(crate) struct LanuchConfig {
+    #[validate]
+    pub(crate) rest: RestLanuchConfig,
 
-    #[validate(range(min = 0, max = 0xFFFF))]
-    #[serde(default = "default_rest_port")]
-    rest_listen_port: u16,
-
-    #[validate(range(min = 0, max = 0xFFFF))]
-    #[serde(default = "default_grpc_port")]
-    grpc_listen_port: u16,
+    #[validate]
+    pub(crate) grpc: GrpcLanuchConfig,
 }
 
-pub struct ListenAddressPair {
-    pub rest: SocketAddr,
-    pub grpc: SocketAddr,
+#[derive(Clone, Debug, Deserialize, Validate)]
+pub(crate) struct RestLanuchConfig {
+    #[serde(default = "default_rest_address")]
+    pub(crate) listen_on: SocketAddr,
+
+    #[serde(default)]
+    pub(crate) cors: CorsConfig,
 }
 
-impl ListenAddressPair {
-    pub fn load<C: ConfigService>(svc: &C) -> Result<Self> {
-        let conf: LanuchConfig = svc.get_section(CONFIG_SECTION)?;
-        let addr = IpAddress::parse_str(conf.listen_address)?.0;
+#[derive(Clone, Debug, Deserialize, Validate)]
+pub(crate) struct GrpcLanuchConfig {
+    #[serde(default = "default_grpc_address")]
+    pub(crate) listen_on: SocketAddr,
 
-        Ok(Self {
-            rest: SocketAddr::new(addr, conf.rest_listen_port),
-            grpc: SocketAddr::new(addr, conf.grpc_listen_port),
+    #[serde(default)]
+    pub(crate) cors: CorsConfig,
+
+    #[serde(default)]
+    pub(crate) enable_http1: bool,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(untagged)]
+#[serde(rename_all = "snake_case")]
+enum CorsConfigValue {
+    Other(String),
+    Items(Vec<String>),
+}
+
+impl CorsConfigValue {
+    fn parse_as_vec<I>(&self) -> anyhow::Result<Option<Vec<I>>>
+    where
+        I: FromStr,
+        I::Err: std::error::Error + Send + Sync + 'static,
+    {
+        Ok(match self {
+            | CorsConfigValue::Other(ref v) => {
+                if v == "*" || v.eq_ignore_ascii_case("any") {
+                    None
+                } else {
+                    Some(vec![v.parse::<I>()?])
+                }
+            }
+            | CorsConfigValue::Items(ref items) => {
+                let items: Result<Vec<I>, _> =
+                    items.iter().map(|h| h.parse::<I>()).collect();
+
+                Some(items?)
+            }
         })
+    }
+}
+
+impl Default for CorsConfigValue {
+    fn default() -> Self {
+        Self::Items(vec![])
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Validate)]
+pub(crate) struct CorsConfig {
+    #[serde(default)]
+    allowed_methods: CorsConfigValue,
+
+    #[serde(default)]
+    allowed_headers: CorsConfigValue,
+
+    #[serde(default)]
+    allowed_origins: CorsConfigValue,
+}
+
+impl CorsConfig {
+    pub(crate) fn into_layer(self) -> anyhow::Result<CorsLayer> {
+        let cors = CorsLayer::new()
+            .allow_headers(self.allow_headers()?)
+            .allow_methods(self.allow_methods()?)
+            .allow_origin(self.allow_origins()?);
+
+        Ok(cors)
+    }
+
+    fn allow_headers(&self) -> anyhow::Result<AllowHeaders> {
+        Ok(self
+            .allowed_headers
+            .parse_as_vec::<http::HeaderName>()?
+            .map(AllowHeaders::list)
+            .unwrap_or(AllowHeaders::any()))
+    }
+
+    fn allow_methods(&self) -> anyhow::Result<AllowMethods> {
+        Ok(self
+            .allowed_methods
+            .parse_as_vec::<http::Method>()?
+            .map(AllowMethods::list)
+            .unwrap_or(AllowMethods::any()))
+    }
+
+    fn allow_origins(&self) -> anyhow::Result<AllowOrigin> {
+        Ok(self
+            .allowed_origins
+            .parse_as_vec::<http::HeaderValue>()?
+            .map(AllowOrigin::list)
+            .unwrap_or(AllowOrigin::any()))
     }
 }
