@@ -6,11 +6,25 @@ use crate::{
     services::{GrpcChatsService, GrpcStatsService},
 };
 
-pub fn add_grpc_services<T>(mut server: Server<T>, state: AppState) -> Router<T>
+pub fn add_grpc_services<const ENABLE_WEB: bool, T>(
+    mut server: Server<T>,
+    state: AppState,
+) -> Router<T>
 where
     T: Clone,
 {
-    server
-        .add_service(ChatsServer::new(GrpcChatsService::new(state.clone())))
-        .add_service(StatsServer::new(GrpcStatsService::new(state)))
+    if ENABLE_WEB {
+        server
+            .accept_http1(true)
+            .add_service(tonic_web::enable(ChatsServer::new(
+                GrpcChatsService::new(state.clone()),
+            )))
+            .add_service(tonic_web::enable(StatsServer::new(
+                GrpcStatsService::new(state),
+            )))
+    } else {
+        server
+            .add_service(ChatsServer::new(GrpcChatsService::new(state.clone())))
+            .add_service(StatsServer::new(GrpcStatsService::new(state)))
+    }
 }

@@ -55,13 +55,18 @@ async fn run_grpc_server(
 ) -> anyhow::Result<()> {
     info!("running gRPC server on: {}", config.listen_on);
 
-    let server = tonic::transport::Server::builder()
-        .accept_http1(config.enable_http1)
-        .layer(config.cors.into_layer()?);
+    let server =
+        tonic::transport::Server::builder().layer(config.cors.into_layer()?);
 
-    add_grpc_services(server, state)
-        .serve(config.listen_on)
-        .await?;
+    if config.enable_http1 {
+        add_grpc_services::<true, _>(server, state)
+            .serve(config.listen_on)
+            .await?;
+    } else {
+        add_grpc_services::<false, _>(server, state)
+            .serve(config.listen_on)
+            .await?;
+    };
 
     Ok(())
 }

@@ -17,6 +17,7 @@ tonic = { version = "0", features = [
   "codegen",
   "prost",
 ] }
+tonic-web = "0"
 
 # project dependencies
 driver_web_common = { path = "../web_common" }
