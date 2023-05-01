@@ -200,7 +200,10 @@ impl<C: ConfigService> AuthService for AppAuthService<C> {
             return Err(RepoError::AlreadyExists.into());
         }
 
-        Ok(self
+        let is_first =
+            self.data.auth().accounts().get_count_for(&user_id).await? == 0;
+
+        let account = self
             .data
             .auth()
             .accounts()
@@ -211,7 +214,17 @@ impl<C: ConfigService> AuthService for AppAuthService<C> {
                 self.hash_svc.hash(&password)?,
                 is_active.into(),
             ))
-            .await?)
+            .await?;
+
+        if is_first {
+            self.data
+                .auth()
+                .roles()
+                .add_to_by_name(&account.id, KnownRoles::UserOwner.into())
+                .await?;
+        }
+
+        Ok(account)
     }
 
     async fn update_password_for(
