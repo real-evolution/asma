@@ -29,6 +29,12 @@ pub trait RolesRepo: Repo<Entity = Role> + InsertRepo<InsertRole> {
         role_id: &Key<Role>,
     ) -> RepoResult<()>;
 
+    async fn add_to_by_name(
+        &self,
+        account_id: &Key<Account>,
+        role_name: &str,
+    ) -> RepoResult<()>;
+
     async fn remove_from(
         &self,
         account_id: &Key<Account>,

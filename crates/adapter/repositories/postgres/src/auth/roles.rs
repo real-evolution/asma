@@ -9,10 +9,7 @@ use proc_macros::Repo;
 use tracing::warn;
 
 use crate::{
-    database::SqlxPool,
-    sqlx_ok,
-    sqlx_vec_ok,
-    util::error::map_sqlx_error,
+    database::SqlxPool, sqlx_ok, sqlx_vec_ok, util::error::map_sqlx_error,
 };
 
 #[derive(Repo)]
@@ -174,6 +171,38 @@ impl RolesRepo for SqlxRolesRepo {
         .map_err(map_sqlx_error)?;
 
         Ok(())
+    }
+
+    async fn add_to_by_name(
+        &self,
+        account_id: &Key<Account>,
+        role_name: &str,
+    ) -> RepoResult<()> {
+        let role_id = sqlx::query_scalar!(
+            r#"
+            SELECT id FROM roles
+            WHERE code = $1 AND is_active = TRUE
+            "#,
+            role_name
+        )
+        .fetch_one(self.0.get())
+        .await
+        .map_err(map_sqlx_error);
+
+        let role_id = match role_id {
+            | Ok(id) => id,
+            | Err(RepoError::NotFound) => self
+                .create(InsertRole {
+                    code: role_name.to_owned(),
+                    friendly_name: None,
+                })
+                .await?
+                .id
+                .value(),
+            | Err(e) => return Err(e.into()),
+        };
+
+        self.add_to(account_id, &Key::new(role_id)).await
     }
 
     async fn remove_from(
