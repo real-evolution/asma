@@ -16,11 +16,12 @@ pub async fn add(
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddAccountDto>,
 ) -> ApiResult<Created<Key<Account>, AccountDto>> {
-    auth.of(&user_id)?
-        .can(&[
-            (Resource::User, Action::Modify),
-            (Resource::Account, Action::Add),
-        ])?;
+    auth.can(&[
+        (Resource::User, Action::Modify),
+        (Resource::Account, Action::Add),
+    ])?
+    .of(&user_id)
+    .or(auth.in_role(KnownRoles::Admin))?;
 
     let account: AccountDto = state
         .auth
