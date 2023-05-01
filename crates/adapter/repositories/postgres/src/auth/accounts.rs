@@ -40,6 +40,23 @@ impl AccountsRepo for SqlxAccountsRepo {
         )
     }
 
+    async fn get_count_for(
+        &self,
+        user_id: &Key<User>,
+    ) -> RepoResult<usize> {
+        let count = sqlx::query_scalar!(
+            r#"
+            SELECT COUNT(id) FROM accounts
+            WHERE user_id = $1"#,
+            user_id.value_ref()
+        )
+        .fetch_one(self.0.get())
+        .await
+        .map_err(map_sqlx_error)?;
+
+        Ok(count.unwrap_or(0) as usize)
+    }
+
     async fn get_in_role(
         &self,
         role_id: &Key<Role>,

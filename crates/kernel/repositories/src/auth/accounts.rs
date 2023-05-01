@@ -19,6 +19,11 @@ pub trait AccountsRepo:
         account_name: &str,
     ) -> RepoResult<Account>;
 
+    async fn get_count_for(
+        &self,
+        user_id: &Key<User>,
+    ) -> RepoResult<usize>;
+
     async fn get_in_role(
         &self,
         role_id: &Key<Role>,
