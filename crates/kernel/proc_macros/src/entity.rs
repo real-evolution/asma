@@ -86,7 +86,6 @@ pub fn expand_entity(
     }
 
     quote! {
-        #[derive(serde::Serialize, serde::Deserialize)]
         #input
 
         #impls
