@@ -4,7 +4,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Validate, Deserialize, JsonSchema, OperationIo)]
+#[derive(Debug, Validate, Deserialize, JsonSchema, OperationIo)]
 #[serde(rename_all = "camelCase")]
 #[aide(input)]
 pub struct UserCredentials {
@@ -16,10 +16,25 @@ pub struct UserCredentials {
     pub password: String,
 }
 
+#[derive(Debug, Deserialize, JsonSchema, OperationIo)]
+#[serde(rename_all = "camelCase")]
+#[aide(input)]
+pub struct TokenRefreshForm {
+    pub refresh_token: String,
+    pub device_identifier: String,
+}
+
 #[derive(Serialize, JsonSchema, OperationIo)]
 #[serde(rename_all = "camelCase")]
 #[aide(output)]
 pub struct TokenPair {
     pub access_token: String,
     pub refresh_token: String,
+}
+
+#[derive(Serialize, JsonSchema, OperationIo)]
+#[serde(rename_all = "camelCase")]
+#[aide(output)]
+pub struct TokenRefreshResponse {
+    pub access_token: String,
 }
