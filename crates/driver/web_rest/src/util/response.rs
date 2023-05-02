@@ -36,10 +36,16 @@ impl<'a, K, E: Serialize> From<Created<K, E, &'a str>>
     }
 }
 
-pub type EntityCreated<E, P = String> = Created<Key<E>, E, P>;
+pub type EntityCreated<E, D, P = String> = Created<Key<E>, D, P>;
 
-impl<E: Entity + Clone, P> EntityCreated<E, P> {
+impl<E, D, P> EntityCreated<E, D, P>
+where
+    E: Entity + Clone,
+    D: From<E>,
+{
     pub fn new(path: P, entity: E) -> Self {
-        Self(path, entity.id().clone(), entity)
+        let id = entity.id().clone();
+
+        Created(path, id, entity.into())
     }
 }
