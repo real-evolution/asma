@@ -165,7 +165,7 @@ impl Chats for GrpcChatsService {
                 }
             }
 
-            return ()
+            ()
         }
         .boxed();
 
