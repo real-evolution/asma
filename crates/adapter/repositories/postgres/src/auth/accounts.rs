@@ -69,8 +69,9 @@ impl AccountsRepo for SqlxAccountsRepo {
                 INNER JOIN account_roles
                         ON account_roles.account_id = accounts.id
                 INNER JOIN roles
-                        ON account_roles.role_id = $1
-                     WHERE account_roles.created_at <= $2
+                        ON account_roles.role_id = roles.id
+                     WHERE roles.id                  = $1 AND
+                           account_roles.created_at <= $2
                   ORDER BY account_roles.created_at DESC
                      LIMIT $3
                 "#,
@@ -99,8 +100,9 @@ impl AccountsRepo for SqlxAccountsRepo {
                 INNER JOIN account_roles
                         ON account_roles.account_id = accounts.id
                 INNER JOIN roles
-                        ON account_roles.role_id = $1
-                     WHERE accounts.user_id          = $2 AND
+                        ON account_roles.role_id = roles.id
+                     WHERE roles.id                  = $1 AND
+                           accounts.user_id          = $2 AND
                            account_roles.created_at <= $3
                   ORDER BY account_roles.created_at DESC
                      LIMIT $4
