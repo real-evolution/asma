@@ -6,7 +6,7 @@ use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use kernel_entities::{entities::auth::*, traits::Key, util::ResourceEntity};
 use kernel_repositories::auth::InsertRole;
 
-use super::dtos::{AddAccountToRoleDto, AddPermissionDto, AddRoleDto};
+use super::dtos::{AddAccountToRoleDto, AddPermissionDto, AddRoleDto, RoleDto, PermissionDto};
 use crate::{
     error::ApiResult,
     extractors::validated_json::ValidatedJson,
@@ -20,7 +20,7 @@ pub async fn add(
     auth: RestAuthToken,
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddRoleDto>,
-) -> ApiResult<EntityCreated<Role>> {
+) -> ApiResult<EntityCreated<Role, RoleDto>> {
     auth.is_root()?;
 
     let role = state
@@ -38,7 +38,7 @@ pub async fn add_permission(
     role_id: Path<Key<Role>>,
     state: State<AppState>,
     Json(form): Json<AddPermissionDto>,
-) -> ApiResult<EntityCreated<Permission>> {
+) -> ApiResult<EntityCreated<Permission, PermissionDto>> {
     auth.is_root()?;
 
     let permission = state

@@ -34,7 +34,7 @@ pub async fn get_all(
         .get_paginated_authed(&pagination.before, pagination.page_size, &auth)
         .await?
         .into_iter()
-        .map(|r| r.into())
+        .map(Into::into)
         .collect_vec();
 
     Ok(Json(roles))

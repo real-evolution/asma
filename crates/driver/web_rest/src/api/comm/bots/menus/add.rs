@@ -3,7 +3,7 @@ use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use kernel_entities::entities::{auth::*, comm::Menu};
 use kernel_repositories::comm::InsertMenu;
 
-use super::dtos::AddMenuDto;
+use super::dtos::{AddMenuDto, MenuDto};
 use crate::{
     error::ApiResult,
     extractors::validated_json::ValidatedJson,
@@ -17,7 +17,7 @@ pub async fn add(
     auth: RestAuthToken,
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddMenuDto>,
-) -> ApiResult<EntityCreated<Menu>> {
+) -> ApiResult<EntityCreated<Menu, MenuDto>> {
     auth.can(&[(Resource::Menu, Action::Add)])?;
 
     let menu_bot = state.data.comm().bots().get(&form.bot_id).await?;

@@ -13,8 +13,7 @@ use kernel_entities::{
 
 use super::dtos::UserDto;
 use crate::{
-    error::ApiResult,
-    extractors::pagination::QueryPagination,
+    error::ApiResult, extractors::pagination::QueryPagination,
     util::auth::token::RestAuthToken,
 };
 
@@ -32,7 +31,7 @@ pub async fn get_all(
         .get_paginated_authed(&pagination.before, pagination.page_size, &auth)
         .await?
         .into_iter()
-        .map(|user| UserDto { user })
+        .map(Into::into)
         .collect::<Vec<_>>();
 
     Ok(Json(users))
@@ -47,5 +46,5 @@ pub async fn get_by_id(
 
     let user = state.data.auth().users().get(&user_id).await?;
 
-    Ok(Json(UserDto { user }))
+    Ok(Json(user.into()))
 }

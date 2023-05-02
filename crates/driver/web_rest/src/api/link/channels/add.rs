@@ -4,7 +4,7 @@ use kernel_entities::entities::{auth::*, link::Channel};
 use kernel_repositories::link::InsertChannel;
 use kernel_services::link::channels::ChannelsService;
 
-use super::dtos::AddChannelDto;
+use super::dtos::{AddChannelDto, ChannelDto};
 use crate::{
     error::ApiResult,
     extractors::validated_json::ValidatedJson,
@@ -18,7 +18,7 @@ pub async fn add(
     auth: RestAuthToken,
     state: State<AppState>,
     ValidatedJson(form): ValidatedJson<AddChannelDto>,
-) -> ApiResult<EntityCreated<Channel>> {
+) -> ApiResult<EntityCreated<Channel, ChannelDto>> {
     auth.of(&form.user_id)?
         .can(&[(Resource::Channel, Action::Add)])?;
 
