@@ -10,7 +10,7 @@ proc-macro = true
 
 [dependencies]
 # crate dependencies
-syn = { version = "1" }
+syn = { version = "2" }
 quote = "1"
 proc-macro2 = "1"
 darling = "0"

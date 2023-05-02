@@ -42,7 +42,7 @@ pub struct EntityOptions {
 }
 
 pub fn expand_entity(
-    args: AttributeArgs,
+    args: Vec<darling::ast::NestedMeta>,
     mut input: DeriveInput,
 ) -> TokenStream {
     let args = EntityOptions::from_list(&args).unwrap();
