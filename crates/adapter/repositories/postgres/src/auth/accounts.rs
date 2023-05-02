@@ -40,10 +40,7 @@ impl AccountsRepo for SqlxAccountsRepo {
         )
     }
 
-    async fn get_count_for(
-        &self,
-        user_id: &Key<User>,
-    ) -> RepoResult<usize> {
+    async fn get_count_for(&self, user_id: &Key<User>) -> RepoResult<usize> {
         let count = sqlx::query_scalar!(
             r#"
             SELECT COUNT(id) FROM accounts
@@ -67,12 +64,16 @@ impl AccountsRepo for SqlxAccountsRepo {
             sqlx::query_as!(
                 models::AccountModel,
                 r#"
-                SELECT accounts.*
-                FROM accounts
-                INNER JOIN account_roles ON role_id = $1
-                WHERE account_roles.created_at <= $2
-                ORDER BY account_roles.created_at
-                LIMIT $3"#,
+                    SELECT accounts.*
+                      FROM accounts
+                INNER JOIN account_roles
+                        ON account_roles.account_id = accounts.id
+                INNER JOIN roles
+                        ON account_roles.role_id = $1
+                     WHERE account_roles.created_at <= $2
+                  ORDER BY account_roles.created_at DESC
+                     LIMIT $3
+                "#,
                 role_id.value_ref(),
                 before,
                 limit as i64,
@@ -93,12 +94,17 @@ impl AccountsRepo for SqlxAccountsRepo {
             sqlx::query_as!(
                 models::AccountModel,
                 r#"
-                SELECT accounts.*
-                FROM accounts
-                INNER JOIN account_roles ON role_id = $1
-                WHERE accounts.user_id = $2 AND account_roles.created_at <= $3
-                ORDER BY account_roles.created_at
-                LIMIT $4"#,
+                    SELECT accounts.*
+                      FROM accounts
+                INNER JOIN account_roles
+                        ON account_roles.account_id = accounts.id
+                INNER JOIN roles
+                        ON account_roles.role_id = $1
+                     WHERE accounts.user_id          = $2 AND
+                           account_roles.created_at <= $3
+                  ORDER BY account_roles.created_at DESC
+                     LIMIT $4
+                "#,
                 role_id.value_ref(),
                 user_id.value_ref(),
                 before,
@@ -186,10 +192,12 @@ impl ChildRepo<User> for SqlxAccountsRepo {
             sqlx::query_as!(
                 models::AccountModel,
                 r#"
-                SELECT * FROM accounts
-                WHERE user_id = $1 AND created_at <= $2
-                ORDER BY created_at
-                LIMIT $3
+                  SELECT *
+                    FROM accounts
+                   WHERE user_id     = $1 AND
+                         created_at <= $2
+                ORDER BY created_at DESC
+                   LIMIT $3
                 "#,
                 user_id.value_ref(),
                 before,
@@ -208,7 +216,12 @@ impl ChildRepo<User> for SqlxAccountsRepo {
         sqlx_ok!(
             sqlx::query_as!(
                 models::AccountModel,
-                r#"SELECT * FROM accounts WHERE id = $1 AND user_id = $2"#,
+                r#"
+                  SELECT *
+                    FROM accounts
+                   WHERE id      = $1 AND
+                         user_id = $2
+                ORDER BY created_at DESC"#,
                 id.value_ref(),
                 user_id.value_ref()
             )

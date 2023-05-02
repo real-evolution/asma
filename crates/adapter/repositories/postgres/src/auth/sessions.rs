@@ -40,10 +40,12 @@ impl SessionsRepo for SqlxSessionsRepo {
         Ok(sqlx::query_as!(
             models::SessionModel,
             r#"
-            SELECT * FROM sessions
-            WHERE account_id = $1 AND
-                  device_identifier = $2 AND
-                  expires_at > $3"#,
+              SELECT *
+                FROM sessions
+               WHERE account_id        = $1 AND
+                     device_identifier = $2 AND
+                     expires_at        > $3
+            ORDER BY created_at DESC"#,
             account_id.value_ref(),
             device_identifier,
             Utc::now()
@@ -126,16 +128,16 @@ impl StatsRepo<User> for SqlxSessionsRepo {
             SELECT
                 COUNT(sessions.id) AS "total!",
                 (
-                    SELECT COUNT(sessions.id) FROM sessions
+                        SELECT COUNT(sessions.id) FROM sessions
                     INNER JOIN accounts
-                          ON accounts.user_id = $1 AND
-                             accounts.id = sessions.account_id
+                            ON accounts.user_id = $1 AND
+                               accounts.id      = sessions.account_id
                     WHERE COALESCE(expires_at, 'infinity') > now()
                 ) AS "active!"
             FROM sessions
-                INNER JOIN accounts
+            INNER JOIN accounts
                     ON accounts.user_id = $1 AND
-                       accounts.id = sessions.account_id
+                       accounts.id      = sessions.account_id
             "#,
             parent_key.value_ref(),
         )
