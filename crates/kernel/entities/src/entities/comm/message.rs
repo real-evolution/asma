@@ -16,8 +16,8 @@ pub enum MessageDirection {
 }
 
 #[entity(bson_compat = true)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde_with::serde_as]
-#[derive(Clone, Debug)]
 pub struct Message {
     pub text: Option<String>,
     pub changes: Vec<String>,

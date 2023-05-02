@@ -14,7 +14,7 @@ pub enum ChatState {
 
 #[serde_with::serde_as]
 #[entity(bson_compat = true)]
-#[derive(Clone, Debug, JsonSchema)]
+#[derive(Clone, Debug, JsonSchema, Serialize, Deserialize)]
 pub struct Chat {
     pub label: Option<String>,
     pub state: ChatState,
