@@ -42,15 +42,17 @@ impl RolesRepo for SqlxRolesRepo {
         let items = sqlx::query_as!(
             models::RolePermissionPair,
             r#"
-               SELECT roles.code,
-                      permissions.resource as "resource?",
-                      permissions.actions as "actions?"
-                 FROM roles
-                 JOIN account_roles
-                   ON account_roles.account_id = $1
-            LEFT JOIN permissions
-                   ON permissions.role_id = account_roles.role_id
-                WHERE roles.is_active = TRUE AND account_roles.is_active = TRUE
+                SELECT roles.code,
+                       permissions.resource as "resource?",
+                       permissions.actions as "actions?"
+                  FROM roles
+            INNER JOIN account_roles
+                    ON account_roles.role_id = roles.id
+             LEFT JOIN permissions
+                    ON permissions.role_id      = roles.id
+                 WHERE account_roles.account_id = $1   AND
+                       account_roles.is_active  = TRUE AND
+                       roles.is_active          = TRUE
             "#,
             account_id.value_ref()
         )
@@ -199,7 +201,7 @@ impl RolesRepo for SqlxRolesRepo {
                 .await?
                 .id
                 .value(),
-            | Err(e) => return Err(e.into()),
+            | Err(e) => return Err(e),
         };
 
         self.add_to(account_id, &Key::new(role_id)).await
