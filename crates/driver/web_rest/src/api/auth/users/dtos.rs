@@ -1,16 +1,23 @@
 use aide::OperationIo;
+use chrono::{DateTime, Utc};
 use common_validation::*;
-use kernel_entities::entities::auth::User;
+use kernel_entities::{entities::auth::User, traits::Key};
+use mapper::Mapper;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Debug, Deserialize, JsonSchema, Serialize, OperationIo)]
+#[derive(Debug, Mapper, Deserialize, JsonSchema, Serialize, OperationIo)]
 #[serde(rename_all = "camelCase")]
+#[from(User)]
 #[aide(output)]
 pub struct UserDto {
-    #[serde(flatten)]
-    pub user: User,
+    pub id: Key<User>,
+    pub display_name: String,
+    pub username: String,
+    pub is_active: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate, JsonSchema, OperationIo)]
