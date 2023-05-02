@@ -88,7 +88,7 @@ impl InstancesRepo for SqlxInstancesRepo {
                 r#"
                 SELECT instances.* FROM instances
                 INNER JOIN channels ON channels.user_id = $1
-                WHERE instances.created_at <= $2
+                WHERE instances.created_at < $2
                 ORDER BY instances.created_at
                 LIMIT $3
                 "#,

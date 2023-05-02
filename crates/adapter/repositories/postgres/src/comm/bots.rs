@@ -54,7 +54,7 @@ impl ChildRepo<User> for SqlxBotsRepo {
                 models::BotModel,
                 r#"
                 SELECT * FROM bots
-                WHERE user_id = $1 AND created_at <= $2
+                WHERE user_id = $1 AND created_at < $2
                 ORDER BY created_at
                 LIMIT $3
                 "#,

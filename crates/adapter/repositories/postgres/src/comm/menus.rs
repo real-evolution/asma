@@ -81,7 +81,7 @@ impl ChildRepo<Bot> for SqlxMenusRepo {
                 models::MenuModel,
                 r#"
                 SELECT * FROM menus
-                WHERE bot_id = $1 AND created_at <= $2
+                WHERE bot_id = $1 AND created_at < $2
                 ORDER BY created_at
                 LIMIT $3
                 "#,

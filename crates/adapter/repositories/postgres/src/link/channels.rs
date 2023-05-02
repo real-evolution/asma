@@ -89,7 +89,7 @@ impl ChildRepo<User> for SqlxChannelsRepo {
                 models::ChannelModel,
                 r#"
                 SELECT * FROM channels
-                WHERE user_id = $1 AND created_at <= $2
+                WHERE user_id = $1 AND created_at < $2
                 ORDER BY created_at
                 LIMIT $3
                 "#,
