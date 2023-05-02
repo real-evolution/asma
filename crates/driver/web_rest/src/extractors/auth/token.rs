@@ -12,7 +12,9 @@ use crate::{
 };
 
 #[async_trait::async_trait]
-impl FromRequestParts<AppState> for RestAuthToken {
+impl<const ACCEPT_EXPIRED: bool> FromRequestParts<AppState>
+    for RestAuthToken<ACCEPT_EXPIRED>
+{
     type Rejection = ApiError;
 
     async fn from_request_parts(
@@ -46,7 +48,10 @@ impl FromRequestParts<AppState> for RestAuthToken {
         let config =
             RestAuthTokenConfig::from_request_parts(parts, state).await?;
 
-        match AuthToken::decode(auth.token(), config.into()) {
+        match AuthToken::decode::<ACCEPT_EXPIRED, _>(
+            auth.token(),
+            config.into(),
+        ) {
             | Ok(token) => Ok(token.into()),
             | Err(err) => {
                 warn!("token decoding failed: {err:?}");

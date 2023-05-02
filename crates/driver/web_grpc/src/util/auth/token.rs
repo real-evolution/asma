@@ -2,8 +2,7 @@ use std::sync::Arc;
 
 use derive_more::{Deref, From, Into};
 use driver_web_common::auth::{
-    config::AUTH_TOKEN_CONFIG_SECTION,
-    token::AuthToken,
+    config::AUTH_TOKEN_CONFIG_SECTION, token::AuthToken,
     validator::FallbackValidator,
 };
 use kernel_services::config::ConfigService;
@@ -47,8 +46,10 @@ impl<T> RequestExt<T> for Request<T> {
             }
         };
 
-        match AuthToken::decode(&token_str[BEARER_TOKEN_PREFIX.len()..], config)
-        {
+        match AuthToken::decode::<false, _>(
+            &token_str[BEARER_TOKEN_PREFIX.len()..],
+            config,
+        ) {
             | Ok(token) => Ok(token.into()),
             | Err(err) => {
                 error!("encode jwt token: {err:?}");

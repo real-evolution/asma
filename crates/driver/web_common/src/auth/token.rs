@@ -101,16 +101,22 @@ impl AuthToken {
         Ok(jwt)
     }
 
-    pub fn decode<'a, J: Into<&'a str>>(
+    pub fn decode<'a, const ACCEPT_EXPIRED: bool, J: Into<&'a str>>(
         jwt: J,
         config: AuthTokenConfig,
     ) -> anyhow::Result<Self> {
         let jwt: &str = jwt.into();
 
+        let mut validation = Validation::default();
+
+        if ACCEPT_EXPIRED {
+            validation.validate_exp = false;
+        }
+
         let mut token = jsonwebtoken::decode::<Self>(
             jwt,
             &DecodingKey::from_secret(config.signing_key.as_bytes()),
-            &Validation::default(),
+            &validation,
         )
         .map(|data| data.claims)?;
 
