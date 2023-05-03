@@ -6,7 +6,9 @@ use driver_web_common::{auth::validator::AuthValidator, state::AppState};
 use kernel_entities::{entities::auth::*, traits::Key, util::ResourceEntity};
 use kernel_repositories::auth::InsertRole;
 
-use super::dtos::{AddAccountToRoleDto, AddPermissionDto, AddRoleDto, RoleDto, PermissionDto};
+use super::dtos::{
+    AddAccountToRoleDto, AddPermissionDto, AddRoleDto, PermissionDto, RoleDto,
+};
 use crate::{
     error::ApiResult,
     extractors::validated_json::ValidatedJson,
@@ -49,7 +51,11 @@ pub async fn add_permission(
         .await?;
 
     Ok(Created::new(
-        format!("/api/auth/roles/{}", role_id.0),
+        format!(
+            "/api/auth/roles/{}/permissions/{}",
+            role_id.value_ref(),
+            permission.id.value_ref()
+        ),
         permission,
     ))
 }
