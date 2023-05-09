@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres
+    container_name: asma_data
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 123
+
+  mongo:
+    image: mongo
+    container_name: asma_doc
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+
+  mongosetup:
+    image: mongo
+    depends_on:
+      - mongo
+    restart: "no"
+    entrypoint: [ "bash", "-c", "sleep 5 && mongosh --host mongo:27017 --eval 'rs.initiate()'"]
+
+  rabbitmq:
+    image: rabbitmq
+    container_name: asma_ipc
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: asma
+      RABBITMQ_DEFAULT_PASS: asma
+
+  app:
+    image: rust:latest
+    container_name: asma
+    restart: always
+    working_dir: /usr/src/asma
+    ports:
+      - 8080:8080
+      - 8888:8888
+    volumes:
+      - ./doc:/etc/asma
+      - .:/usr/src/asma
+    environment:
+      ASMA_CONFIG: /etc/asma/asma.toml
+      ASMA_LOG: info
+    entrypoint: [ "cargo", "run", "--release"]
