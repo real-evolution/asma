@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
 # environment variables
 ENV ASMA_CONFIG=/etc/asma.toml
 ENV ASMA_LOG=info
+ENV SQLX_OFFLINE=true
 
 # build
 RUN cargo build --release
