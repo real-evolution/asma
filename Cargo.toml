@@ -31,6 +31,7 @@ regex = "1"
 sqlx = { version = "0", features = [
   "chrono",
   "macros",
+  "offline",
   "postgres",
   "runtime-tokio-rustls",
   "uuid",

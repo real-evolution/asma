@@ -1,0 +1,5936 @@
+{
+  "db": "PostgreSQL",
+  "0021ee053599975801b4b371576bde78a9630ca690c9c78084682d0d2a7375b4": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Int4",
+          "Varchar",
+          "Timestamptz",
+          "Bool",
+          "Int8",
+          "Uuid",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE channels SET name = $1, platform = $2, api_key = $3, valid_until = $4, is_active = $5, max_instances = $6, user_id = $7, created_at = $8, updated_at = $9 WHERE id = $10"
+  },
+  "00acf77a8f44d17c8f7908bf09201e85136aaa9b5b963d63b40ddcd9276c9f31": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "role_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, account_id, role_id, is_active, created_at, updated_at FROM account_roles LIMIT $1 OFFSET $2"
+  },
+  "02ef219599982e20528f1c62bea59c7c53dc39aae848617ca88972e86eb211d4": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE instances SET username = $1 WHERE id = $2"
+  },
+  "051ab33cfec3e14964705dffa736cfe251dfb3611f902cff52025040656c6347": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "role_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, account_id, role_id, is_active, created_at, updated_at FROM account_roles WHERE id = $1"
+  },
+  "05751c769518a85764fa7b2a4a22b4078cef5dab2f096a724166c5750a3b5428": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "platform_identifier",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM instances\n                   WHERE channel_id = $1 AND platform_identifier = $2"
+  },
+  "0815f9f73547bf81ea1548be71f11585e538104d7b4f8f67387ae89a28e389b6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE menus SET updated_at = $1 WHERE id = $2"
+  },
+  "0a7445f3848f627b1fc806260423a806cb9192321dfd42a9d2530c7a3a303100": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE menus SET is_active = $1 WHERE id = $2"
+  },
+  "0b72902bc8ec599bc847b3671444f3f19f59bdcc47e22697d73196df434c9aca": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM channels WHERE id = $1"
+  },
+  "0f6748994e32f5c85699af12b3e1ec21c4e10d686e5cce314ce83dc7e27df26c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "created_at",
+          "ordinal": 0,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int4",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "INSERT INTO permissions (id, resource, actions, role_id) VALUES ($1, $2, $3, $4) RETURNING created_at"
+  },
+  "11e96cfd8c2736f13ce55975ea910dd68640f6f14e38a4b3342d514804e3de27": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM sessions WHERE id = $1"
+  },
+  "152b86d4a9fecf65d80dc4f49f815a0da3adfb3072cfcdfec6199ef0229e6d6f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Bool"
+        ]
+      }
+    },
+    "query": "INSERT INTO roles (code, friendly_name, is_active) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at"
+  },
+  "1aaa67b92917eec30fa46a7ff05bbdf9220d2264335413b89e05916e317ee151": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "max_instances",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Int4",
+          "Varchar",
+          "Timestamptz",
+          "Bool",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "INSERT INTO channels (name, platform, api_key, valid_until, is_active, user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, max_instances, created_at, updated_at"
+  },
+  "1d9615328bb97652b68789337557e6cc9c74ebc4abf88b5f20c222206a50ec42": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, name, is_active, user_id, created_at, updated_at FROM bots LIMIT $1 OFFSET $2"
+  },
+  "2147ed9a8eb3bd94b1b67682a103e2616e749d1f64b5d21751ad11585873611e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "code",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "friendly_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id, code, friendly_name, is_active, created_at, updated_at FROM roles WHERE code = $1"
+  },
+  "233bc9014117823cbf1e1d14a9b66b2c87292513cd803ea09fcf78ba1829b9c6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "menu_trigger",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "matching_strategy",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "parent_menu_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "bot_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, title, content, menu_trigger, matching_strategy, is_active, parent_menu_id, bot_id, created_at, updated_at FROM menus WHERE bot_id = $1"
+  },
+  "24aa083b258af67589fbd65c890a837b8c85d2de7c0863c144e1ec0ed0c35e48": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz"
+        ]
+      }
+    },
+    "query": "\n            SELECT COUNT(id) FROM SESSIONS\n            WHERE account_id = $1 AND expires_at > $2"
+  },
+  "24d3b1810da62859702fcb6ec9e6bcb24312d4931c055040a7fb8dbc7b5d0963": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, account_name, holder_name, password_hash, state, user_id, created_at, updated_at FROM accounts WHERE id = $1"
+  },
+  "26ca8f16a75aeeb6f22c7968d6f0645933301afb6f7d5829eb27636f3a61068a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Bool",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE account_roles SET account_id = $1, role_id = $2, is_active = $3, created_at = $4, updated_at = $5 WHERE id = $6"
+  },
+  "289b6b0053aea54ff90f597f2378b87865a1776b4a023926e402ba87bb2d32e7": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE channels SET updated_at = $1 WHERE id = $2"
+  },
+  "2a004f75092ee3dafb7efee63fb6e3fad0c7f240ed9bd9e059429e3e183254eb": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE roles SET friendly_name = $1 WHERE id = $2"
+  },
+  "2ab691e62c8baff28a1c966d466a55e71c1cdfeea3e48875245c2d0b13bb7265": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "platform",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "api_key",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "valid_until",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "max_instances",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM channels\n            WHERE created_at < $1\n            ORDER BY created_at DESC\n            LIMIT $2"
+  },
+  "2beae4a5795a5978c49344a2c82e8fa28cd251aad76b0205f2d9b68053150c05": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM bots\n                WHERE user_id = $1 AND created_at < $2\n                ORDER BY created_at\n                LIMIT $3\n                "
+  },
+  "2f224b51a791cf2c891e8774bd6b5e552a6e84846f01283791895a2389bf0921": {
+    "describe": {
+      "columns": [
+        {
+          "name": "total!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "active!",
+          "ordinal": 1,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n            SELECT\n                COUNT(id) AS \"total!\",\n                (\n                    SELECT COUNT(id) FROM accounts\n                    WHERE user_id = $1 AND state = $2\n                ) AS \"active!\"\n            FROM accounts\n            WHERE user_id = $1\n            "
+  },
+  "2fccfc6eb3de256c784397b013a6ea1f9aac7f7eb2454bcd09945a2d6848ff40": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, account_name, holder_name, password_hash, state, user_id, created_at, updated_at FROM accounts WHERE user_id = $1"
+  },
+  "300b3f7837cbadb91d04ede5c0c37c1b5b179efa96b0158c03b12d0c9c656689": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM accounts WHERE id = $1 AND user_id = $2"
+  },
+  "309713fd9198ae422c0f5578498383f4eab977d212d07842b07e96867c285dbf": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "platform",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "api_key",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "valid_until",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "max_instances",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n            SELECT * FROM channels\n            WHERE is_active = TRUE AND\n                  COALESCE(valid_until, 'infinity') > now()\n            ORDER BY created_at\n            "
+  },
+  "32ae24fd9d782d690cc3fb627f21a05852bf0ef5b775796b6775365a76c4cff7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "menu_trigger",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "matching_strategy",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "parent_menu_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "bot_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM menus\n            WHERE created_at < $1\n            ORDER BY created_at DESC\n            LIMIT $2"
+  },
+  "3467be23d1c7139f2e0b82be7b3c8f28a71bf9e0b4ff411a365e4783247c08f4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "menu_trigger",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "matching_strategy",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "parent_menu_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "bot_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM menus\n                WHERE parent_menu_id = $1 AND\n                      parent_menu_id != id AND\n                      is_active = TRUE\n                "
+  },
+  "3a85e6ff7689982a4334ed1e0a1842e373a5d6cc7b59c59c5a060c1372fe5084": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, display_name, username, is_active, created_at, updated_at FROM users LIMIT $1 OFFSET $2"
+  },
+  "3a97faa20417b58d9c328946e88b8a157cf422f02444e2beacb8ccd00ded74f5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM channels WHERE id = $1 AND user_id = $2"
+  },
+  "3dbd5f83fad7963e1daa96a8d36339031c51e26f00b82c8392f1ee37886a8bfa": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "menu_trigger",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "matching_strategy",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "parent_menu_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "bot_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM menus\n                WHERE bot_id = $1 AND parent_menu_id = id AND is_active = TRUE \n                "
+  },
+  "3e2f0c7903d2eae714c2e5ef3186dea78334b936f0c163a43f24a79cb6e80c6b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "total!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "active!",
+          "ordinal": 1,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            SELECT\n                COUNT(id) AS \"total!\",\n                (\n                    SELECT COUNT(id) FROM bots\n                    WHERE user_id = $1 AND is_active = TRUE\n                ) AS \"active!\"\n            FROM bots\n            WHERE user_id = $1\n            "
+  },
+  "43ff997652f4e799b2f2b8f071c59cd42e797fc20664b94f1c265c27d8600b3f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET holder_name = $1, updated_at = $2 WHERE id = $3"
+  },
+  "45437903523e9da1b4b51289266fc68a81536115cd567d185960aabab50687af": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, display_name, username, is_active, created_at, updated_at FROM users"
+  },
+  "45a2f5207c2adf579b93856de08f573ec5499d3c2c5d20c98eb45ab765b030e4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "code",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "friendly_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, code, friendly_name, is_active, created_at, updated_at FROM roles WHERE id = $1"
+  },
+  "463e3cb3cc41990e508d9159e6e4043629edcc6761ce8ccaddfafc51523b2991": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM roles WHERE id = $1"
+  },
+  "46d6c2571f259c719eaf606340076cf5453265a0d2c480df1e06c4540341ddc8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "device_identifier",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "agent",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "refresh_token",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_address",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, device_identifier, agent, refresh_token, last_address, account_id, expires_at, created_at, updated_at FROM sessions LIMIT $1 OFFSET $2"
+  },
+  "4719bd09a30a2b670d1bd07e9b897d74447f2c4d7602dbce2d294cfacf116f2e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "platform",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "api_key",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "valid_until",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "max_instances",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, name, platform, api_key, valid_until, is_active, max_instances, user_id, created_at, updated_at FROM channels"
+  },
+  "48585933df0ec7abbf279ee1b50b06d863b7e51c98f1f8aaa93a89d74a2e0329": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "platform_identifier",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, platform_identifier, username, display_name, phone_number, last_active, chat_id, channel_id, created_at, updated_at FROM instances WHERE id = $1"
+  },
+  "4bc038fd06b421b95ccce61f50f6f2aa130e0fa662b17480e3e24fa50ada3512": {
+    "describe": {
+      "columns": [
+        {
+          "name": "total!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "active!",
+          "ordinal": 1,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            SELECT\n                COUNT(sessions.id) AS \"total!\",\n                (\n                        SELECT COUNT(sessions.id) FROM sessions\n                    INNER JOIN accounts\n                            ON accounts.user_id = $1 AND\n                               accounts.id      = sessions.account_id\n                    WHERE COALESCE(expires_at, 'infinity') > now()\n                ) AS \"active!\"\n            FROM sessions\n            INNER JOIN accounts\n                    ON accounts.user_id = $1 AND\n                       accounts.id      = sessions.account_id\n            "
+  },
+  "4eeae29d121ed170f60cb9b67142e06fe57833dec64fe9d2bf7b0b80075ba3f7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "INSERT INTO instances (platform_identifier, chat_id, channel_id) VALUES ($1, $2, $3) RETURNING id, username, display_name, phone_number, last_active, created_at, updated_at"
+  },
+  "50293c2e54af11d4c2a553e29b671cef087a159c6ee7182d8ca929ecb748f3b7": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM users WHERE id = $1"
+  },
+  "50e70cbe4588f033df530ed7979cb980adc12f641343722ac32121f39c4a8e4d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "device_identifier",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "agent",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "refresh_token",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_address",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, device_identifier, agent, refresh_token, last_address, account_id, expires_at, created_at, updated_at FROM sessions"
+  },
+  "519ff491f406f7121464ffe1953bb225a16d9fbd376d915314613894061a4705": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET updated_at = $1 WHERE id = $2"
+  },
+  "51a6f5e8a20de9f68d2fe88cf31ad406b838e30008424b11143de21d2b39effa": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE channels SET max_instances = $1 WHERE id = $2"
+  },
+  "5233f860e2b687da28c0effcee37665ea74dd9e32ccb478dc46970a2a2573899": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Bool",
+          "Uuid",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE bots SET name = $1, is_active = $2, user_id = $3, created_at = $4, updated_at = $5 WHERE id = $6"
+  },
+  "529daabad1fef723f10798d9766f1890c10e24ba70eee36a5c46aae230681146": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE roles SET friendly_name = $1, updated_at = $2 WHERE id = $3"
+  },
+  "5482d1f5971bd7d07b34b3b6ce36b88b3124769f44110f6aa3ed71676836add5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET password_hash = $1 WHERE id = $2"
+  },
+  "5594b8749224daee4d2aed820d52bdfc9ba5da4b2c188fada9d4378a977bc5e4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            SELECT COUNT(id) FROM accounts\n            WHERE user_id = $1"
+  },
+  "564093c555161cafe0f60cad202cdd2383124115a6e03042cdbaee11a1757dd0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "device_identifier",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "agent",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "refresh_token",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_address",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id, device_identifier, agent, refresh_token, last_address, account_id, expires_at, created_at, updated_at FROM sessions WHERE device_identifier = $1"
+  },
+  "5682a4924593c3f6fc131252104e827dd89c1a7deb434459322cf8d2f0e14fe2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "resource",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "actions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, resource, actions, role_id, created_at FROM permissions WHERE role_id = $1"
+  },
+  "5c680a894602efbd3899f436c85a30d36ccc5c41e9d337bff935c35e772e31ee": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE users SET display_name = $1, updated_at = $2 WHERE id = $3"
+  },
+  "5f9dfeaf0f1bc0f0064b807eda9c91d15936765922f2fdaa6d24bf03c3d08f14": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "platform_identifier",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n                SELECT instances.* FROM instances\n                INNER JOIN channels ON channels.user_id = $1\n                WHERE instances.created_at < $2\n                ORDER BY instances.created_at\n                LIMIT $3\n                "
+  },
+  "5fb98279cd1938fc9e72b5ba42cbf55a324e0701a39acd74e941d98707120486": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "resource",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "actions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, resource, actions, role_id, created_at FROM permissions WHERE id = $1"
+  },
+  "6256787b3575f0fa0811655997194bc46dff45960a9de4d6865a8e9d3623f91b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "platform_identifier",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n                SELECT instances.* FROM instances\n                INNER JOIN channels ON channels.user_id = $1\n                WHERE instances.id = $2\n                "
+  },
+  "62fa3f178a0b34b2808c1fb3e38b5d4a5188061bf2d57c7c32a5f7231d44d6e5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT 1 FROM instances WHERE id = $1)"
+  },
+  "6449ebb15e43778c484e6c335dcf1ddd2f9610696dc05a9d23ea2420648a111b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Bool",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE users SET display_name = $1, username = $2, is_active = $3, created_at = $4, updated_at = $5 WHERE id = $6"
+  },
+  "69ca3ef86fc99454107f841e5aeaee8e1c1bcc1860e84e3ff81818de4c22c412": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT 1 FROM sessions WHERE id = $1)"
+  },
+  "6a6bec68b35012df41e6bb99b5afc11a90e3404fa29698fb04fa3ad18ad2025b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE users SET display_name = $1 WHERE id = $2"
+  },
+  "6b58dc5634ad8938c6f3953b090b113e91e3ce4898964a96059d36b04c71f97d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "created_at",
+          "ordinal": 0,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Uuid",
+          "Bool"
+        ]
+      }
+    },
+    "query": "INSERT INTO account_roles (id, account_id, role_id, is_active) VALUES ($1, $2, $3, $4) RETURNING created_at, updated_at"
+  },
+  "6c3bbc90d69e8b3ce27c7e815f46985c50519dbedf05c1e4a63a2ed064e9408f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE bots SET is_active = $1 WHERE id = $2"
+  },
+  "6cb02e089049fcb262721e69e99d780d34f3e31a67fd95907d155cf9e15ba3eb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n                    SELECT accounts.*\n                      FROM accounts\n                INNER JOIN account_roles\n                        ON account_roles.account_id = accounts.id\n                INNER JOIN roles\n                        ON account_roles.role_id = roles.id\n                     WHERE roles.id                 = $1 AND\n                           account_roles.created_at < $2\n                  ORDER BY account_roles.created_at DESC\n                     LIMIT $3\n                "
+  },
+  "6e5e2e967db0c35c8cd711c3b7369f069bde0560830e168bf8bbe39794c1441a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4",
+          "Uuid",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE permissions SET resource = $1, actions = $2, role_id = $3, created_at = $4 WHERE id = $5"
+  },
+  "7a1caf0ac06a4387fcbc21b47769ecd3c0b40237e806efe8ca54c66efe269359": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "role_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, account_id, role_id, is_active, created_at, updated_at FROM account_roles"
+  },
+  "7a42108ababf6d9a541d56f52ea853114829d3dedd2b31d52fb127e84220a54e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM permissions WHERE id = $1"
+  },
+  "7b3e97376cbcd02d26f2e3d0fcd310cca1741362d16d2d2040928274c71e009b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Uuid",
+          "Timestamptz"
+        ]
+      }
+    },
+    "query": "INSERT INTO sessions (device_identifier, agent, refresh_token, last_address, account_id, expires_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, created_at, updated_at"
+  },
+  "7ba385ed1ad2224d5ce5fd32f4b554a3f8fd09f7a2ae7d86410b40acf751b55f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "device_identifier",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "agent",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "refresh_token",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_address",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Timestamptz"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM sessions\n            WHERE refresh_token = $1 AND\n                  device_identifier = $2 AND\n                  expires_at > $3"
+  },
+  "7c71d3238eb5db1199dc155658cd9fe69c09ea814febdad46f9c421a4aafa43c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE sessions SET last_address = $1, agent = $2, expires_at = $3, updated_at = $4 WHERE id = $5"
+  },
+  "7cecfdd3ed131ee138fc67d4ef5990d2ed94b283eaaf1970dc7fd1b5aad2f646": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (\n                SELECT 1 FROM accounts\n                WHERE user_id = $1 AND account_name = $2\n            )"
+  },
+  "7d8de8708a79e55187aedeaedbecea6f2223d75fdb6b6f38da59c0609d04626f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id, account_name, holder_name, password_hash, state, user_id, created_at, updated_at FROM accounts WHERE account_name = $1"
+  },
+  "7de8a0aa60d339cc1917f48dd148bcdeead0ccb5144e40701e712375a8ce48fb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM bots WHERE is_active = TRUE"
+  },
+  "7f7d6150d9538421ba19c59b404c428a64b1120cbbfb81bdd9bacc1342e1f250": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE instances SET display_name = $1, phone_number = $2, updated_at = $3 WHERE id = $4"
+  },
+  "82276c45ba869ae39ea8a6270b53880b59bafc76759709854429e76e6d63b24e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, account_name, holder_name, password_hash, state, user_id, created_at, updated_at FROM accounts"
+  },
+  "836509fafe323df4506fc0b8753b10faa277e1a20db68c5520d8b3ad5468726d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, display_name, username, is_active, created_at, updated_at FROM users WHERE id = $1"
+  },
+  "86eb81c5a6b1aca6c7aa71a4f0a7a47d4120259181940bb2201c5b3cc191b716": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "platform",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "api_key",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "valid_until",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "max_instances",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, name, platform, api_key, valid_until, is_active, max_instances, user_id, created_at, updated_at FROM channels LIMIT $1 OFFSET $2"
+  },
+  "872d0a338bfb96f7362091d31761b38b1eff47cf525700f0f915462a7cfdd672": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE sessions SET updated_at = $1 WHERE id = $2"
+  },
+  "8801742f2cfd808bd96e83468b083af756fede35e1905305b891f82ef8e4b2a9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "platform_identifier",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, platform_identifier, username, display_name, phone_number, last_active, chat_id, channel_id, created_at, updated_at FROM instances WHERE channel_id = $1"
+  },
+  "891bd3fea8334ea1557e5fe3e972c47b74aa15d8ea437869d237cff018344982": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n                    SELECT accounts.*\n                      FROM accounts\n                INNER JOIN account_roles\n                        ON account_roles.account_id = accounts.id\n                INNER JOIN roles\n                        ON account_roles.role_id = roles.id\n                     WHERE roles.id                 = $1 AND\n                           accounts.user_id         = $2 AND\n                           account_roles.created_at < $3\n                  ORDER BY account_roles.created_at DESC\n                     LIMIT $4\n                "
+  },
+  "8a4092db674703ec723ef62e678ea10de026591d23051ad1d40deb073af61970": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "code",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "friendly_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, code, friendly_name, is_active, created_at, updated_at FROM roles"
+  },
+  "8d406d50ad2d3ebef582878edfa76e8b000e937b29ce3d826d5d482a0dd57a75": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE users SET updated_at = $1 WHERE id = $2"
+  },
+  "9437bdcff56b545a1b24e2873cc8ef0f0baf3cbaab9380f5dff58af33da9a400": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM accounts\n            WHERE created_at < $1\n            ORDER BY created_at DESC\n            LIMIT $2"
+  },
+  "95efe7e1ee619dddc81a2b8b5ea962fe8afdaa2545d4cb3801a2d0ad95b6c4e2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "platform_identifier",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, platform_identifier, username, display_name, phone_number, last_active, chat_id, channel_id, created_at, updated_at FROM instances LIMIT $1 OFFSET $2"
+  },
+  "9b10a84fca1861958c888dcfeae79cb9fd8546b3f49a25ee4947f071389c7f11": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, account_name, holder_name, password_hash, state, user_id, created_at, updated_at FROM accounts LIMIT $1 OFFSET $2"
+  },
+  "9c01277d75d89e083b328ecdefbaf3667258b17e0ff088f8184f437d21946c4d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n                  SELECT *\n                    FROM accounts\n                   WHERE user_id    = $1 AND\n                         created_at < $2\n                ORDER BY created_at DESC\n                   LIMIT $3\n                "
+  },
+  "9d1c5d6e2143ef14336f31bca2293abff0a462f6fa88151f9e4d6eda7fe93d2c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "code",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "friendly_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, code, friendly_name, is_active, created_at, updated_at FROM roles LIMIT $1 OFFSET $2"
+  },
+  "9f44802bcd20339c8becd0f5a3f01f27cc12dda9618f1e7892db5ba01c6b2cf2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Bool",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE roles SET code = $1, friendly_name = $2, is_active = $3, created_at = $4, updated_at = $5 WHERE id = $6"
+  },
+  "9fb8ee1aaef6773449c2086bc2e6ad7c7093957dfc94e498b65ffea8acfec40f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "menu_trigger",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "matching_strategy",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "parent_menu_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "bot_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT * FROM menus WHERE id = $1 AND bot_id = $2"
+  },
+  "a0064d2bf16fdf42919193eff40402381219a3eea980534d1d2f674cff49bd28": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM accounts WHERE id = $1"
+  },
+  "a00e662700ac110e7acfaf2b67257436a80a8fb353aca3612df9576f28e0bd39": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "platform",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "api_key",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "valid_until",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "max_instances",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM channels\n                WHERE user_id = $1 AND created_at < $2\n                ORDER BY created_at\n                LIMIT $3\n                "
+  },
+  "a79e97a5e306adbfe0597412574316a03dc6b691de658c2512d38c5ff2ce1ae8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "code",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "resource?",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "actions?",
+          "ordinal": 2,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n                SELECT roles.code,\n                       permissions.resource as \"resource?\",\n                       permissions.actions as \"actions?\"\n                  FROM roles\n            INNER JOIN account_roles\n                    ON account_roles.role_id = roles.id\n             LEFT JOIN permissions\n                    ON permissions.role_id      = roles.id\n                 WHERE account_roles.account_id = $1   AND\n                       account_roles.is_active  = TRUE AND\n                       roles.is_active          = TRUE\n            "
+  },
+  "a7e8814f23cd857c979d86e59e0266c73116e3b8750352dc8436ed5ec7061aeb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT 1 FROM users WHERE id = $1)"
+  },
+  "a823757bc47b615fbb643afa0a9c7dfbd237873101a959c3e68a422d2ef3be76": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT 1 FROM menus WHERE id = $1)"
+  },
+  "a85be1cc0dc5887209017d881017153d8dc96880a34657f8dc927cccd0ba6b91": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Int4",
+          "Uuid",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET account_name = $1, holder_name = $2, password_hash = $3, state = $4, user_id = $5, created_at = $6, updated_at = $7 WHERE id = $8"
+  },
+  "a8f6c84899e53172c6fd64a147088c4011121ce4e373ee1c22176dbc9facd239": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE instances SET last_active = $1 WHERE id = $2"
+  },
+  "aa6ee6cb19f489db54b047316e51893227fc3089fe95761bb7eb79d3d9bf7ea1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "platform",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "api_key",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "valid_until",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "max_instances",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM channels\n                WHERE user_id = $1 AND\n                      is_active = TRUE AND\n                      COALESCE(valid_until, 'infinity') > now()\n                ORDER BY created_at\n            "
+  },
+  "ab21e86855daf688146a15f9d285df8d6e02e5feea8706b7a1e9468f2e511e64": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, name, is_active, user_id, created_at, updated_at FROM bots WHERE id = $1"
+  },
+  "af2afbb13a738d34146ced910c58877723cde1c6fb37e97b23ab17ac8a4d1ff1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT 1 FROM accounts WHERE id = $1)"
+  },
+  "b1dbb2e0a4e8a5632a85e53574f7b70bb6a4ff95ca20749e376d5f641132c52b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, name, is_active, user_id, created_at, updated_at FROM bots"
+  },
+  "b253552965945d734a99f52df799477c1f46670f5f51eeb83aceaa1bf78c3d90": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Timestamptz",
+          "Uuid",
+          "Uuid",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE instances SET platform_identifier = $1, username = $2, display_name = $3, phone_number = $4, last_active = $5, chat_id = $6, channel_id = $7, created_at = $8, updated_at = $9 WHERE id = $10"
+  },
+  "b2b966685386337e24e414789b75bad57f63aadc4f84485b5ea6b9ff04358f8a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM bots WHERE id = $1 AND user_id = $2"
+  },
+  "b2e351ebe72a315df83e6b36ed6c2fdbe73d247b26cc61244fe683f2ce2927a3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "created_at",
+          "ordinal": 0,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Int4",
+          "Bool",
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "INSERT INTO menus (id, title, content, menu_trigger, matching_strategy, is_active, parent_menu_id, bot_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING created_at, updated_at"
+  },
+  "b3a8695f725d769ea8753103c789bce2d1af95f297b89fff7f7e36727af5b16e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "device_identifier",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "agent",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "refresh_token",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_address",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, device_identifier, agent, refresh_token, last_address, account_id, expires_at, created_at, updated_at FROM sessions WHERE account_id = $1"
+  },
+  "b433019b5af7930ff0ff9f47a84cffe944a2ad04c5ba44d471f5d3644b341f20": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "platform",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "api_key",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "valid_until",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "max_instances",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, name, platform, api_key, valid_until, is_active, max_instances, user_id, created_at, updated_at FROM channels WHERE id = $1"
+  },
+  "b443b11311e380feb9f01f4597fbc7c264e09d01489dfc0ffbd9773834273c63": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "platform_identifier",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, platform_identifier, username, display_name, phone_number, last_active, chat_id, channel_id, created_at, updated_at FROM instances"
+  },
+  "b456a0171a7ff213132512f960a32abfa3b66f5010c469ad7f19e1c40b39bb15": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM users\n            WHERE created_at < $1\n            ORDER BY created_at DESC\n            LIMIT $2"
+  },
+  "b4c0832cd4aaaaf0db83979b356d3dce9e4ea60735b66d6e5f883768d1b932f5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE roles SET updated_at = $1 WHERE id = $2"
+  },
+  "b5bb4e742d03cf8f48fa1f5cf11dbbd107b67e4ed6e460b1d59d2dbf3a71d162": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "platform",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "api_key",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "valid_until",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "max_instances",
+          "ordinal": 6,
+          "type_info": "Int8"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT * FROM channels WHERE id = $1 AND user_id = $2"
+  },
+  "b7a7742e0fef51106d150e4757912b7a07bafb888357258858f31d3e168e754f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE account_roles SET updated_at = $1 WHERE id = $2"
+  },
+  "ba627dbec0fe68dd4ba6be9d4d56b0ecc8ee5dc9a02a230bce5c9e99c1f5db32": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            SELECT EXISTS (\n                SELECT 1 FROM permissions\n                WHERE resource = $1 AND actions = $2 AND role_id = $3\n            )"
+  },
+  "bae1a13f918c134349f718c83ecee7948fe841d1e68e0365974869b51aaa614d": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET state = $1, updated_at = $2 WHERE id = $3"
+  },
+  "bcb47569f37396632db6f09b8f66ab743c549c6f24abb0dec6c802f6390e8e4e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, name, is_active, user_id, created_at, updated_at FROM bots WHERE user_id = $1"
+  },
+  "beee7bdc337225f24424e798a6abbc4d1be64c1f311c785b12cbab5ee96c241b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT 1 FROM channels WHERE id = $1)"
+  },
+  "bf5189a5f680472bf94f50132cdb1037939a0cc77df153b3b8b2105a37e73c70": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "menu_trigger",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "matching_strategy",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "parent_menu_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "bot_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, title, content, menu_trigger, matching_strategy, is_active, parent_menu_id, bot_id, created_at, updated_at FROM menus"
+  },
+  "c048b6b0aa664ef17edab12e586cd8a4d159be7a975ab9b8f963220843e00d20": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id, display_name, username, is_active, created_at, updated_at FROM users WHERE username = $1"
+  },
+  "c09724df92c71017845091e71806fba712b65e0cb5cfff9a6279d1440bf655d6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM instances WHERE id = $1"
+  },
+  "c3646ecf80de61cfe18a6a56970e3926acee4c26c7914e3192312b95c9ea450c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "total!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "active!",
+          "ordinal": 1,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            SELECT\n                COUNT(id) AS \"total!\",\n                (\n                    SELECT COUNT(id) FROM channels\n                    WHERE user_id = $1 AND is_active = TRUE\n                ) AS \"active!\"\n            FROM channels\n            WHERE user_id = $1\n            "
+  },
+  "c55dc1abb67e0228d5324c5fb1a224c3e131b7918c4db9c1fce1ace7513e65c4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM accounts\n                WHERE user_id = $1 AND account_name = $2\n                "
+  },
+  "c5c86336758317a80cd374c611a89347b4b7fd6ed6d5894462d455ee8765faa6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM menus WHERE id = $1 AND bot_id = $2"
+  },
+  "c69a2d422d82799a61216921127a3a14283f6a0b15e3b2a21705cd6a80237487": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            DELETE FROM account_roles\n            WHERE account_id = $1 AND role_id = $2\n            "
+  },
+  "c8317fe40543daff1624b97231e11a921032a32d5b43d933932b20302145e114": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "resource",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "actions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, resource, actions, role_id, created_at FROM permissions"
+  },
+  "c836b8a2839593a1cecbe8b15ca0e027670d8f9b6f3fd13f4e87fffbb9ac5eb5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET password_hash = $1, updated_at = $2 WHERE id = $3"
+  },
+  "c8cc0aace6acc87ab546edf812b8a48f99f45d96bae85d156c1ead3a2b95c51f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT 1 FROM bots WHERE id = $1)"
+  },
+  "c98d874485bdb91b294e57de5f53fa3de758412d62e3fc2bc37df5239988bceb": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE channels SET is_active = $1 WHERE id = $2"
+  },
+  "cb121ea81f9ecd6f153921022b0e3d56b5a10befa69e26671fe41d816141fec6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE bots SET updated_at = $1 WHERE id = $2"
+  },
+  "cb73e0d5383dc78fb892da34bc71370957114828b58e5949431d3ef22b864656": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "menu_trigger",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "matching_strategy",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "parent_menu_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "bot_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n                SELECT * FROM menus\n                WHERE bot_id = $1 AND created_at < $2\n                ORDER BY created_at\n                LIMIT $3\n                "
+  },
+  "d019489b7600a6aad461de839fcd90740ca1f71f9787b38a0f2897ee49374150": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM permissions WHERE id = $1 AND role_id = $2"
+  },
+  "d240139a3bf54f3b4eff62d6faeee25948fdb84c9f630c2ddc7bab44cefa8b70": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT 1 FROM roles WHERE id = $1)"
+  },
+  "d2d15e5d69f53bbe185a181719ea77dcc6a6591ced34c587149d8bca3c492d58": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            SELECT id FROM roles\n            WHERE code = $1 AND is_active = TRUE\n            "
+  },
+  "d309ed842b1b0275a1f5c881e1fe14a2217648b9609cb791fa0b45c43edd2ba6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Int4",
+          "Bool",
+          "Uuid",
+          "Uuid",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE menus SET title = $1, content = $2, menu_trigger = $3, matching_strategy = $4, is_active = $5, parent_menu_id = $6, bot_id = $7, created_at = $8, updated_at = $9 WHERE id = $10"
+  },
+  "d88a582d01e162d3cdcb3d4db716e76474ca2e411f27352c7f6d94b75251a2fe": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "code",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "friendly_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM roles\n            WHERE created_at < $1\n            ORDER BY created_at DESC\n            LIMIT $2"
+  },
+  "d9dbcb3e22ce928245db377e78a0f1b4247a928fb73d4b1f07083c190d7bf167": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM bots\n            WHERE created_at < $1\n            ORDER BY created_at DESC\n            LIMIT $2"
+  },
+  "dc31f7f90fe8d2eaab03a6e613e38a54d37a261e08dd0e59304063f0dfdbdfa8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "device_identifier",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "agent",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "refresh_token",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_address",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, device_identifier, agent, refresh_token, last_address, account_id, expires_at, created_at, updated_at FROM sessions WHERE id = $1"
+  },
+  "dcb148ef548591f6a74a4a47b30ccde08e36ef7f4c586bb0a8ecd34d6d96c172": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "device_identifier",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "agent",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "refresh_token",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_address",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM sessions\n            WHERE created_at < $1\n            ORDER BY created_at DESC\n            LIMIT $2"
+  },
+  "ddef3e4863dbb599910a213dfba2534ce552c717ab900f4614ad0850792bf9f7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "holder_name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "state",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n                  SELECT *\n                    FROM accounts\n                   WHERE id      = $1 AND\n                         user_id = $2\n                ORDER BY created_at DESC"
+  },
+  "de5989015c30b7f5222b3af051c1957a3bd169a285c770dd71ea79bc79ce2b10": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "menu_trigger",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "matching_strategy",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "parent_menu_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "bot_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, title, content, menu_trigger, matching_strategy, is_active, parent_menu_id, bot_id, created_at, updated_at FROM menus WHERE id = $1"
+  },
+  "dff0beba625e0779890192970c644d32fe5dc4de5de81bf31f6fc26ed81b0026": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "device_identifier",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "agent",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "refresh_token",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_address",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Timestamptz"
+        ]
+      }
+    },
+    "query": "\n              SELECT *\n                FROM sessions\n               WHERE account_id        = $1 AND\n                     device_identifier = $2 AND\n                     expires_at        > $3\n            ORDER BY created_at DESC"
+  },
+  "e19549cf37aeb9200f076023a7babc6ced7786cd09ef11a41bc0539e16177f6b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM bots WHERE id = $1"
+  },
+  "e1bf0ce6328811442c7e930cffcd30a561ea5b3b0b82efaaf268ce71d570a961": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "resource",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "actions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, resource, actions, role_id, created_at FROM permissions LIMIT $1 OFFSET $2"
+  },
+  "e679d9710a937537aa5180b19351fb4f37f1df2c17d538f27ae4623ce98740fa": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET state = $1 WHERE id = $2"
+  },
+  "e9549695b12eeaea80d631c48c163a8a039e0961df143215f0221288ac4c2310": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "platform_identifier",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT * FROM instances\n            WHERE created_at < $1\n            ORDER BY created_at DESC\n            LIMIT $2"
+  },
+  "ea45ead3bff3416b242e58a69621cc7da714b50232f232c3fcfe60117bc0bbac": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE accounts SET holder_name = $1 WHERE id = $2"
+  },
+  "ee73481c83a85880eb8e9f5365a5e16e14be8cf84c5d49181ec2468dc6456951": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Timestamptz",
+          "Bool",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE channels SET name = $1, api_key = $2, valid_until = $3, is_active = $4, updated_at = $5 WHERE id = $6"
+  },
+  "eed5601696d83a87c9b0d12fb994fe1c14d26e401d5481e7626b9887e400191d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "platform_identifier",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "phone_number",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "last_active",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT id, platform_identifier, username, display_name, phone_number, last_active, chat_id, channel_id, created_at, updated_at FROM instances WHERE chat_id = $1"
+  },
+  "eed6da39f2a5a435a32d54e89f33d019975fb3f6c1347f954fa3b15701c84548": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Int4",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "INSERT INTO accounts (account_name, holder_name, password_hash, state, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at, updated_at"
+  },
+  "f1051be2149320fc6042ead5b4b44418b6b115566a54bb622eee192f46ed9bdb": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE instances SET display_name = $1 WHERE id = $2"
+  },
+  "f366aa8889b810e71d59ab591b52796905613c107eb27281b9b42beca5166ec1": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE instances SET phone_number = $1 WHERE id = $2"
+  },
+  "f6cb23aa5dbffda7f103a42198da8bcba569cdc6f524489b6b6cc95c83fa486d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "user_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT * FROM bots WHERE id = $1 AND user_id = $2"
+  },
+  "faee81678700ddf87875595a8fd42281a2d7aa428f6ef44ea373c124ceb1edab": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Bool"
+        ]
+      }
+    },
+    "query": "INSERT INTO users (display_name, username, is_active) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at"
+  },
+  "fb042a2be7e09eac7b75588d963e53aee2198f1be6281ba195b421887bad5ed5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM account_roles WHERE id = $1"
+  },
+  "fc2b34d808e4fb4b83d5605eaa0f0badc3290b2d5edc72ac4cd095d2a074334b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Bool",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "INSERT INTO bots (name, is_active, user_id) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at"
+  },
+  "fca22d61c06119a7fcc5e62a53a3a29fd9e833bc8da9d2385699c816b5539b50": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Uuid",
+          "Timestamptz",
+          "Timestamptz",
+          "Timestamptz",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE sessions SET device_identifier = $1, agent = $2, refresh_token = $3, last_address = $4, account_id = $5, expires_at = $6, created_at = $7, updated_at = $8 WHERE id = $9"
+  },
+  "fd0cca4e4ab9c6da7c395341f4d688b605418df3ba694e0d8aa5c00f1c6894d1": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM menus WHERE id = $1"
+  },
+  "ff9de21f07bc767e55d8ef4e8428748fc38e2139fe452b5f51656784c9c94c16": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "menu_trigger",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "matching_strategy",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "is_active",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "parent_menu_id",
+          "ordinal": 6,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "bot_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 9,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT id, title, content, menu_trigger, matching_strategy, is_active, parent_menu_id, bot_id, created_at, updated_at FROM menus LIMIT $1 OFFSET $2"
+  }
+}
