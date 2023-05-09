@@ -1,7 +1,6 @@
 use std::{
     collections::HashMap,
-    env,
-    io,
+    env, io,
     sync::{Arc, Mutex, MutexGuard},
 };
 
@@ -17,6 +16,7 @@ use serde::de::DeserializeOwned;
 const QUALIFIER: &str = "com";
 const ORGANIZATION: &str = "SGSTel";
 const APPLICATION: &str = "asma";
+const CONFIG_ENV_KEY: &str = "ASMA_CONFIG";
 
 #[derive(Constructor, Default)]
 pub struct TomlConfigService(Arc<Mutex<Config>>);
@@ -125,6 +125,10 @@ impl TomlConfigService {
     }
 
     fn get_config_files() -> anyhow::Result<Vec<String>> {
+        if let Ok(path) = env::var(CONFIG_ENV_KEY) {
+            return Ok(vec![path]);
+        }
+
         let mut config_dir = directories::ProjectDirs::from(
             QUALIFIER,
             ORGANIZATION,
