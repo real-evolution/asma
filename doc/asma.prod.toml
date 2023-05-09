@@ -1,0 +1,179 @@
+[web.rest]
+listen_on = "0.0.0.0:8080"
+
+[web.rest.cors]
+# Allowed Cross-Origin Resource Sharing (CORS) methods. This can be either:
+# - any or '*': Allow all methods
+# Or a list of allowed HTTP methods
+allowed_methods = "*"
+# Allowed Cross-Origin Resource Sharing (CORS) headers.
+allowed_headers = "*"
+# Allowed Cross-Origin Resource Sharing (CORS) origins.
+allowed_origins = "*"
+
+[web.grpc]
+# gRPC API listening endpoint.IPv4 and IPv6 are supported. The address and
+# the port are delimited by a colon (:). If the port is omitted, the default
+# port (8080) will be used.
+listen_on = "0.0.0.0:8888"
+# Whether to enable HTTP/1.1 support or not. This is required for gRPC-Web
+enable_http1 = true
+
+[web.grpc.cors]
+# Allowed Cross-Origin Resource Sharing (CORS) methods. This can be either:
+# - any: Allow all methods
+# Or a list of allowed HTTP methods
+allowed_methods = "any"
+# Allowed Cross-Origin Resource Sharing (CORS) headers.
+allowed_headers = "any"
+# Allowed Cross-Origin Resource Sharing (CORS) origins.
+allowed_origins = "any"
+
+[log]
+# Log entires display format. This accepts the following values:
+# - Full: Gives full output. This is ideal for a production setup, where logs
+#         are written to a log file.
+# - Pretty: Use a human friendly format. This should be used in development
+#           only, because of the use of colors that are not needed in
+#           production environment.
+# - Compact: Gives a compact output (one line per log entry). This is intended
+#            to be used in production with console output.
+# - Json: Outputs a structured JSON-formatted log entries. This is ideal for
+#         a production setup, where logs need to be parsed, and used in other
+#         componenents.
+formatter = "compact"
+# Whether to include the full name of the file that the log entry originated
+# from or not
+show_file = true
+# Whether to include the number of the line that the log entry originated
+# from or not
+how_line = true
+# Whether to include the name of the crate that created the log entry or not
+show_target = true
+# Whether to include the thread identifier in the logs or not
+show_thread_id = false
+# Whether to include the thread name (can be empty) in the logs or not
+show_thread_names = false
+# Whether to include the log level in the logs or not
+show_level = true
+# Whether to use ANSI codes (to enable text coloring, formatting, etc..) in
+# the logs text or not. This should be `false` for logs that are saved to
+# the disk
+use_ansi = true
+# Maximum log level to be used. This is useful to filter logs depending on the
+# current environment. Each level enables all the levels below it.
+# This can be one of the following:
+# - trace: Trace logs (function calls, handler invokations, etc..). This
+#          should be enabled during development only.
+# - debug: Logs used by developers to show verbose logs. This should be enabled
+#          during development only.l
+# - info: Informational logs. Includes regular events that need to be reported.
+#         This is the recommended level for production environments.
+# - warn: Warning logs. This includes potentially erronous events that were
+#         handled by the system.
+# - error: Recoverable errors.
+# - off: Completely turn off all logs
+level = "warn"
+
+[auth]
+# Seconds that sessions should be valid for. After this duration, further
+# attempts of refreshing the session should fail, and a new sign-in is required
+signin_validity_seconds = 259200
+# Seconds that refreshed sessions should be valid for. After this duration,
+# further attempts of refreshing the session should fail, and a new sign-in
+# is required
+refresh_validity_seconds = 259200
+# Maximum number of allowed simultaneous sessions for the same account.
+max_sessions_count = 12
+# Generated refresh tokens lengths.
+refresh_token_length = 128
+
+[auth.token]
+# Whether to disable root account privileges not not
+disable_root = false
+# JWT token issuer value
+issuer = "asma.sgstel.com.ye"
+# JWT token audience value
+audience = "asma.sgstel.com.ye"
+# JWT token validity in seconds.
+timeout_seconds = 600
+# JWT token signing secret key. This value should be protected against
+# unauthorized access, as it may compromise the system's security.
+signing_key = "TFyW14CKP8nH0NMlvQYOntm04uU84n9N5yQVRDDppZlh3mMcJHS"
+
+[data]
+# Databae connection driver. Supported drivers are: postgres (PostgreSQL),
+# mysql (MySQL), mssql (Microsoft SQL Server), and mariadb (MariaDB),
+driver = "postgres"
+# Database server address
+host = "postgres"
+# Database server listening port
+port = 5432
+# Database server username
+username = "postgres"
+# Database server password
+password = "123"
+# Database to be used by the system
+database = "asma"
+
+[data.pool]
+# Minumum number of connections to be opened & pooled to the database server
+min_connections = 8
+# Maximum number of connections to be opened & pooled to the database server
+max_connections = 64
+# Lifetime of connections (in milliseconds), after which the connections should
+# be closed
+max_lifetime_ms = 120000
+# Idle connections timeout
+idle_timeout_ms = 600000
+# Whether to created connections lazily (on demand) or not
+lazy = true
+
+[docs]
+# Documents store (NoSQL) connection driver. Supported drivers are: mongodb
+driver = "mongodb"
+# Document store server address
+host = "mongo"
+# Document store server listening port
+port = 27017
+# Document store server username
+#username = "postgres"
+# Document store server password
+#password = "123"
+# Document store to be used by the system
+database = "asma"
+# MongoDB replica set name
+repl_name = "rs0"
+
+[docs.pool]
+# Minumum number of connections to be opened & pooled to the database server
+min_connections = 8
+# Maximum number of connections to be opened & pooled to the database server
+max_connections = 64
+# Lifetime of connections (in milliseconds), after which the connections should
+# be closed
+max_lifetime_ms = 120000
+# Idle connections timeout
+idle_timeout_ms = 600000
+
+[message_queue]
+# Message passing queue protoocl. Currently, only `amqp` is supported
+protocol = "amqp"
+# Message passing queue server address
+host = "rabbitmq"
+# Message passing queue server listening port
+port = 5672
+# Message passing queue server username
+username = "asma"
+# Message passing queue server password
+password = "asma"
+# Whether to require delivery acknowledgement or not
+require_ack = true
+
+[message_queue.pool]
+# Maximum number of connections to be opened & pooled to the message queue
+# server
+max_connections = 64
+# Lifetime of connections (in milliseconds), after which the connections should
+# be closed
+max_lifetime_ms = 120000

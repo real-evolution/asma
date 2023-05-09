@@ -5,7 +5,7 @@ WORKDIR /usr/src/asma
 COPY . .
 
 # copy config
-COPY ./doc/asma.toml /etc/asma.toml
+COPY ./doc/asma.prod.toml /etc/asma.toml
 
 # install dependencies
 RUN apt-get update && apt-get install -y \
