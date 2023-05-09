@@ -27,7 +27,7 @@ impl<T> RequestExt<T> for Request<T> {
         config: Arc<C>,
     ) -> Result<GrpcAuthToken, Status> {
         let Some(token_str) = self.metadata().get(AUTHORIZATION_KEY) else {
-            return Err(Status::unauthenticated("auth header missing"));
+            return Err(Status::failed_precondition("auth header missing"));
         };
 
         let Ok(token_str) = token_str.to_str() else {
@@ -53,7 +53,8 @@ impl<T> RequestExt<T> for Request<T> {
             | Ok(token) => Ok(token.into()),
             | Err(err) => {
                 error!("encode jwt token: {err:?}");
-                Err(Status::internal("encoding error"))
+
+                Err(Status::unauthenticated("invalid/expired auth token"))
             }
         }
     }
