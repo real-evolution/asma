@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
   libssl-dev \
   pkg-config \
   clang      \
-  mold       \
   && rm -rf /var/lib/apt/lists/*
 
 # environment variables
