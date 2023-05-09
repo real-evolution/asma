@@ -3,10 +3,7 @@ use std::sync::Arc;
 use auth::SqlxAuthDataStore;
 use database::SqlxPool;
 use kernel_repositories::{
-    auth::AuthDataStore,
-    comm::CommDataStore,
-    link::LinkDataStore,
-    *,
+    auth::AuthDataStore, comm::CommDataStore, link::LinkDataStore, *,
 };
 use link::SqlxLinkDataStore;
 
@@ -55,6 +52,9 @@ pub async fn create_datastore(
     );
 
     let pool = SqlxPool(conf.into_pool().await?);
+
+    tracing::debug!("migrating database");
+    pool.migrate().await?;
 
     Ok(Arc::new(SqlxDataStore {
         auth: SqlxAuthDataStore::new(pool.clone()),
