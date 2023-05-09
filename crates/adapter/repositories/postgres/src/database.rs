@@ -14,6 +14,12 @@ pub(crate) struct SqlxPool(pub PoolType);
 struct SqlxTransactionWrapper<'c>(sqlx::Transaction<'c, DbType>);
 
 impl SqlxPool {
+    pub async fn migrate(&self) -> anyhow::Result<()> {
+        sqlx::migrate!("./migrations").run(&self.0).await?;
+
+        Ok(())
+    }
+
     pub(crate) fn get(&self) -> &PoolType {
         &self.0
     }
