@@ -19,8 +19,11 @@ RUN apt-get update && apt-get install -y \
 ENV ASMA_CONFIG=/etc/asma.toml
 ENV ASMA_LOG=info
 
+# build
+RUN cargo build --release
+
 # run
-CMD ["cargo", "run", "--release"]
+CMD ["./target/release/driver_web_runner"]
 
 # ports
 EXPOSE 8080
