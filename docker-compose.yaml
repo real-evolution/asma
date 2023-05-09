@@ -30,17 +30,9 @@ services:
       RABBITMQ_DEFAULT_PASS: asma
 
   app:
-    image: ghcr.io/plc-lang/rust-llvm:latest
+    build: .
     container_name: asma
-    working_dir: /usr/src/asma
     restart: always
     ports:
       - 8080:8080
       - 8888:8888
-    volumes:
-      - ./doc:/etc/asma
-      - .:/usr/src/asma
-    environment:
-      ASMA_CONFIG: /etc/asma/asma.toml
-      ASMA_LOG: info
-    entrypoint: [ "cargo", "run", "--release"]
