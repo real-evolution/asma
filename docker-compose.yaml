@@ -30,10 +30,10 @@ services:
       RABBITMQ_DEFAULT_PASS: asma
 
   app:
-    image: rust:latest
+    image: ghcr.io/plc-lang/rust-llvm:latest
     container_name: asma
-    restart: always
     working_dir: /usr/src/asma
+    restart: always
     ports:
       - 8080:8080
       - 8888:8888
