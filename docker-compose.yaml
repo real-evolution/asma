@@ -7,19 +7,38 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: 123
+    networks:
+      asma:
+        aliases:
+          - data.asma.sgstel.com.ye
 
   mongo:
     image: mongo
     container_name: asma_doc
     restart: always
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+    networks:
+      asma:
+        aliases:
+          - docs.asma.sgstel.com.ye
+    entrypoint:
+      [
+        "/usr/bin/mongod",
+        "--bind_ip_all",
+        "--replSet",
+        "rs0"
+      ]
 
   mongosetup:
     image: mongo
     depends_on:
       - mongo
     restart: "no"
-    entrypoint: [ "bash", "-c", "sleep 5 && mongosh --host mongo:27017 --eval 'rs.initiate()'"]
+    entrypoint:
+      [
+        "bash",
+        "-c",
+        "sleep 5 && mongosh --host mongo:27017 --eval 'rs.initiate()'"
+      ]
 
   rabbitmq:
     image: rabbitmq
@@ -28,11 +47,19 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: asma
       RABBITMQ_DEFAULT_PASS: asma
+    networks:
+      asma:
+        aliases:
+          - ipc.asma.sgstel.com.ye
 
   app:
     build: .
     container_name: asma
     restart: always
+    networks:
+      asma:
+        aliases:
+          - asma.sgstel.com.ye
     depends_on:
       - postgres
       - mongo
@@ -41,3 +68,6 @@ services:
     ports:
       - 8080:8080
       - 8888:8888
+
+networks:
+  asma:

@@ -106,7 +106,7 @@ signing_key = "TFyW14CKP8nH0NMlvQYOntm04uU84n9N5yQVRDDppZlh3mMcJHS"
 # mysql (MySQL), mssql (Microsoft SQL Server), and mariadb (MariaDB),
 driver = "postgres"
 # Database server address
-host = "postgres"
+host = "data.asma.sgstel.com.ye"
 # Database server listening port
 port = 5432
 # Database server username
@@ -133,7 +133,7 @@ lazy = true
 # Documents store (NoSQL) connection driver. Supported drivers are: mongodb
 driver = "mongodb"
 # Document store server address
-host = "mongo"
+host = "docs.asma.sgstel.com.ye"
 # Document store server listening port
 port = 27017
 # Document store server username
@@ -160,7 +160,7 @@ idle_timeout_ms = 600000
 # Message passing queue protoocl. Currently, only `amqp` is supported
 protocol = "amqp"
 # Message passing queue server address
-host = "rabbitmq"
+host = "ipc.asma.sgstel.com.ye"
 # Message passing queue server listening port
 port = 5672
 # Message passing queue server username
